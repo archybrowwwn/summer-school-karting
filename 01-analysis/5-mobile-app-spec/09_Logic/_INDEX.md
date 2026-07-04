@@ -1,10 +1,8 @@
 # 09. Логики — индекс
 
-> Переиспользуемая бизнес- и UI-логика приложения «Карт». Выносится один раз и
-> подключается на экранах через секцию «Применяемые логики» по ссылке (принцип DRY).
-> Шаблон — [_LOGIC_TEMPLATE.md](../_LOGIC_TEMPLATE.md).
+> Переиспользуемая бизнес- и UI-логика приложения «Апекс». Шаблон — [_LOGIC_TEMPLATE.md](../_LOGIC_TEMPLATE.md).
 
-**Статус:** Черновик · **Дата:** 2026-07-04
+**Статус:** Актуален · **Дата:** 2026-07-04
 
 ---
 
@@ -12,29 +10,11 @@
 
 | ID | Логика | Приоритет | Назначение | Применяется на |
 |----|--------|-----------|------------|----------------|
-| **LOGIC-001** | [OTP-авторизация и сессия](LOGIC-001_OTP-авторизация.md) | Critical | Вход по телефону без пароля (3 шага), управление сессией/токеном, выход | [SCR-001](../SCR-001-registration.md), [SCR-007](../SCR-007-profile.md) |
-| **LOGIC-002** | [Расчёт доступности картов и слотов](LOGIC-002_Расчёт-доступности.md) | Critical | Проверка наличия свободных картов, расчёт количества доступных мест на сессию | [SCR-003](../SCR-003-slot-card.md), [SCR-004](../SCR-004-booking.md) |
-| **LOGIC-003** | [Расчёт цены сессии](LOGIC-003_Расчёт-цены-сессии.md) | High | Базовая цена + допы (шлем, перчатки, фото/видео), скидки, итоговая сумма | [SCR-003](../SCR-003-slot-card.md), [SCR-004](../SCR-004-booking.md), [BS-002](../BS-002-booking-success.md), [SCR-005](../SCR-005-my-bookings.md), [SCR-006](../SCR-006-booking-details.md) |
-| **LOGIC-004** | [Отмена брони: правило 24 часов](LOGIC-004_Отмена-правило-24-часов.md) | Critical | Ранняя отмена (≥24 ч) без штрафа / поздняя отмена с удержанием | [SCR-006](../SCR-006-booking-details.md), [BS-003](../BS-003-cancel-confirm.md) |
-| **LOGIC-005** | [Фильтрация и сортировка слотов](LOGIC-005_Фильтрация-слотов.md) | High | Фильтры (дата, тип карта, уровень, доступность), сортировка по времени/цене | [SCR-002](../SCR-002-slot-list.md), [BS-001](../BS-001-filters.md) |
-| **LOGIC-006** | [Карта трассы и выбор позиции](LOGIC-006_Карта-трассы.md) | Medium | Интерактивная карта трассы, выбор стартовой позиции, превью поворотов | [SCR-003](../SCR-003-slot-card.md), [SCR-006](../SCR-006-booking-details.md), [BS-004](../BS-004-track-map.md) |
-| **LOGIC-007** | [Запрос push-разрешения](LOGIC-007_Запрос-push-разрешения.md) | Medium | Системный запрос push только после первой успешной брони | [BS-002](../BS-002-booking-success.md) |
-| **LOGIC-008** | [Паттерн состояний экрана](LOGIC-008_Паттерн-состояний-экрана.md) | High | Loading → Content → Empty → Error + pull-to-refresh | Все экраны с запросами |
-
----
-
-## Карта «экран → логики»
-
-| Экран | Логики |
-|-------|--------|
-| [SCR-001 Регистрация / Вход](../SCR-001-registration.md) | L-001 |
-| [SCR-002 Список слотов](../SCR-002-slot-list.md) | L-005, L-008 |
-| [BS-001 Фильтры](../BS-001-filters.md) | L-005 |
-| [SCR-003 Карточка слота / карта](../SCR-003-slot-card.md) | L-002, L-003, L-006, L-008 |
-| [SCR-004 Оформление брони](../SCR-004-booking.md) | L-002, L-003 |
-| [BS-002 Подтверждение брони](../BS-002-booking-success.md) | L-003, L-007 |
-| [SCR-005 Мои бронирования](../SCR-005-my-bookings.md) | L-003, L-008 |
-| [SCR-006 Детали брони + отмена](../SCR-006-booking-details.md) | L-003, L-004, L-006, L-008 |
-| [BS-003 Подтверждение отмены](../BS-003-cancel-confirm.md) | L-004 |
-| [BS-004 Карта трассы](../BS-004-track-map.md) | L-006 |
-| [SCR-007 Профиль пилота](../SCR-007-profile.md) | L-001, L-008 |
+| **LOGIC-001** | [OTP-авторизация](LOGIC-001_OTP_Authorization.md) | Critical | Вход по телефону (3 шага), JWT-сессия | SCR-001, SCR-007 |
+| **LOGIC-002** | [Доступность мест и экипировки](LOGIC-002_Kart_Availability_Calculation.md) | Critical | `max_seats`, `rental_count`, CTA | SCR-002, SCR-003, SCR-004 |
+| **LOGIC-003** | [Итоговая цена брони](LOGIC-003_Session_Pricing_Calculation.md) | High | Серверный `price_total` (R-005) | SCR-004, BS-002, SCR-005, SCR-006 |
+| **LOGIC-004** | [Отмена: правило 1 часа](LOGIC-004_Cancellation_24h_Rule.md) | Critical | Ранняя / поздняя отмена (R-021) | SCR-006, BS-003 |
+| **LOGIC-005** | [Фильтрация заездов](LOGIC-005_Slot_Filtering_and_Sorting.md) | High | `listSlots` + фильтры BS-001 | SCR-002, BS-001 |
+| **LOGIC-006** | [Схема трассы и место сбора](LOGIC-006_Track_Map_and_Position.md) | Medium | `route.geometry`, meeting_point | SCR-003, SCR-006, BS-004 |
+| **LOGIC-007** | [Запрос push-разрешения](LOGIC-007_Push_Permission_Request.md) | Medium | Push после первой брони | BS-002 |
+| **LOGIC-008** | [Паттерн состояний экрана](LOGIC-008_Screen_State_Pattern.md) | High | Loading → Content → Empty → Error | Все экраны с запросами |

@@ -46,15 +46,15 @@ components:
           description: >-
             Необязательные машиночитаемые детали для динамических сообщений на клиенте
             (foundations §6): например, актуальная доступность для E1/E2, чтобы показать
-            «Свободно: N мест» / «Свободно: M досок» без разбора текста message.
+            «Свободно: N мест» / «Свободно: M комплектов экипировки» без разбора текста message.
           properties:
             available_seats:
               type: integer
               description: Сколько мест реально свободно на момент ошибки (для slot_full / превышения мест).
               example: 2
-            available_rental_boards:
+            available_rental_gear:
               type: integer
-              description: Сколько прокатных досок реально свободно (для нехватки прокатных досок).
+              description: Сколько прокатных комплектов экипировки реально свободно (для нехватки прокатных комплектов экипировки).
               example: 1
 
     PaginationMeta:
@@ -204,7 +204,7 @@ components:
 
   responses:
     BadRequest:
-      description: Неверные параметры запроса (например, seats_count вне диапазона 1..3 или rental_count больше seats_count).
+      description: Неверные параметры запроса (например, seats_count вне диапазона 1..5 или rental_count больше seats_count).
       content:
         application/json:
           schema:
@@ -245,7 +245,7 @@ components:
 
     Conflict:
       description: >-
-        Нарушение инварианта — нет свободных мест или прокатных досок (овербукинг,
+        Нарушение инварианта — нет свободных мест или прокатных комплектов экипировки (овербукинг,
         slot_full), двойная бронь (double_booking), повторная отмена
         (already_cancelled) либо повтор Idempotency-Key с другим телом запроса
         (idempotency_key_conflict, R-022).
@@ -258,7 +258,7 @@ components:
             message: На выбранном слоте не осталось свободных мест.
             details:
               available_seats: 0
-              available_rental_boards: 1
+              available_rental_gear: 1
 
     Gone:
       description: Слот отменён (status=cancelled).

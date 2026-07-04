@@ -7,10 +7,10 @@ components:
     BookingStatus:
       type: string
       description: >-
-        Статус брони. late_cancel — поздняя отмена (менее 2 часов до начала):
-        место и доска НЕ освобождаются. club_cancelled — «Отменена клубом»:
+        Статус брони. late_cancel — поздняя отмена (менее 1 часа до начала):
+        место и экипировка НЕ освобождаются. club_cancelled — «Отменена клубом»:
         слот снят клубом (Slot.status = cancelled), бронь отменена не по
-        инициативе клиента, места и доски освобождаются (R-008).
+        инициативе клиента, места и экипировки освобождаются (R-008).
       enum:
         - active
         - cancelled
@@ -33,20 +33,20 @@ components:
           type: integer
           description: Число мест.
           minimum: 1
-          maximum: 3
+          maximum: 5
           example: 2
         rental_count:
           type: integer
-          description: Число прокатных досок. Не больше seats_count.
+          description: Число прокатных комплектов экипировки. Не больше seats_count.
           minimum: 0
-          maximum: 3
+          maximum: 5
           example: 1
 
     Booking:
       type: object
       description: >-
         Полные данные брони для экрана деталей (SCR-006). Тарифы (price за место,
-        rental_price за прокатную доску) и валюта лежат в booking.slot, а не на
+        rental_price за прокатную экипировку) и валюта лежат в booking.slot, а не на
         верхнем уровне брони (R-005); на уровне брони присутствует только
         производное итоговое поле price_total.
       required:
@@ -75,13 +75,13 @@ components:
           type: integer
           description: Число забронированных мест.
           minimum: 1
-          maximum: 3
+          maximum: 5
           example: 2
         rental_count:
           type: integer
-          description: Число прокатных досок (0..seats_count).
+          description: Число прокатных комплектов экипировки (0..seats_count).
           minimum: 0
-          maximum: 3
+          maximum: 5
           example: 1
         status:
           $ref: '#/components/schemas/BookingStatus'
@@ -167,13 +167,13 @@ components:
           type: integer
           description: Число забронированных мест.
           minimum: 1
-          maximum: 3
+          maximum: 5
           example: 2
         rental_count:
           type: integer
-          description: Число прокатных досок (0..seats_count).
+          description: Число прокатных комплектов экипировки (0..seats_count).
           minimum: 0
-          maximum: 3
+          maximum: 5
           example: 1
         status:
           $ref: '#/components/schemas/BookingStatus'

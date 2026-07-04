@@ -1,16 +1,16 @@
 openapi: 3.0.3
 
 info:
-  title: Сапбординг-клуб API — Profile
+  title: Картинг-центр «Апекс» API — Profile
   description: >-
     Профиль клиента: просмотр, смена имени, смена телефона по коду из SMS,
-    удаление аккаунта. Часть клиентского API сервиса записи на сапбординг-прогулки.
+    удаление аккаунта. Часть клиентского API сервиса записи на записи на заезды в картинг-центре «Апекс».
   version: 1.0.0
 
 servers:
-  - url: https://api.supclub.example/v1
+  - url: https://api.apex-karting.example/v1
     description: Production — продакшен-окружение
-  - url: https://staging-api.supclub.example/v1
+  - url: https://staging-api.apex-karting.example/v1
     description: Staging — тестовое окружение
 
 tags:
@@ -74,7 +74,7 @@ paths:
         SCR-007 §6.3, AC-008; R-009/R-017). Последствия:
 
         - активные брони (status=active) аннулируются и освобождают места и прокатные
-          доски в своих слотах;
+          экипировки в своих слотах;
 
         - прошедшие/завершённые брони анонимизируются (обезличиваются от ПДн), но
           сохраняются для учёта/статистики клуба;

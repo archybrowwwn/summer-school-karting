@@ -1,4 +1,4 @@
-# Слот (сеанс прогулки) — read-only-проекция и его представления.
+# Слот (заезд) — read-only-проекция и его представления.
 # Ссылки: '#/components/schemas/...' — внутри файла;
 # '../instructors/...' и '../common/...' — на соседние домены.
 
@@ -14,24 +14,24 @@ components:
     Slot:
       type: object
       description: >-
-        Полная карточка слота (конкретный сеанс прогулки на дату/время). Доступен
+        Полная карточка слота (конкретный заезд на дату/время). Доступен
         только для чтения. Статус «Прошедшая» — производное значение по полю start_at,
         отдельным статусом не хранится.
 
 
-        Доступность (R-003): максимально доступное к брони число мест
-        max_seats = min(free_seats, route.capacity_cap, 3). Число прокатных досок в
-        брони ограничено: rental_count ≤ free_rental_boards. Клиент со своей доской
+        Доступность (R-013): максимально доступное к брони число мест
+        max_seats = min(free_seats, route.capacity_cap, 5). Число прокатных комплектов экипировки в
+        брони ограничено: rental_count ≤ free_rental_gear. Клиент со своей экипировкой
         занимает место (free_seats), но не расходует прокатный фонд
-        (free_rental_boards).
+        (free_rental_gear).
 
 
         Цены (R-010): price — тариф за место, rental_price — отдельный тариф проката
-        за доску, оба в рублях (валюта RUB). Итоговая цена брони производная =
+        за экипировку, оба в рублях (валюта RUB). Итоговая цена брони производная =
         price·seats_count + rental_price·rental_count.
 
 
-        Инварианты: free_seats ≤ total_seats; счётчики (free_seats, free_rental_boards,
+        Инварианты: free_seats ≤ total_seats; счётчики (free_seats, free_rental_gear,
         total_seats) и цены (price, rental_price) неотрицательны.
       required:
         - id
@@ -40,7 +40,7 @@ components:
         - instructor
         - total_seats
         - free_seats
-        - free_rental_boards
+        - free_rental_gear
         - price
         - rental_price
         - meeting_point
@@ -55,7 +55,7 @@ components:
         start_at:
           type: string
           format: date-time
-          description: Дата и время начала прогулки.
+          description: Дата и время начала заезда.
         route:
           $ref: '../instructors/models.yaml#/components/schemas/Route'
         instructor:
@@ -69,16 +69,16 @@ components:
           type: integer
           minimum: 0
           description: >-
-            Число свободных мест (расчётное). Своя доска клиента тоже занимает место.
-            К брони доступно max_seats = min(free_seats, route.capacity_cap, 3), R-003.
+            Число свободных мест (расчётное). Своя экипировка клиента тоже занимает место.
+            К брони доступно max_seats = min(free_seats, route.capacity_cap, 5), R-013.
           example: 5
-        free_rental_boards:
+        free_rental_gear:
           type: integer
           minimum: 0
           description: >-
-            Число свободных прокатных досок из общего фонда (расчётное). Ограничивает
-            rental_count в брони (rental_count ≤ free_rental_boards). Своя доска фонд
-            не расходует, R-003.
+            Число свободных прокатных комплектов экипировки из общего фонда (расчётное). Ограничивает
+            rental_count в брони (rental_count ≤ free_rental_gear). Своя экипировка фонд
+            не расходует, R-013.
           example: 7
         price:
           type: integer
@@ -88,12 +88,12 @@ components:
         rental_price:
           type: integer
           minimum: 0
-          description: Тариф проката за одну доску, в рублях (целое число, валюта RUB).
+          description: Тариф проката за одну экипировку, в рублях (целое число, валюта RUB).
           example: 800
         meeting_point:
           type: string
           description: Адрес или ориентир места встречи.
-          example: Лодочная станция у Елагина моста
+          example: Картинг-центр «Апекс», зона брифинга у пит-лейна
         meeting_point_lat:
           type: number
           format: float
@@ -119,7 +119,7 @@ components:
         - rental_price
         - total_seats
         - free_seats
-        - free_rental_boards
+        - free_rental_gear
         - status
       properties:
         id:
@@ -129,7 +129,7 @@ components:
         start_at:
           type: string
           format: date-time
-          description: Дата и время начала прогулки.
+          description: Дата и время начала заезда.
         route:
           $ref: '../instructors/models.yaml#/components/schemas/Route'
         instructor:
@@ -142,7 +142,7 @@ components:
         rental_price:
           type: integer
           minimum: 0
-          description: Тариф проката за одну доску, в рублях (целое число, валюта RUB).
+          description: Тариф проката за одну экипировку, в рублях (целое число, валюта RUB).
           example: 800
         total_seats:
           type: integer
@@ -153,16 +153,16 @@ components:
           type: integer
           minimum: 0
           description: >-
-            Число свободных мест (расчётное). Своя доска клиента тоже занимает место.
-            К брони доступно max_seats = min(free_seats, route.capacity_cap, 3), R-003.
+            Число свободных мест (расчётное). Своя экипировка клиента тоже занимает место.
+            К брони доступно max_seats = min(free_seats, route.capacity_cap, 5), R-013.
           example: 5
-        free_rental_boards:
+        free_rental_gear:
           type: integer
           minimum: 0
           description: >-
-            Число свободных прокатных досок из общего фонда (расчётное). Ограничивает
-            rental_count в брони (rental_count ≤ free_rental_boards). Своя доска фонд
-            не расходует, R-003.
+            Число свободных прокатных комплектов экипировки из общего фонда (расчётное). Ограничивает
+            rental_count в брони (rental_count ≤ free_rental_gear). Своя экипировка фонд
+            не расходует, R-013.
           example: 7
         status:
           $ref: '#/components/schemas/SlotStatus'

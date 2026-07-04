@@ -1,16 +1,16 @@
 openapi: 3.0.3
 
 info:
-  title: Сапбординг-клуб API — Instructors
+  title: Картинг-центр «Апекс» API — Instructors
   description: >-
     Справочник инструкторов (read-only) для фильтра по инструктору. Часть
-    клиентского API сервиса записи на сапбординг-прогулки.
+    клиентского API сервиса записи на записи на заезды в картинг-центре «Апекс».
   version: 1.0.0
 
 servers:
-  - url: https://api.supclub.example/v1
+  - url: https://api.apex-karting.example/v1
     description: Production — продакшен-окружение
-  - url: https://staging-api.supclub.example/v1
+  - url: https://staging-api.apex-karting.example/v1
     description: Staging — тестовое окружение
 
 tags:

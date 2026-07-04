@@ -1,16 +1,16 @@
 openapi: 3.0.3
 
 info:
-  title: Сапбординг-клуб API — Bookings
+  title: Картинг-центр «Апекс» API — Bookings
   description: >-
     Бронирования клиента: создание, список, детали и отмена. Часть клиентского
-    API сервиса записи на сапбординг-прогулки.
+    API сервиса записи на записи на заезды в картинг-центре «Апекс».
   version: 1.0.0
 
 servers:
-  - url: https://api.supclub.example/v1
+  - url: https://api.apex-karting.example/v1
     description: Production — продакшен-окружение
-  - url: https://staging-api.supclub.example/v1
+  - url: https://staging-api.apex-karting.example/v1
     description: Staging — тестовое окружение
 
 tags:
@@ -28,7 +28,7 @@ paths:
       summary: Создать бронь
       operationId: createBooking
       description: >-
-        Запись на слот (SCR-004). seats_count 1..3, rental_count 0..seats_count.
+        Запись на слот (SCR-004). seats_count 1..5, rental_count 0..seats_count.
         Итоговая цена (price_total) производна от тарифов слота:
         slot.price·seats_count + slot.rental_price·rental_count (R-005). Операция
         атомарна.
@@ -135,8 +135,8 @@ paths:
       operationId: cancelBooking
       description: >-
         Отмена брони (SCR-006/BS-003). Сервер определяет тип по времени до
-        старта: ≥2ч → cancelled (места и прокатные доски возвращаются в слот);
-        <2ч → late_cancel (не возвращаются, штрафов нет). Граница ровно 2ч
+        старта: ≥1 ч → cancelled (места и прокатная экипировка возвращаются в слот);
+        <1 ч → late_cancel (не возвращаются, штрафов нет). Граница ровно 1 ч
         трактуется как ранняя. Отмена недоступна после старта слота.
       parameters:
         - $ref: '../common/models.yaml#/components/parameters/BookingIdParam'

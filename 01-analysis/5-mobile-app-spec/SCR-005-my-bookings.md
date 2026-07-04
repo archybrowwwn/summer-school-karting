@@ -54,7 +54,7 @@
 ### Бизнес-ценность
 
 - Снижает неявки: клиент видит ближайший заезд и его детали заранее.
-- Самообслуживание: вход в детали и отмену без обращения к центру (Telegram/доска маркером).
+- Самообслуживание: вход в детали и отмену без обращения к центру (Telegram/экипировка маркером).
 - Прозрачность: история прошедших и отменённых записей всегда под рукой. При отмене центром (в т.ч. по погоде) — чёткий статус и причина.
 
 ---
@@ -145,7 +145,7 @@ flowchart LR
 
 > **Пагинация и ленивая загрузка (R-025).** История может быть длинной, поэтому грузится постранично: первая страница — при открытии (`offset = 0`); следующие — по мере приближения к концу списка (бесконечный скролл), увеличивая `offset` на `limit`. `meta` ответа (`BookingListResponse.meta`) сообщает о наличии следующей страницы. Догрузка идёт **поверх** уже показанного списка (контент не сбрасывается); группировка/сортировка на клиенте применяются к накопленному набору.
 
-**Ответ (200):** `BookingListResponse` = `items: BookingSummary[]` + `meta` (пагинация). Поля `BookingSummary`, используемые на экране: `id`, `seats_count`, `rental_count`, **`price_total`** (серверный итог, RUB), `status` (`active`/`cancelled`/`late_cancel`/`club_cancelled`), `cancelled_at`, `cancellation_reason` (причина отмены центром, заполняется при `status = club_cancelled`), `slot` (`SlotSummary` → `start_at`, `configuration.name`, `configuration.type`, `marshal.name`, тарифы `price`/`rental_price` для разбивки).
+**Ответ (200):** `BookingListResponse` = `items: BookingSummary[]` + `meta` (пагинация). Поля `BookingSummary`, используемые на экране: `id`, `seats_count`, `rental_count`, **`price_total`** (серверный итог, RUB), `status` (`active`/`cancelled`/`late_cancel`/`club_cancelled`), `cancelled_at`, `cancellation_reason` (причина отмены центром, заполняется при `status = club_cancelled`), `slot` (`SlotSummary` → `start_at`, `route.name`, `route.type`, `instructor.name`, тарифы `price`/`rental_price` для разбивки).
 
 **Обработка ответа:**
 
@@ -236,8 +236,8 @@ flowchart LR
 | Элемент | Описание | Источник данных | Валидация | Действие |
 |---------|----------|-----------------|-----------|----------|
 | Дата и время старта | Крупно, основной ориентир (день недели + дата + время) | `slot.start_at` из `listBookings` | — | — |
-| Название конфигурации | Название + тип конфигурации, если приходит | `slot.configuration.name` (+ `slot.configuration.type`: `novice`→«новичковая», `experienced`→«опытная») | — | — |
-| Маршал | «Маршал: <имя>» | `slot.marshal.name` | — | — |
+| Название конфигурации | Название + тип конфигурации, если приходит | `slot.route.name` (+ `slot.route.type`: `novice`→«новичковая», `experienced`→«опытная») | — | — |
+| Маршал | «Маршал: <имя>» | `slot.instructor.name` | — | — |
 | Сводка мест и экипировки | Число мест + сводка по прокату | `seats_count`, `rental_count` (0 → «своя экипировка»; >0 → «N прокатных») | — | — |
 | Итог цены | Итоговая цена по записи, RUB; оплата офлайн | `price_total` из `BookingSummary` (серверное поле, см. LOGIC-003, R-005) | — | — |
 | Бейдж статуса | Текст + форма: `active`→«активна», `cancelled`→«отменена», `late_cancel`→«поздняя отмена», `club_cancelled`→«отменена центром» | `status` | — | — |

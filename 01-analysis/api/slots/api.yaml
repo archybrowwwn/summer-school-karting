@@ -1,16 +1,16 @@
 openapi: 3.0.3
 
 info:
-  title: Сапбординг-клуб API — Slots
+  title: Картинг-центр «Апекс» API — Slots
   description: >-
     Просмотр слотов расписания (read-only проекция) с фильтрами и пагинацией.
-    Часть клиентского API сервиса записи на сапбординг-прогулки.
+    Часть клиентского API сервиса записи на записи на заезды в картинг-центре «Апекс».
   version: 1.0.0
 
 servers:
-  - url: https://api.supclub.example/v1
+  - url: https://api.apex-karting.example/v1
     description: Production — продакшен-окружение
-  - url: https://staging-api.supclub.example/v1
+  - url: https://staging-api.apex-karting.example/v1
     description: Staging — тестовое окружение
 
 tags:
@@ -28,7 +28,7 @@ paths:
       summary: Список слотов с фильтрами
       operationId: listSlots
       description: >-
-        Возвращает предстоящие слоты (расписание прогулок) с фильтрами и
+        Возвращает предстоящие слоты (расписание заездов) с фильтрами и
         пагинацией (SCR-002, BS-001). Слоты — read-only проекция. По умолчанию
         only_available=false (показываются все, в т.ч. без мест — с пометкой
         «Мест нет» на клиенте), R-012. Сортировка по start_at по возрастанию (R-027).
@@ -67,8 +67,8 @@ paths:
       summary: Карточка слота
       operationId: getSlot
       description: >-
-        Полные данные слота для карточки (SCR-003): маршрут с geometry, место
-        встречи с координатами, цены, доступность мест и прокатных досок.
+        Полные данные слота для карточки (SCR-013): конфигурация трассы (route) с geometry, место
+        встречи с координатами, цены, доступность мест и прокатных комплектов экипировки.
       parameters:
         - $ref: '../common/models.yaml#/components/parameters/SlotIdParam'
       responses:

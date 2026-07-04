@@ -1,4 +1,4 @@
-# Sequence-диаграмма API-взаимодействия
+﻿# Sequence-диаграмма API-взаимодействия
 
 > Этап 3. Проектирование. Как клиент и сервер обмениваются вызовами в критичных сценариях бронирования. Контракты API — в многофайловой спецификации [api/redocly.yaml](../api/redocly.yaml) (домены `bookings`, `slots`, `auth`).
 > Операции: `createBooking`, `cancelBooking` ([bookings/api.yaml](../api/bookings/api.yaml)).
@@ -11,7 +11,7 @@
 
 ## Сценарий 1: Создание брони (`createBooking`, UC-1)
 
-Поток: [SCR-004 «Оформление записи на заезд»](../3-design-brief/SCR-004-booking.md) → `POST /bookings` → [BS-002 «Подтверждение»](../3-design-brief/BS-002-booking-success.md). Клиент отправляет `slot_id`, `seats_count` (1..3) и `rental_count` (0..seats_count). Итоговую цену `price_total` (RUB, read-only) считает сервер — клиент её не вычисляет, а показывает (R-005, R-010).
+Поток: [SCR-004 «Оформление записи на заезд»](../3-design-brief/SCR-004-booking.md) → `POST /bookings` → [BS-002 «Подтверждение»](../3-design-brief/BS-002-booking-success.md). Клиент отправляет `slot_id`, `seats_count` (1..5) и `rental_count` (0..seats_count). Итоговую цену `price_total` (RUB, read-only) считает сервер — клиент её не вычисляет, а показывает (R-005, R-010).
 
 ```mermaid
 sequenceDiagram
@@ -58,7 +58,7 @@ sequenceDiagram
 
 ## Сценарий 2: Отмена брони (`cancelBooking`, UC-2)
 
-Поток: [SCR-006 «Детали записи»](../3-design-brief/SCR-006-booking-details.md) → [BS-003 «Подтверждение отмены»](../3-design-brief/BS-003-cancel-confirm.md) → `POST /bookings/{bookingId}/cancel`. Отмена — **только целиком** (R-014). **Тип отмены определяет сервер** по времени до старта (источник истины — `slot.start_at` в UTC): `≥ 2 ч` → `cancelled` (места и прокатные комплекты экипировки возвращаются в слот), `< 2 ч` → `late_cancel` (не возвращаются, штрафов нет). Граница «ровно 2 часа» трактуется как ранняя отмена (R-021).
+Поток: [SCR-006 «Детали записи»](../3-design-brief/SCR-006-booking-details.md) → [BS-003 «Подтверждение отмены»](../3-design-brief/BS-003-cancel-confirm.md) → `POST /bookings/{bookingId}/cancel`. Отмена — **только целиком** (R-014). **Тип отмены определяет сервер** по времени до старта (источник истины — `slot.start_at` в UTC): `≥ 1 ч` → `cancelled` (места и прокатные комплекты экипировки возвращаются в слот), `< 1 ч` → `late_cancel` (не возвращаются, штрафов нет). Граница «ровно 1 часа» трактуется как ранняя отмена (R-021).
 
 ```mermaid
 sequenceDiagram
@@ -68,16 +68,16 @@ sequenceDiagram
 
     Note over App: SCR-006: бронь active, старт в будущем
     User->>App: Тап «Отменить запись»
-    App-->>User: BS-003 «Подтверждение отмены»<br/>(текст правила 2 часов)
+    App-->>User: BS-003 «Подтверждение отмены»<br/>(текст правила 1 часа)
     User->>App: Подтверждает отмену (целиком)
 
     App->>API: POST /bookings/{bookingId}/cancel<br/>Authorization: Bearer
-    Note over API: Сервер по slot.start_at (UTC) выбирает<br/>тип отмены; граница ровно 2ч = ранняя
+    Note over API: Сервер по slot.start_at (UTC) выбирает<br/>тип отмены; граница ровно 1 ч = ранняя
 
-    alt Ранняя отмена (≥ 2 ч)
+    alt Ранняя отмена (≥ 1 ч)
         API-->>App: 200 Booking {status: cancelled, cancelled_at}
         App-->>User: SCR-006 + снек «Бронь отменена»<br/>(места/комплекты экипировки вернулись в заезд)
-    else Поздняя отмена (< 2 ч)
+    else Поздняя отмена (< 1 ч)
         API-->>App: 200 Booking {status: late_cancel, cancelled_at}
         App-->>User: SCR-006 + «Поздняя отмена: место/комплект экипировки не<br/>освобождены. Штраф не взимается.»
     else Слот уже стартовал (422 Unprocessable)

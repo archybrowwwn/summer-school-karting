@@ -1,16 +1,16 @@
 openapi: 3.0.3
 
 info:
-  title: Сапбординг-клуб API — Auth
+  title: Картинг-центр «Апекс» API — Auth
   description: >-
     Аутентификация клиента по номеру телефона с подтверждением одноразовым кодом
-    (OTP). Часть клиентского API сервиса записи на сапбординг-прогулки.
+    (OTP). Часть клиентского API сервиса записи на записи на заезды в картинг-центре «Апекс».
   version: 1.0.0
 
 servers:
-  - url: https://api.supclub.example/v1
+  - url: https://api.apex-karting.example/v1
     description: Production — продакшен-окружение
-  - url: https://staging-api.supclub.example/v1
+  - url: https://staging-api.apex-karting.example/v1
     description: Staging — тестовое окружение
 
 tags:
@@ -166,7 +166,7 @@ paths:
       operationId: registerPushToken
       description: >-
         Регистрирует токен push-уведомлений устройства для текущего клиента,
-        чтобы доставлять напоминания о прогулке (R-006). Повторный вызов с тем же
+        чтобы доставлять напоминания о заезде (R-006). Повторный вызов с тем же
         токеном идемпотентен (обновляет привязку). Один клиент может иметь
         несколько токенов (несколько устройств).
       requestBody:
