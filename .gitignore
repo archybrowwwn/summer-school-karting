@@ -1,0 +1,17 @@
+.claude
+
+# Секреты доступа (токен Figma, API-ключи и пр.)
+.env
+.env.*
+
+# Архивы и временные файлы
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
