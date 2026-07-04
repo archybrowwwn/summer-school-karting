@@ -124,6 +124,15 @@ private fun OtpStep(
                 onValueChange = { onIntent(AuthIntent.CodeChanged(it)) },
                 fieldError = state.fieldError,
             )
+            state.devOtpHint?.let { devCode ->
+                Text(
+                    text = "Код для разработки (без SMS): $devCode",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             TextButton(
                 enabled = state.canResendCode,
                 onClick = { onIntent(AuthIntent.ResendCode) },

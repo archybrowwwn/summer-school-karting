@@ -12,6 +12,7 @@ import (
 )
 
 type AuthHandler struct {
+	authapi.Unimplemented
 	service *auth.Service
 }
 
@@ -72,7 +73,12 @@ func (h *AuthHandler) VerifyAuthCode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httpapi.WriteJSON(w, http.StatusOK, authapi.VerifyCodeResponse{
-		Token: result.Token,
+		Tokens: authapi.TokenPair{
+			AccessToken:  result.Token,
+			RefreshToken: result.Token,
+			ExpiresIn:    24 * 60 * 60,
+			TokenType:    authapi.Bearer,
+		},
 		Client: authapi.Client{
 			Id:        clientID,
 			Name:      result.Client.Name,

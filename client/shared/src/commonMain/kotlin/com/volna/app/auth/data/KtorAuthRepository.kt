@@ -26,7 +26,7 @@ class KtorAuthRepository(
             setBody(VerifyCodeRequestDto(phone.value, code))
         }
         result.getOrNull()?.let { response ->
-            sessionRepository.saveToken(response.token)
+            sessionRepository.saveToken(response.tokens.accessToken)
         }
         return result.map { it.toDomain() }
     }

@@ -13,9 +13,9 @@ func TestCancellationStatusBoundaries(t *testing.T) {
 		status string
 		ok     bool
 	}{
-		{name: "two hours plus one second", now: start.Add(-2*time.Hour - time.Second), status: "cancelled", ok: true},
-		{name: "exactly two hours", now: start.Add(-2 * time.Hour), status: "cancelled", ok: true},
-		{name: "one second under two hours", now: start.Add(-2*time.Hour + time.Second), status: "late_cancel", ok: true},
+		{name: "one hour plus one second", now: start.Add(-time.Hour - time.Second), status: "cancelled", ok: true},
+		{name: "exactly one hour", now: start.Add(-time.Hour), status: "cancelled", ok: true},
+		{name: "one second under one hour", now: start.Add(-time.Hour + time.Second), status: "late_cancel", ok: true},
 		{name: "after start", now: start.Add(time.Second), status: "", ok: false},
 	}
 

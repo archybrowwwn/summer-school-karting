@@ -7,6 +7,7 @@ import com.volna.app.domain.model.Phone
 data class RequestCodeResult(
     val ttlSeconds: Int,
     val resendAfterSeconds: Int,
+    val devCode: String? = null,
 )
 
 data class VerifyCodeResult(

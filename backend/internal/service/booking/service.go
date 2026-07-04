@@ -114,7 +114,7 @@ func NewService(repo Repository) *Service {
 }
 
 func (s *Service) Create(ctx context.Context, command CreateCommand) (Booking, error) {
-	if command.SeatsCount < 1 || command.SeatsCount > 3 || command.RentalCount < 0 || command.RentalCount > command.SeatsCount || command.SlotID == "" {
+	if command.SeatsCount < 1 || command.SeatsCount > 5 || command.RentalCount < 0 || command.RentalCount > command.SeatsCount || command.SlotID == "" {
 		return Booking{}, ErrInvalidRequest
 	}
 
@@ -182,7 +182,7 @@ func CancellationStatus(now, startAt time.Time) (string, bool) {
 	if !now.Before(startAt) {
 		return "", false
 	}
-	if startAt.Sub(now) >= 2*time.Hour {
+	if startAt.Sub(now) >= time.Hour {
 		return "cancelled", true
 	}
 	return "late_cancel", true

@@ -35,6 +35,7 @@ func NewRouter(logger *slog.Logger, options ...RouterOptions) http.Handler {
 	}
 
 	router := chi.NewRouter()
+	router.Use(corsMiddleware)
 	router.Use(requestIDMiddleware)
 	router.Use(recoverMiddleware(logger))
 	router.Use(accessLogMiddleware(logger))

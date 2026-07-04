@@ -24,6 +24,40 @@ const (
 	BearerAuthScopes = "bearerAuth.Scopes"
 )
 
+// Defines values for ErrorCode.
+const (
+	ErrorCodeAlreadyCancelled       ErrorCode = "already_cancelled"
+	ErrorCodeBadRequest             ErrorCode = "bad_request"
+	ErrorCodeDoubleBooking          ErrorCode = "double_booking"
+	ErrorCodeForbidden              ErrorCode = "forbidden"
+	ErrorCodeIdempotencyKeyConflict ErrorCode = "idempotency_key_conflict"
+	ErrorCodeInternalError          ErrorCode = "internal_error"
+	ErrorCodeInvalidCode            ErrorCode = "invalid_code"
+	ErrorCodeNotFound               ErrorCode = "not_found"
+	ErrorCodeSlotCancelled          ErrorCode = "slot_cancelled"
+	ErrorCodeSlotFull               ErrorCode = "slot_full"
+	ErrorCodeSlotStarted            ErrorCode = "slot_started"
+	ErrorCodeTooManyRequests        ErrorCode = "too_many_requests"
+	ErrorCodeUnauthorized           ErrorCode = "unauthorized"
+)
+
+// Defines values for PushTokenDeleteRequestPlatform.
+const (
+	PushTokenDeleteRequestPlatformAndroid PushTokenDeleteRequestPlatform = "android"
+	PushTokenDeleteRequestPlatformIos     PushTokenDeleteRequestPlatform = "ios"
+)
+
+// Defines values for PushTokenRequestPlatform.
+const (
+	PushTokenRequestPlatformAndroid PushTokenRequestPlatform = "android"
+	PushTokenRequestPlatformIos     PushTokenRequestPlatform = "ios"
+)
+
+// Defines values for TokenPairTokenType.
+const (
+	Bearer TokenPairTokenType = "Bearer"
+)
+
 // Client Клиент сервиса. Аутентифицируется по номеру телефона (логин в формате E.164). Сразу после регистрации (verify-code, is_new=true) name ещё не задан — пустое/отсутствующее имя означает незавершённую регистрацию (дозаполняется через PATCH /profile).
 type Client struct {
 	// CreatedAt Дата и время регистрации клиента.
@@ -35,19 +69,19 @@ type Client struct {
 	// Name Имя клиента. Отсутствует у только что зарегистрированного клиента до шага 3 (PATCH /profile).
 	Name *string `json:"name,omitempty"`
 
-	// Phone Номер телефона в формате E.164. Используется как логин.
+	// Phone Номер телефона в формате E.164. Используется как логин. Владельцу в GET /profile возвращается полностью; в любых представлениях, видимых третьим лицам, ПДн (включая телефон) маскируются (R-017, NFR-11).
 	Phone string `json:"phone"`
 }
 
 // Error Стандартное тело ошибки.
 type Error struct {
-	// Code Машинный код ошибки, например: slot_full, double_booking, slot_cancelled, slot_started, already_cancelled, invalid_code.
-	Code string `json:"code"`
+	// Code Канонический машинный код ошибки (R-023). Доменные коды: slot_full (нет свободных мест), double_booking (повторная бронь того же слота), slot_cancelled (слот отменён клубом), slot_started (слот уже стартовал), already_cancelled (бронь уже отменена), invalid_code (неверный/истёкший OTP). Идемпотентность: idempotency_key_conflict (повтор ключа с другим телом). Транспортные/общие: bad_request (400), unauthorized (401), forbidden (403), not_found (404), too_many_requests (429), internal_error (5xx).
+	Code ErrorCode `json:"code"`
 
-	// Details Необязательные машиночитаемые детали для динамических сообщений на клиенте (foundations §6): например, актуальная доступность для E1/E2, чтобы показать «Свободно: N мест» / «Свободно: M досок» без разбора текста message.
+	// Details Необязательные машиночитаемые детали для динамических сообщений на клиенте (foundations §6): например, актуальная доступность для E1/E2, чтобы показать «Свободно: N мест» / «Свободно: M комплектов экипировки» без разбора текста message.
 	Details *struct {
-		// AvailableRentalBoards Сколько прокатных досок реально свободно (для нехватки прокатных досок).
-		AvailableRentalBoards *int `json:"available_rental_boards,omitempty"`
+		// AvailableRentalGear Сколько прокатных комплектов экипировки реально свободно (для нехватки прокатных комплектов экипировки).
+		AvailableRentalGear *int `json:"available_rental_gear,omitempty"`
 
 		// AvailableSeats Сколько мест реально свободно на момент ошибки (для slot_full / превышения мест).
 		AvailableSeats *int `json:"available_seats,omitempty"`
@@ -55,6 +89,39 @@ type Error struct {
 
 	// Message Человекочитаемое сообщение об ошибке.
 	Message string `json:"message"`
+}
+
+// ErrorCode Канонический машинный код ошибки (R-023). Доменные коды: slot_full (нет свободных мест), double_booking (повторная бронь того же слота), slot_cancelled (слот отменён клубом), slot_started (слот уже стартовал), already_cancelled (бронь уже отменена), invalid_code (неверный/истёкший OTP). Идемпотентность: idempotency_key_conflict (повтор ключа с другим телом). Транспортные/общие: bad_request (400), unauthorized (401), forbidden (403), not_found (404), too_many_requests (429), internal_error (5xx).
+type ErrorCode string
+
+// PushTokenDeleteRequest Снятие регистрации push-токена устройства (R-006). Токен передаётся в теле, а не в URL, чтобы не записывать сырое значение токена в логи/историю URL.
+type PushTokenDeleteRequest struct {
+	// Platform Платформа устройства.
+	Platform PushTokenDeleteRequestPlatform `json:"platform"`
+
+	// Token Токен push-уведомлений, выданный платформой (APNs/FCM).
+	Token string `json:"token"`
+}
+
+// PushTokenDeleteRequestPlatform Платформа устройства.
+type PushTokenDeleteRequestPlatform string
+
+// PushTokenRequest Регистрация push-токена устройства для напоминаний (R-006).
+type PushTokenRequest struct {
+	// Platform Платформа устройства.
+	Platform PushTokenRequestPlatform `json:"platform"`
+
+	// Token Токен push-уведомлений, выданный платформой (APNs/FCM).
+	Token string `json:"token"`
+}
+
+// PushTokenRequestPlatform Платформа устройства.
+type PushTokenRequestPlatform string
+
+// RefreshTokenRequest Запрос на обновление сессии по refresh-токену (R-016).
+type RefreshTokenRequest struct {
+	// RefreshToken Действительный refresh-токен, ранее выданный verify-code или refresh.
+	RefreshToken string `json:"refresh_token"`
 }
 
 // RequestCodeRequest Запрос на отправку OTP-кода на номер телефона.
@@ -68,12 +135,30 @@ type RequestCodeResponse struct {
 	// Code OTP-код для демонстрационной реализации без SMS-провайдера. В production должен отправляться через провайдера и не возвращаться клиенту.
 	Code *string `json:"code,omitempty"`
 
-	// ResendAfterSeconds Через сколько секунд можно запросить повторную отправку.
+	// ResendAfterSeconds Через сколько секунд можно запросить повторную отправку (по умолчанию 60). Более ранний повтор → 429.
 	ResendAfterSeconds int `json:"resend_after_seconds"`
 
-	// TtlSeconds Срок жизни кода в секундах.
+	// TtlSeconds Срок жизни кода в секундах (по умолчанию 300 = 5 минут). По истечении код недействителен.
 	TtlSeconds int `json:"ttl_seconds"`
 }
+
+// TokenPair Пара JWT-токенов сессии (R-016). access_token передаётся в Authorization для защищённых запросов; refresh_token используется только на /auth/refresh для получения новой пары (ротация).
+type TokenPair struct {
+	// AccessToken JWT access-токен. Короткоживущий, передаётся в заголовке Authorization.
+	AccessToken string `json:"access_token"`
+
+	// ExpiresIn Срок жизни access-токена в секундах.
+	ExpiresIn int `json:"expires_in"`
+
+	// RefreshToken Refresh-токен для обновления сессии через POST /auth/refresh. Долгоживущий, хранится только на клиенте.
+	RefreshToken string `json:"refresh_token"`
+
+	// TokenType Тип токена.
+	TokenType TokenPairTokenType `json:"token_type"`
+}
+
+// TokenPairTokenType Тип токена.
+type TokenPairTokenType string
 
 // VerifyCodeRequest Подтверждение OTP-кода и вход/регистрация. Только phone и code: на этом шаге ещё не известно, новый клиент или существующий, поэтому имя здесь не передаётся — для нового клиента оно дозаполняется отдельным шагом (PATCH /profile, шаг 3 SCR-001).
 type VerifyCodeRequest struct {
@@ -84,7 +169,7 @@ type VerifyCodeRequest struct {
 	Phone string `json:"phone"`
 }
 
-// VerifyCodeResponse Ответ на подтверждение кода — сессия и данные клиента. Для нового клиента (is_new=true) поле client.name пустое/отсутствует: имя дозаполняется через PATCH /profile (шаг 3 SCR-001). Существующий клиент возвращается с заполненным именем.
+// VerifyCodeResponse Ответ на подтверждение кода — пара токенов сессии и данные клиента (R-016). Для нового клиента (is_new=true) поле client.name пустое/отсутствует: имя дозаполняется через PATCH /profile (шаг 3 SCR-001). Существующий клиент возвращается с заполненным именем.
 type VerifyCodeResponse struct {
 	// Client Клиент сервиса. Аутентифицируется по номеру телефона (логин в формате E.164). Сразу после регистрации (verify-code, is_new=true) name ещё не задан — пустое/отсутствующее имя означает незавершённую регистрацию (дозаполняется через PATCH /profile).
 	Client Client `json:"client"`
@@ -92,8 +177,8 @@ type VerifyCodeResponse struct {
 	// IsNew true, если клиент только что зарегистрирован (имя ещё не задано).
 	IsNew bool `json:"is_new"`
 
-	// Token Bearer-токен сессии.
-	Token string `json:"token"`
+	// Tokens Пара JWT-токенов сессии (R-016). access_token передаётся в Authorization для защищённых запросов; refresh_token используется только на /auth/refresh для получения новой пары (ротация).
+	Tokens TokenPair `json:"tokens"`
 }
 
 // BadRequest Стандартное тело ошибки.
@@ -102,11 +187,23 @@ type BadRequest = Error
 // InternalError Стандартное тело ошибки.
 type InternalError = Error
 
+// NotFound Стандартное тело ошибки.
+type NotFound = Error
+
 // TooManyRequests Стандартное тело ошибки.
 type TooManyRequests = Error
 
 // Unauthorized Стандартное тело ошибки.
 type Unauthorized = Error
+
+// DeletePushTokenJSONRequestBody defines body for DeletePushToken for application/json ContentType.
+type DeletePushTokenJSONRequestBody = PushTokenDeleteRequest
+
+// RegisterPushTokenJSONRequestBody defines body for RegisterPushToken for application/json ContentType.
+type RegisterPushTokenJSONRequestBody = PushTokenRequest
+
+// RefreshTokenJSONRequestBody defines body for RefreshToken for application/json ContentType.
+type RefreshTokenJSONRequestBody = RefreshTokenRequest
 
 // RequestAuthCodeJSONRequestBody defines body for RequestAuthCode for application/json ContentType.
 type RequestAuthCodeJSONRequestBody = RequestCodeRequest
@@ -119,6 +216,15 @@ type ServerInterface interface {
 	// Выход
 	// (POST /auth/logout)
 	Logout(w http.ResponseWriter, r *http.Request)
+	// Удалить push-токен
+	// (DELETE /auth/push-tokens)
+	DeletePushToken(w http.ResponseWriter, r *http.Request)
+	// Зарегистрировать push-токен
+	// (POST /auth/push-tokens)
+	RegisterPushToken(w http.ResponseWriter, r *http.Request)
+	// Обновить токен сессии
+	// (POST /auth/refresh)
+	RefreshToken(w http.ResponseWriter, r *http.Request)
 	// Запросить код подтверждения (OTP)
 	// (POST /auth/request-code)
 	RequestAuthCode(w http.ResponseWriter, r *http.Request)
@@ -134,6 +240,24 @@ type Unimplemented struct{}
 // Выход
 // (POST /auth/logout)
 func (_ Unimplemented) Logout(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Удалить push-токен
+// (DELETE /auth/push-tokens)
+func (_ Unimplemented) DeletePushToken(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Зарегистрировать push-токен
+// (POST /auth/push-tokens)
+func (_ Unimplemented) RegisterPushToken(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Обновить токен сессии
+// (POST /auth/refresh)
+func (_ Unimplemented) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -169,6 +293,60 @@ func (siw *ServerInterfaceWrapper) Logout(w http.ResponseWriter, r *http.Request
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Logout(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeletePushToken operation middleware
+func (siw *ServerInterfaceWrapper) DeletePushToken(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeletePushToken(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RegisterPushToken operation middleware
+func (siw *ServerInterfaceWrapper) RegisterPushToken(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RegisterPushToken(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RefreshToken operation middleware
+func (siw *ServerInterfaceWrapper) RefreshToken(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RefreshToken(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -323,6 +501,15 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/auth/logout", wrapper.Logout)
 	})
 	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/auth/push-tokens", wrapper.DeletePushToken)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/push-tokens", wrapper.RegisterPushToken)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/refresh", wrapper.RefreshToken)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/auth/request-code", wrapper.RequestAuthCode)
 	})
 	r.Group(func(r chi.Router) {
@@ -335,59 +522,92 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

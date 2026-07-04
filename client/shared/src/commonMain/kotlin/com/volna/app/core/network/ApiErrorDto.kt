@@ -17,7 +17,7 @@ data class ApiErrorDto(
 data class ApiErrorDetailsDto(
     @SerialName("available_seats")
     val availableSeats: Int? = null,
-    @SerialName("available_rental_boards")
+    @SerialName("available_rental_gear")
     val availableRentalBoards: Int? = null,
 )
 

@@ -268,7 +268,7 @@ private fun BookingBoardsSection(
             )
         }
         Text(
-            text = "Прокатных выбрано: ${boardSelections.count { it == BoardSelection.Rental }} из $freeRentalBoards",
+            text = "Прокатных комплектов: ${boardSelections.count { it == BoardSelection.Rental }} из $freeRentalBoards",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.labelMedium,

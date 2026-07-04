@@ -30,10 +30,7 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request, p
 		return
 	}
 
-	idempotencyKey := ""
-	if params.IdempotencyKey != nil {
-		idempotencyKey = params.IdempotencyKey.String()
-	}
+	idempotencyKey := params.IdempotencyKey.String()
 	created, err := h.service.Create(r.Context(), booking.CreateCommand{
 		Token:          token,
 		IdempotencyKey: idempotencyKey,
@@ -63,9 +60,12 @@ func (h *BookingHandler) ListBookings(w http.ResponseWriter, r *http.Request, pa
 		return
 	}
 	var status *string
-	if params.Status != nil {
-		value := string(*params.Status)
-		if value != string(bookingsapi.BookingStatusActive) && value != string(bookingsapi.BookingStatusCancelled) && value != string(bookingsapi.BookingStatusLateCancel) {
+	if params.Status != nil && len(*params.Status) > 0 {
+		value := (*params.Status)[0]
+		if value != string(bookingsapi.BookingStatusActive) &&
+			value != string(bookingsapi.BookingStatusCancelled) &&
+			value != string(bookingsapi.BookingStatusLateCancel) &&
+			value != string(bookingsapi.BookingStatusClubCancelled) {
 			httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
 			return
 		}
@@ -156,7 +156,7 @@ func writeBookingError(w http.ResponseWriter, err error) {
 func availabilityDetails(availability booking.Availability) map[string]int {
 	return map[string]int{
 		"available_seats":         availability.AvailableSeats,
-		"available_rental_boards": availability.AvailableRentalBoards,
+		"available_rental_gear": availability.AvailableRentalBoards,
 	}
 }
 
@@ -239,7 +239,7 @@ func bookingSlotDTO(value booking.Slot) (bookingsapi.Slot, error) {
 		StartAt:          value.StartAt,
 		TotalSeats:       value.TotalSeats,
 		FreeSeats:        value.FreeSeats,
-		FreeRentalBoards: value.FreeRentalBoards,
+		FreeRentalGear: value.FreeRentalBoards,
 		Price:            value.Price,
 		RentalPrice:      value.RentalPrice,
 		MeetingPoint:     value.MeetingPoint,
@@ -261,7 +261,7 @@ func bookingSlotSummaryDTO(value booking.Slot) (bookingsapi.SlotSummary, error) 
 		StartAt:          slot.StartAt,
 		TotalSeats:       slot.TotalSeats,
 		FreeSeats:        slot.FreeSeats,
-		FreeRentalBoards: slot.FreeRentalBoards,
+		FreeRentalGear: slot.FreeRentalGear,
 		Price:            slot.Price,
 		RentalPrice:      slot.RentalPrice,
 		Status:           slot.Status,

@@ -24,15 +24,32 @@ const (
 	BearerAuthScopes = "bearerAuth.Scopes"
 )
 
+// Defines values for ErrorCode.
+const (
+	ErrorCodeAlreadyCancelled       ErrorCode = "already_cancelled"
+	ErrorCodeBadRequest             ErrorCode = "bad_request"
+	ErrorCodeDoubleBooking          ErrorCode = "double_booking"
+	ErrorCodeForbidden              ErrorCode = "forbidden"
+	ErrorCodeIdempotencyKeyConflict ErrorCode = "idempotency_key_conflict"
+	ErrorCodeInternalError          ErrorCode = "internal_error"
+	ErrorCodeInvalidCode            ErrorCode = "invalid_code"
+	ErrorCodeNotFound               ErrorCode = "not_found"
+	ErrorCodeSlotCancelled          ErrorCode = "slot_cancelled"
+	ErrorCodeSlotFull               ErrorCode = "slot_full"
+	ErrorCodeSlotStarted            ErrorCode = "slot_started"
+	ErrorCodeTooManyRequests        ErrorCode = "too_many_requests"
+	ErrorCodeUnauthorized           ErrorCode = "unauthorized"
+)
+
 // Error Стандартное тело ошибки.
 type Error struct {
-	// Code Машинный код ошибки, например: slot_full, double_booking, slot_cancelled, slot_started, already_cancelled, invalid_code.
-	Code string `json:"code"`
+	// Code Канонический машинный код ошибки (R-023). Доменные коды: slot_full (нет свободных мест), double_booking (повторная бронь того же слота), slot_cancelled (слот отменён клубом), slot_started (слот уже стартовал), already_cancelled (бронь уже отменена), invalid_code (неверный/истёкший OTP). Идемпотентность: idempotency_key_conflict (повтор ключа с другим телом). Транспортные/общие: bad_request (400), unauthorized (401), forbidden (403), not_found (404), too_many_requests (429), internal_error (5xx).
+	Code ErrorCode `json:"code"`
 
-	// Details Необязательные машиночитаемые детали для динамических сообщений на клиенте (foundations §6): например, актуальная доступность для E1/E2, чтобы показать «Свободно: N мест» / «Свободно: M досок» без разбора текста message.
+	// Details Необязательные машиночитаемые детали для динамических сообщений на клиенте (foundations §6): например, актуальная доступность для E1/E2, чтобы показать «Свободно: N мест» / «Свободно: M комплектов экипировки» без разбора текста message.
 	Details *struct {
-		// AvailableRentalBoards Сколько прокатных досок реально свободно (для нехватки прокатных досок).
-		AvailableRentalBoards *int `json:"available_rental_boards,omitempty"`
+		// AvailableRentalGear Сколько прокатных комплектов экипировки реально свободно (для нехватки прокатных комплектов экипировки).
+		AvailableRentalGear *int `json:"available_rental_gear,omitempty"`
 
 		// AvailableSeats Сколько мест реально свободно на момент ошибки (для slot_full / превышения мест).
 		AvailableSeats *int `json:"available_seats,omitempty"`
@@ -42,18 +59,21 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-// Instructor Инструктор, ведущий прогулку.
+// ErrorCode Канонический машинный код ошибки (R-023). Доменные коды: slot_full (нет свободных мест), double_booking (повторная бронь того же слота), slot_cancelled (слот отменён клубом), slot_started (слот уже стартовал), already_cancelled (бронь уже отменена), invalid_code (неверный/истёкший OTP). Идемпотентность: idempotency_key_conflict (повтор ключа с другим телом). Транспортные/общие: bad_request (400), unauthorized (401), forbidden (403), not_found (404), too_many_requests (429), internal_error (5xx).
+type ErrorCode string
+
+// Instructor Маршал-инструктор, ведущий заезд (брифинг и контроль безопасности).
 type Instructor struct {
-	// Id Идентификатор инструктора.
+	// Id Идентификатор маршала-инструктора.
 	Id openapi_types.UUID `json:"id"`
 
-	// Name Имя инструктора.
+	// Name Имя маршала-инструктора.
 	Name string `json:"name"`
 }
 
-// InstructorListResponse Постраничный список инструкторов (справочник для фильтра, BS-001).
+// InstructorListResponse Постраничный список маршалов-инструкторов (справочник для фильтра, BS-001).
 type InstructorListResponse struct {
-	// Items Элементы списка инструкторов.
+	// Items Элементы списка маршалов.
 	Items []Instructor `json:"items"`
 
 	// Meta Метаданные постраничной выдачи.
@@ -283,38 +303,45 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/n8DAAD//x0f3N/OFAAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

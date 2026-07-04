@@ -15,6 +15,7 @@ data class RequestCodeResponseDto(
     val ttlSeconds: Int,
     @SerialName("resend_after_seconds")
     val resendAfterSeconds: Int,
+    val code: String? = null,
 )
 
 @Serializable
@@ -24,8 +25,20 @@ data class VerifyCodeRequestDto(
 )
 
 @Serializable
+data class TokenPairDto(
+    @SerialName("access_token")
+    val accessToken: String,
+    @SerialName("refresh_token")
+    val refreshToken: String,
+    @SerialName("expires_in")
+    val expiresIn: Int,
+    @SerialName("token_type")
+    val tokenType: String,
+)
+
+@Serializable
 data class VerifyCodeResponseDto(
-    val token: String,
+    val tokens: TokenPairDto,
     val client: ClientDto,
     @SerialName("is_new")
     val isNew: Boolean,

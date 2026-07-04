@@ -34,6 +34,7 @@ data class AuthState(
     val step: AuthStep = AuthStep.Phone,
     val phoneInput: String = "",
     val codeInput: String = "",
+    val devOtpHint: String? = null,
     val nameInput: String = "",
     val ttlSeconds: Int? = null,
     val resendAfterSeconds: Int? = null,
@@ -145,15 +146,20 @@ class AuthStore(
             result.fold(
                 onSuccess = { response ->
                     startResendTimer(response.resendAfterSeconds)
+                    val devCode = response.devCode
                     mutableState.update {
                         it.copy(
                             step = AuthStep.Otp,
                             ttlSeconds = response.ttlSeconds,
                             resendAfterSeconds = response.resendAfterSeconds,
-                            codeInput = "",
+                            codeInput = devCode.orEmpty(),
+                            devOtpHint = devCode,
                             actionStatus = ActionStatus.Idle,
                             fieldError = null,
                         )
+                    }
+                    if (devCode != null) {
+                        verifyCode()
                     }
                 },
                 onFailure = { failure ->
@@ -230,6 +236,7 @@ class AuthStore(
             it.copy(
                 step = AuthStep.Phone,
                 codeInput = "",
+                devOtpHint = null,
                 ttlSeconds = null,
                 resendAfterSeconds = null,
                 resendSecondsRemaining = 0,

@@ -11,7 +11,7 @@ func TestCreateRejectsInvalidCountsBeforeRepositoryLookup(t *testing.T) {
 	repo := &fakeRepo{clientFound: true}
 	service := NewService(repo)
 
-	_, err := service.Create(context.Background(), CreateCommand{Token: "token", SlotID: "slot", SeatsCount: 4, RentalCount: 0})
+	_, err := service.Create(context.Background(), CreateCommand{Token: "token", SlotID: "slot", SeatsCount: 6, RentalCount: 0})
 	if !errors.Is(err, ErrInvalidRequest) {
 		t.Fatalf("Create() error = %v, want %v", err, ErrInvalidRequest)
 	}

@@ -111,7 +111,7 @@ internal fun RouteType.toTagText(): String = when (this) {
 }
 
 internal fun cancelDeadlineText(booking: Booking): String =
-    "Бесплатно освободить место можно до ${booking.slot?.startAt?.minus(2.hours)?.toUiText() ?: "уточняется"}"
+    "Бесплатно освободить место можно до ${booking.slot?.startAt?.minus(1.hours)?.toUiText() ?: "уточняется"}"
 
 internal fun Instant.toBookingCardStartText(): String {
     val dateTime = toLocalDateTime(TimeZone.currentSystemDefault())

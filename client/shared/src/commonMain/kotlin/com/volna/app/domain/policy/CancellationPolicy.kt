@@ -15,7 +15,7 @@ object CancellationPolicy {
             return CancellationKind.UnavailableAfterStart
         }
         val beforeStart = slotStartAt - now
-        return if (beforeStart >= 2.hours) {
+        return if (beforeStart >= 1.hours) {
             CancellationKind.Early
         } else {
             CancellationKind.Late

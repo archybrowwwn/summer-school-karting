@@ -49,13 +49,13 @@ func TestCreateBookingFlowAndIdempotency(t *testing.T) {
 		PriceTotal int    `json:"price_total"`
 		Slot       struct {
 			FreeSeats        int `json:"free_seats"`
-			FreeRentalBoards int `json:"free_rental_boards"`
+			FreeRentalGear int `json:"free_rental_gear"`
 		} `json:"slot"`
 	}
 	if err := json.Unmarshal(first.Body.Bytes(), &firstResponse); err != nil {
 		t.Fatalf("decode first response: %v", err)
 	}
-	if firstResponse.PriceTotal != 5800 || firstResponse.Slot.FreeSeats != 6 || firstResponse.Slot.FreeRentalBoards != 11 {
+	if firstResponse.PriceTotal != 5800 || firstResponse.Slot.FreeSeats != 6 || firstResponse.Slot.FreeRentalGear != 11 {
 		t.Fatalf("unexpected first response: %+v", firstResponse)
 	}
 
@@ -299,13 +299,13 @@ func TestCancelBookingEarlyLateAndAfterStart(t *testing.T) {
 		Status string `json:"status"`
 		Slot   struct {
 			FreeSeats        int `json:"free_seats"`
-			FreeRentalBoards int `json:"free_rental_boards"`
+			FreeRentalGear int `json:"free_rental_gear"`
 		} `json:"slot"`
 	}
 	if err := json.Unmarshal(earlyRecorder.Body.Bytes(), &earlyResponse); err != nil {
 		t.Fatalf("decode early response: %v", err)
 	}
-	if earlyResponse.Status != "cancelled" || earlyResponse.Slot.FreeSeats != 8 || earlyResponse.Slot.FreeRentalBoards != 12 {
+	if earlyResponse.Status != "cancelled" || earlyResponse.Slot.FreeSeats != 8 || earlyResponse.Slot.FreeRentalGear != 12 {
 		t.Fatalf("unexpected early response: %+v", earlyResponse)
 	}
 	repeatRecorder := performCancelBooking(router, token, earlyID)
@@ -314,7 +314,7 @@ func TestCancelBookingEarlyLateAndAfterStart(t *testing.T) {
 	}
 
 	lateID := "dddddddd-dddd-dddd-dddd-dddddddddddd"
-	if _, err := db.Exec(ctx, `UPDATE slots SET start_at = $1, free_seats = 10, free_rental_boards = 9 WHERE id = '66666666-6666-6666-6666-666666666666'`, time.Now().Add(time.Hour)); err != nil {
+	if _, err := db.Exec(ctx, `UPDATE slots SET start_at = $1, free_seats = 10, free_rental_boards = 9 WHERE id = '66666666-6666-6666-6666-666666666666'`, time.Now().Add(30*time.Minute)); err != nil {
 		t.Fatalf("update late slot: %v", err)
 	}
 	insertBooking(t, ctx, db, lateID, "66666666-6666-6666-6666-666666666666", clientID, 2, 1)
@@ -326,13 +326,13 @@ func TestCancelBookingEarlyLateAndAfterStart(t *testing.T) {
 		Status string `json:"status"`
 		Slot   struct {
 			FreeSeats        int `json:"free_seats"`
-			FreeRentalBoards int `json:"free_rental_boards"`
+			FreeRentalGear int `json:"free_rental_gear"`
 		} `json:"slot"`
 	}
 	if err := json.Unmarshal(lateRecorder.Body.Bytes(), &lateResponse); err != nil {
 		t.Fatalf("decode late response: %v", err)
 	}
-	if lateResponse.Status != "late_cancel" || lateResponse.Slot.FreeSeats != 10 || lateResponse.Slot.FreeRentalBoards != 9 {
+	if lateResponse.Status != "late_cancel" || lateResponse.Slot.FreeSeats != 10 || lateResponse.Slot.FreeRentalGear != 9 {
 		t.Fatalf("unexpected late response: %+v", lateResponse)
 	}
 

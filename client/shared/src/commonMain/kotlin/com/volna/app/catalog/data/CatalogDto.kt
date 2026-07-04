@@ -35,7 +35,7 @@ data class SlotDto(
     val totalSeats: Int,
     @SerialName("free_seats")
     val freeSeats: Int,
-    @SerialName("free_rental_boards")
+    @SerialName("free_rental_gear")
     val freeRentalBoards: Int,
     val price: Int,
     @SerialName("rental_price")

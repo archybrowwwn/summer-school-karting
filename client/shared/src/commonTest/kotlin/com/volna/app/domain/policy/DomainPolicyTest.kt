@@ -28,7 +28,7 @@ class DomainPolicyTest {
 
         val availability = AvailabilityPolicy.availability(slot)
 
-        assertEquals(3, availability.maxSeatsForBooking)
+        assertEquals(5, availability.maxSeatsForBooking)
         assertEquals(12, availability.freeRentalBoards)
     }
 
@@ -88,12 +88,12 @@ class DomainPolicyTest {
     }
 
     @Test
-    fun exactlyTwoHoursBeforeStartIsEarlyCancellation() {
+    fun exactlyOneHourBeforeStartIsEarlyCancellation() {
         val startAt = Instant.parse("2026-07-01T12:00:00Z")
 
-        assertEquals(CancellationKind.Early, CancellationPolicy.classify(startAt - 2.hours, startAt))
-        assertEquals(CancellationKind.Early, CancellationPolicy.classify(startAt - 2.hours - 1.seconds, startAt))
-        assertEquals(CancellationKind.Late, CancellationPolicy.classify(startAt - 2.hours + 1.seconds, startAt))
+        assertEquals(CancellationKind.Early, CancellationPolicy.classify(startAt - 1.hours, startAt))
+        assertEquals(CancellationKind.Early, CancellationPolicy.classify(startAt - 1.hours - 1.seconds, startAt))
+        assertEquals(CancellationKind.Late, CancellationPolicy.classify(startAt - 1.hours + 1.seconds, startAt))
         assertEquals(CancellationKind.UnavailableAfterStart, CancellationPolicy.classify(startAt, startAt))
     }
 

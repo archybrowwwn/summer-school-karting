@@ -19,7 +19,7 @@ sealed interface AvailabilityViolation {
 }
 
 object AvailabilityPolicy {
-    private const val MaxClientSeats = 3
+    private const val MaxClientSeats = 5
 
     fun availability(slot: Slot): Availability {
         val maxSeats = if (slot.status == SlotStatus.Scheduled) {

@@ -9,10 +9,11 @@ import com.volna.app.domain.model.Phone
 fun RequestCodeResponseDto.toDomain(): RequestCodeResult = RequestCodeResult(
     ttlSeconds = ttlSeconds,
     resendAfterSeconds = resendAfterSeconds,
+    devCode = code,
 )
 
 fun VerifyCodeResponseDto.toDomain(): VerifyCodeResult = VerifyCodeResult(
-    token = token,
+    token = tokens.accessToken,
     client = client.toDomain(),
     isNew = isNew,
 )

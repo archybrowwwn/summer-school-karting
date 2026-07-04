@@ -26,6 +26,23 @@ const (
 	BearerAuthScopes = "bearerAuth.Scopes"
 )
 
+// Defines values for ErrorCode.
+const (
+	ErrorCodeAlreadyCancelled       ErrorCode = "already_cancelled"
+	ErrorCodeBadRequest             ErrorCode = "bad_request"
+	ErrorCodeDoubleBooking          ErrorCode = "double_booking"
+	ErrorCodeForbidden              ErrorCode = "forbidden"
+	ErrorCodeIdempotencyKeyConflict ErrorCode = "idempotency_key_conflict"
+	ErrorCodeInternalError          ErrorCode = "internal_error"
+	ErrorCodeInvalidCode            ErrorCode = "invalid_code"
+	ErrorCodeNotFound               ErrorCode = "not_found"
+	ErrorCodeSlotCancelled          ErrorCode = "slot_cancelled"
+	ErrorCodeSlotFull               ErrorCode = "slot_full"
+	ErrorCodeSlotStarted            ErrorCode = "slot_started"
+	ErrorCodeTooManyRequests        ErrorCode = "too_many_requests"
+	ErrorCodeUnauthorized           ErrorCode = "unauthorized"
+)
+
 // Defines values for RouteType.
 const (
 	RouteTypeExperienced RouteType = "experienced"
@@ -46,13 +63,13 @@ const (
 
 // Error Стандартное тело ошибки.
 type Error struct {
-	// Code Машинный код ошибки, например: slot_full, double_booking, slot_cancelled, slot_started, already_cancelled, invalid_code.
-	Code string `json:"code"`
+	// Code Канонический машинный код ошибки (R-023). Доменные коды: slot_full (нет свободных мест), double_booking (повторная бронь того же слота), slot_cancelled (слот отменён клубом), slot_started (слот уже стартовал), already_cancelled (бронь уже отменена), invalid_code (неверный/истёкший OTP). Идемпотентность: idempotency_key_conflict (повтор ключа с другим телом). Транспортные/общие: bad_request (400), unauthorized (401), forbidden (403), not_found (404), too_many_requests (429), internal_error (5xx).
+	Code ErrorCode `json:"code"`
 
-	// Details Необязательные машиночитаемые детали для динамических сообщений на клиенте (foundations §6): например, актуальная доступность для E1/E2, чтобы показать «Свободно: N мест» / «Свободно: M досок» без разбора текста message.
+	// Details Необязательные машиночитаемые детали для динамических сообщений на клиенте (foundations §6): например, актуальная доступность для E1/E2, чтобы показать «Свободно: N мест» / «Свободно: M комплектов экипировки» без разбора текста message.
 	Details *struct {
-		// AvailableRentalBoards Сколько прокатных досок реально свободно (для нехватки прокатных досок).
-		AvailableRentalBoards *int `json:"available_rental_boards,omitempty"`
+		// AvailableRentalGear Сколько прокатных комплектов экипировки реально свободно (для нехватки прокатных комплектов экипировки).
+		AvailableRentalGear *int `json:"available_rental_gear,omitempty"`
 
 		// AvailableSeats Сколько мест реально свободно на момент ошибки (для slot_full / превышения мест).
 		AvailableSeats *int `json:"available_seats,omitempty"`
@@ -62,23 +79,26 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-// Geometry Геометрия маршрута для отрисовки линии на карте Яндекс.
+// ErrorCode Канонический машинный код ошибки (R-023). Доменные коды: slot_full (нет свободных мест), double_booking (повторная бронь того же слота), slot_cancelled (слот отменён клубом), slot_started (слот уже стартовал), already_cancelled (бронь уже отменена), invalid_code (неверный/истёкший OTP). Идемпотентность: idempotency_key_conflict (повтор ключа с другим телом). Транспортные/общие: bad_request (400), unauthorized (401), forbidden (403), not_found (404), too_many_requests (429), internal_error (5xx).
+type ErrorCode string
+
+// Geometry Геометрия трассы для отрисовки линии на карте Яндекс.
 type Geometry struct {
 	union json.RawMessage
 }
 
-// Geometry0 Массив координат точек маршрута.
+// Geometry0 Массив координат точек трассы.
 type Geometry0 = [][]float32
 
 // Geometry1 Закодированная полилиния (encoded polyline).
 type Geometry1 = string
 
-// Instructor Инструктор, ведущий прогулку.
+// Instructor Маршал-инструктор, ведущий заезд (брифинг и контроль безопасности).
 type Instructor struct {
-	// Id Идентификатор инструктора.
+	// Id Идентификатор маршала-инструктора.
 	Id openapi_types.UUID `json:"id"`
 
-	// Name Имя инструктора.
+	// Name Имя маршала-инструктора.
 	Name string `json:"name"`
 }
 
@@ -94,42 +114,51 @@ type PaginationMeta struct {
 	Total int `json:"total"`
 }
 
-// Route Маршрут прогулки. Справочник, доступен только для чтения.
+// Route Конфигурация трассы заезда (короткая новичковая / длинная опытная). Справочник, доступен только для чтения.
 type Route struct {
-	// CapacityCap Потолок числа мест на маршруте. Новичковый — не более 8, опытный — не более 12.
+	// CapacityCap Потолок числа мест на трассе. Новичковая — не более 8, опытная — не более 14.
 	CapacityCap int `json:"capacity_cap"`
 
-	// DurationMin Продолжительность прогулки в минутах (обычно 90-120).
+	// Description Описательный текст конфигурации / заезда для карточки слота (SCR-003). Опционально; может отсутствовать или быть null.
+	Description *string `json:"description"`
+
+	// DurationMin Продолжительность заезда в минутах (обычно 15–20, включая инструктаж).
 	DurationMin int `json:"duration_min"`
 
-	// Geometry Геометрия маршрута для отрисовки линии на карте Яндекс.
-	Geometry *Geometry `json:"geometry,omitempty"`
+	// Geometry Геометрия трассы для отрисовки линии на карте Яндекс.
+	Geometry Geometry `json:"geometry"`
 
-	// Id Идентификатор маршрута.
+	// Id Идентификатор конфигурации трассы.
 	Id openapi_types.UUID `json:"id"`
 
-	// Name Название маршрута.
+	// Name Название конфигурации трассы.
 	Name string `json:"name"`
 
-	// Type Тип маршрута — новичковый (novice) или опытный (experienced).
+	// Type Тип конфигурации трассы — новичковая (novice) или опытная (experienced).
 	Type RouteType `json:"type"`
 }
 
-// RouteType Тип маршрута — новичковый (novice) или опытный (experienced).
+// RouteType Тип конфигурации трассы — новичковая (novice) или опытная (experienced).
 type RouteType string
 
-// Slot Полная карточка слота (конкретный сеанс прогулки на дату/время). Доступен только для чтения. Статус «Прошедшая» — производное значение по полю start_at, отдельным статусом не хранится. Итоговая цена брони производная = price·seats_count + rental_price·rental_count.
+// Slot Полная карточка слота (конкретный заезд на дату/время). Доступен только для чтения. Статус «Прошедшая» — производное значение по полю start_at, отдельным статусом не хранится.
+//
+// Доступность (R-013): максимально доступное к брони число мест max_seats = min(free_seats, route.capacity_cap, 5). Число прокатных комплектов экипировки в брони ограничено: rental_count ≤ free_rental_gear. Клиент со своей экипировкой занимает место (free_seats), но не расходует прокатный фонд (free_rental_gear).
+//
+// Цены (R-010): price — тариф за место, rental_price — отдельный тариф проката за экипировку, оба в рублях (валюта RUB). Итоговая цена брони производная = price·seats_count + rental_price·rental_count.
+//
+// Инварианты: free_seats ≤ total_seats; счётчики (free_seats, free_rental_gear, total_seats) и цены (price, rental_price) неотрицательны.
 type Slot struct {
-	// FreeRentalBoards Число свободных прокатных досок из общего фонда (12).
-	FreeRentalBoards int `json:"free_rental_boards"`
+	// FreeRentalGear Число свободных прокатных комплектов экипировки из общего фонда (расчётное). Ограничивает rental_count в брони (rental_count ≤ free_rental_gear). Своя экипировка фонд не расходует, R-013.
+	FreeRentalGear int `json:"free_rental_gear"`
 
-	// FreeSeats Число свободных мест. Расчётное значение.
+	// FreeSeats Число свободных мест (расчётное). Своя экипировка клиента тоже занимает место. К брони доступно max_seats = min(free_seats, route.capacity_cap, 5), R-013.
 	FreeSeats int `json:"free_seats"`
 
 	// Id Идентификатор слота.
 	Id openapi_types.UUID `json:"id"`
 
-	// Instructor Инструктор, ведущий прогулку.
+	// Instructor Маршал-инструктор, ведущий заезд (брифинг и контроль безопасности).
 	Instructor Instructor `json:"instructor"`
 
 	// MeetingPoint Адрес или ориентир места встречи.
@@ -144,13 +173,13 @@ type Slot struct {
 	// Price Цена за одно место, в рублях (целое число, валюта RUB).
 	Price int `json:"price"`
 
-	// RentalPrice Тариф проката за одну доску, в рублях (целое число, валюта RUB).
+	// RentalPrice Тариф проката за одну экипировку, в рублях (целое число, валюта RUB).
 	RentalPrice int `json:"rental_price"`
 
-	// Route Маршрут прогулки. Справочник, доступен только для чтения.
+	// Route Конфигурация трассы заезда (короткая новичковая / длинная опытная). Справочник, доступен только для чтения.
 	Route Route `json:"route"`
 
-	// StartAt Дата и время начала прогулки.
+	// StartAt Дата и время начала заезда.
 	StartAt time.Time `json:"start_at"`
 
 	// Status Статус слота.
@@ -174,28 +203,28 @@ type SlotStatus string
 
 // SlotSummary Урезанное представление слота для списка (SCR-002).
 type SlotSummary struct {
-	// FreeRentalBoards Число свободных прокатных досок из общего фонда (12).
-	FreeRentalBoards int `json:"free_rental_boards"`
+	// FreeRentalGear Число свободных прокатных комплектов экипировки из общего фонда (расчётное). Ограничивает rental_count в брони (rental_count ≤ free_rental_gear). Своя экипировка фонд не расходует, R-013.
+	FreeRentalGear int `json:"free_rental_gear"`
 
-	// FreeSeats Число свободных мест. Расчётное значение.
+	// FreeSeats Число свободных мест (расчётное). Своя экипировка клиента тоже занимает место. К брони доступно max_seats = min(free_seats, route.capacity_cap, 5), R-013.
 	FreeSeats int `json:"free_seats"`
 
 	// Id Идентификатор слота.
 	Id openapi_types.UUID `json:"id"`
 
-	// Instructor Инструктор, ведущий прогулку.
+	// Instructor Маршал-инструктор, ведущий заезд (брифинг и контроль безопасности).
 	Instructor Instructor `json:"instructor"`
 
 	// Price Цена за одно место, в рублях (целое число, валюта RUB).
 	Price int `json:"price"`
 
-	// RentalPrice Тариф проката за одну доску, в рублях (целое число, валюта RUB).
+	// RentalPrice Тариф проката за одну экипировку, в рублях (целое число, валюта RUB).
 	RentalPrice int `json:"rental_price"`
 
-	// Route Маршрут прогулки. Справочник, доступен только для чтения.
+	// Route Конфигурация трассы заезда (короткая новичковая / длинная опытная). Справочник, доступен только для чтения.
 	Route Route `json:"route"`
 
-	// StartAt Дата и время начала прогулки.
+	// StartAt Дата и время начала заезда.
 	StartAt time.Time `json:"start_at"`
 
 	// Status Статус слота.
@@ -243,16 +272,16 @@ type Unauthorized = Error
 
 // ListSlotsParams defines parameters for ListSlots.
 type ListSlotsParams struct {
-	// DateFrom Фильтр: слоты со стартом не раньше
+	// DateFrom Фильтр: слоты со стартом не раньше указанного момента (граница включительна), R-026. По умолчанию — текущий момент (R-027).
 	DateFrom *DateFromParam `form:"date_from,omitempty" json:"date_from,omitempty"`
 
-	// DateTo Фильтр: слоты со стартом не позже
+	// DateTo Фильтр: слоты со стартом не позже указанного момента (граница включительна), R-026. По умолчанию — date_from + 7 дней (R-027).
 	DateTo *DateToParam `form:"date_to,omitempty" json:"date_to,omitempty"`
 
-	// RouteType Тип маршрута (множественный выбор, OR внутри группы)
+	// RouteType Тип маршрута (множественный выбор). Значения внутри группы объединяются по OR; между разными группами фильтров (route_type, instructor_id) — AND (R-026).
 	RouteType *RouteTypeParam `form:"route_type,omitempty" json:"route_type,omitempty"`
 
-	// InstructorId Идентификаторы инструкторов (множественный выбор, OR внутри группы)
+	// InstructorId Идентификаторы инструкторов (множественный выбор). Значения внутри группы объединяются по OR; между разными группами фильтров — AND (R-026).
 	InstructorId *InstructorIdParam `form:"instructor_id,omitempty" json:"instructor_id,omitempty"`
 
 	// OnlyAvailable Только слоты со свободными местами (free_seats > 0). По умолчанию false — показываются все.
@@ -603,69 +632,88 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

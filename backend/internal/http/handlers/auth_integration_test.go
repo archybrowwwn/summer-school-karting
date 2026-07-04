@@ -45,8 +45,10 @@ func TestAuthVerifyAndLogoutFlow(t *testing.T) {
 		t.Fatalf("verify status = %d, body = %s", verifyRecorder.Code, verifyRecorder.Body.String())
 	}
 	var verifyResponse struct {
-		Token  string `json:"token"`
-		IsNew  bool   `json:"is_new"`
+		Tokens struct {
+			AccessToken string `json:"access_token"`
+		} `json:"tokens"`
+		IsNew  bool `json:"is_new"`
 		Client struct {
 			Phone string `json:"phone"`
 		} `json:"client"`
@@ -54,13 +56,13 @@ func TestAuthVerifyAndLogoutFlow(t *testing.T) {
 	if err := json.Unmarshal(verifyRecorder.Body.Bytes(), &verifyResponse); err != nil {
 		t.Fatalf("decode verify response: %v", err)
 	}
-	if verifyResponse.Token == "" || !verifyResponse.IsNew || verifyResponse.Client.Phone != phone {
+	if verifyResponse.Tokens.AccessToken == "" || !verifyResponse.IsNew || verifyResponse.Client.Phone != phone {
 		t.Fatalf("unexpected verify response: %+v", verifyResponse)
 	}
 
 	logoutRecorder := httptest.NewRecorder()
 	logoutReq := httptest.NewRequest(http.MethodPost, "/auth/logout", nil)
-	logoutReq.Header.Set("Authorization", "Bearer "+verifyResponse.Token)
+	logoutReq.Header.Set("Authorization", "Bearer "+verifyResponse.Tokens.AccessToken)
 	router.ServeHTTP(logoutRecorder, logoutReq)
 
 	if logoutRecorder.Code != http.StatusNoContent {

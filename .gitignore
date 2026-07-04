@@ -17,3 +17,4 @@ client/java_pid*.hprof
 .env
 .env.*
 
+terminals/
