@@ -1,4 +1,4 @@
-# План реализации BE для «Волны»
+# План реализации BE для картинг-центра «Апекс»
 
 ## TOC / Todo реализации
 
@@ -48,7 +48,7 @@
 | Bookings | `createBooking` | `POST /bookings` | Атомарное создание брони, `Idempotency-Key` |
 | Bookings | `listBookings` | `GET /bookings` | Список броней текущего клиента |
 | Bookings | `getBooking` | `GET /bookings/{bookingId}` | Детали своей брони |
-| Bookings | `cancelBooking` | `POST /bookings/{bookingId}/cancel` | Отмена брони по правилу 2 часов |
+| Bookings | `cancelBooking` | `POST /bookings/{bookingId}/cancel` | Отмена брони по правилу 1 часа |
 
 Служебные endpoints для эксплуатации можно добавить вне клиентского API: `GET /healthz`, `GET /readyz`. Если они попадают в публичный контракт, сначала обновить OpenAPI.
 
@@ -100,7 +100,7 @@
 - Таблицы `clients`, `auth_sessions`, `otp_codes`, `routes`, `instructors`, `slots`, `bookings`, `idempotency_keys`.
 - `routes`, `instructors`, `slots` сделать read-only для клиентского API; данные для dev/test загружать seed-миграцией или fixtures.
 - Для `bookings` сохранить `status in (active,cancelled,late_cancel)`, `seats_count`, `rental_count`, `created_at`, `cancelled_at`.
-- Для `slots` хранить данные, достаточные для атомарного расчёта `free_seats` и `free_rental_boards`; не полагаться на FE для лимитов.
+- Для `slots` хранить данные, достаточные для атомарного расчёта `free_seats` и `free_rental_gear`; не полагаться на FE для лимитов.
 - Добавить индексы по `phone`, `slot_id`, `client_id`, `start_at`, `status`, idempotency key.
 
 Готово, когда:
@@ -148,14 +148,14 @@
 
 Сделать:
 - `POST /bookings` принимать `Idempotency-Key` и сохранять результат для безопасного retry.
-- Валидировать `seats_count` в диапазоне `1..3` и `rental_count` в диапазоне `0..seats_count`.
-- В транзакции заблокировать слот, проверить `status=scheduled`, `start_at` в будущем, свободные места и прокатные доски.
+- Валидировать `seats_count` в диапазоне `1..5` и `rental_count` в диапазоне `0..seats_count`.
+- В транзакции заблокировать слот, проверить `status=scheduled`, `start_at` в будущем, свободные места и прокатный фонд экипировки.
 - Предотвратить double booking текущего клиента на тот же слот согласно NFR-8.
 - Уменьшать доступность слота только после успешного создания брони.
 - Возвращать `409 slot_full`/`double_booking`, `410 slot_cancelled`, `422 slot_started` с `details.available_*`, где применимо.
 
 Готово, когда:
-- Concurrency test с параллельными `createBooking` не допускает `free_seats < 0` и `free_rental_boards < 0`.
+- Concurrency test с параллельными `createBooking` не допускает `free_seats < 0` и `free_rental_gear < 0`.
 - Повтор с тем же `Idempotency-Key` возвращает тот же результат без второй брони.
 - Сетевой retry сценарий из UC-1 E4 покрыт тестом.
 
@@ -175,13 +175,13 @@
 Сделать:
 - `POST /bookings/{bookingId}/cancel`: в транзакции заблокировать booking и slot.
 - Отмена доступна только до `slot.start_at`.
-- Если до старта `>= 2h`, статус `cancelled`, места и прокатные доски возвращаются.
-- Если до старта `< 2h`, статус `late_cancel`, места и прокатные доски не возвращаются.
-- Ровно `2h` считать ранней отменой.
+- Если до старта `>= 1h`, статус `cancelled`, места и прокатный фонд экипировки возвращаются.
+- Если до старта `< 1h`, статус `late_cancel`, места и прокатный фонд не возвращаются.
+- Ровно `1h` считать ранней отменой.
 - Повторную отмену возвращать как контрактную ошибку `409 already_cancelled`.
 
 Готово, когда:
-- Unit tests покрывают границы времени: `2h+1s`, `2h`, `1h59m59s`, после старта.
+- Unit tests покрывают границы времени: `1h+1s`, `1h`, `59m59s`, после старта.
 - Concurrency test параллельных cancel не возвращает места дважды.
 
 ### BE-10. Довести контрактные ошибки и валидацию

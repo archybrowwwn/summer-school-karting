@@ -7,7 +7,7 @@
 
 ## Source Of Truth
 - Start with `01-analysis/5-mobile-app-spec/README.md` for the current client app spec and screen inventory.
-- Use `01-analysis/5-mobile-app-spec/*.md` and `01-analysis/5-mobile-app-spec/09_Логики/*.md` for screen flows, API operationIds, validation, states, and acceptance criteria.
+- Use `01-analysis/5-mobile-app-spec/*.md` and `01-analysis/5-mobile-app-spec/09_Logic/*.md` for screen flows, API operationIds, validation, states, and acceptance criteria.
 - Use `01-analysis/api/redocly.yaml` plus domain files under `01-analysis/api/{auth,slots,bookings,profile,instructors}/` for API contracts.
 - Use `01-analysis/2-requirements/` for requirements and `01-analysis/4-design/data-model.md` for resource model and invariants.
 - Older references to `../api/openapi.yaml` are stale; there is no such file now. Use the multi-file OpenAPI domains registered in `redocly.yaml`.

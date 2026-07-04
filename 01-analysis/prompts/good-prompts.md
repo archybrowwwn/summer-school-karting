@@ -39,3 +39,19 @@
 
 **Ответ ИИ (фрагмент):**
 > UC-1 Запись… E1 slot_full, E3 гонка, E4 idempotency. UC-2 Отмена… A1 late_cancel. UC-3 Фильтрация… UC-4 OTP…
+
+## Пример 3: Модель данных и API-последовательности
+
+**Промпт:**
+> По user stories и FR для картинг-центра «Апекс» спроектируй:
+> 1) ресурсную модель API (Client, Route, Instructor, Slot, Booking) с атрибутами и ERD mermaid;
+> 2) sequence-диаграммы для `createBooking` и `cancelBooking` (idempotency, ошибки 409/410/422).
+>
+> Инварианты: `free_rental_gear` отдельно от `free_seats`; seats 1..5; отмена ≥1ч освобождает места; слоты read-only для клиента.
+
+**Почему работает:**
+- Разделяем «что храним» и «как вызываем API» — два артефакта п.2
+- Явно указаны границы скоупа (только клиентский API)
+
+**Ответ ИИ (фрагмент):**
+> data-model.md: сущности, статусы booking, формула price_total… api-sequence.md: POST /bookings с Idempotency-Key, cancel с границей 1 часа…

@@ -1,17 +1,17 @@
-# План реализации CMP-клиента для «Волны»
+# План реализации CMP-клиента для картинг-центра «Апекс»
 
 ## Контекст анализа
 
-Документ проектирует клиентское приложение «Волна» для Android, iOS и Web на Kotlin Compose Multiplatform. Основа: чистая архитектура, MVI, контрактная интеграция с существующим Go BE и OpenAPI из `01-analysis/api`.
+Документ проектирует клиентское приложение «Апекс» для Android, iOS и Web на Kotlin Compose Multiplatform. Основа: чистая архитектура, MVI, контрактная интеграция с Go BE и OpenAPI из `01-analysis/api`.
 
 Источники:
 
 - `01-analysis/5-mobile-app-spec/README.md` и экранные ТЗ `SCR-*`, `BS-*`.
-- Переиспользуемые логики `01-analysis/5-mobile-app-spec/09_Логики/LOGIC-*`.
+- Переиспользуемые логики `01-analysis/5-mobile-app-spec/09_Logic/LOGIC-*`.
 - API-контракты `01-analysis/api/{auth,slots,bookings,profile,instructors}/`.
 - Backend implementation under `backend/`.
 - `02-development/BE_IMPLEMENTATION_PLAN.md`.
-- Figma file: `https://www.figma.com/design/ySEt0cjmRqmhdWyDlTpDM5/...`. В текущей сессии содержимое Figma недоступно через инструмент, поэтому точные токены темы нужно извлечь отдельным шагом после доступа к файлу.
+- Figma file: `https://www.figma.com/design/kART123ptRqmhdWyDlTpDM5/Апекс-картинг`. Точные токены темы извлекаются отдельным шагом после доступа к файлу.
 
 ## Выводы по требованиям
 
@@ -34,9 +34,9 @@ MVP-клиент покрывает только роль клиента:
 Сквозные логики, которые должны стать отдельными domain/application сервисами или pure-функциями:
 
 - `LOGIC-001` OTP-авторизация и сессия.
-- `LOGIC-002` доступность: `min(free_seats, route.capacity_cap, 3)` плюс проверка `free_rental_boards`.
-- `LOGIC-003` цена: `price * seats_count + rental_price * rental_count`.
-- `LOGIC-004` отмена: `>= 2h` ранняя, `< 2h` поздняя, после старта отмена недоступна.
+- `LOGIC-002` доступность: `min(free_seats, route.capacity_cap, 5)` плюс проверка `free_rental_gear`.
+- `LOGIC-003` цена: `price * seats_count + rental_price * rental_count`; итог `price_total` — read-only с сервера (R-005).
+- `LOGIC-004` отмена: `>= 1h` ранняя, `< 1h` поздняя, после старта отмена недоступна.
 - `LOGIC-005` фильтры слотов: OR внутри группы, AND между группами.
 - `LOGIC-006` карта: Yandex Static/JS/API или платформенный адаптер, обязательный текстовый фолбэк.
 - `LOGIC-007` push-разрешение после первой успешной брони.
@@ -71,8 +71,8 @@ BE важные особенности для клиента:
 - `verifyAuthCode` возвращает `token`, `client`, `is_new`; при `is_new=true` нужно выполнить `updateProfile`.
 - `createBooking` принимает опциональный `Idempotency-Key` UUID. Клиент должен генерировать и удерживать ключ на время retry одного и того же payload.
 - Ошибки приходят в формате `{ code, message, details? }`; для action errors UI показывает snackbar с `message`.
-- `slot_full` может содержать `details.available_seats` и `details.available_rental_boards`; UI должен обновлять форму и подсказывать уменьшить места/прокат.
-- В текущем OpenAPI и BE `Booking`/`BookingSummary` возвращают `price_total`. Это расходится с `LOGIC-003`, где сказано, что API его не возвращает. Клиентское решение: в форме `SCR-004` считать цену локально до отправки, для уже созданных броней предпочитать серверный `price_total`, а при его отсутствии считать fallback-формулой.
+- `slot_full` может содержать `details.available_seats` и `details.available_rental_gear`; UI должен обновлять форму и подсказывать уменьшить места/прокат.
+- `Booking`/`BookingSummary` возвращают `price_total` (read-only, R-005). В форме `SCR-004` до отправки цену можно показать локально по формуле `LOGIC-003`; после создания брони — только серверный `price_total`.
 - OpenAPI `Route.geometry` есть, миграции содержат `routes.geometry`, но текущие BE-мапперы `catalog.go` и `bookings.go` не возвращают `geometry`. Для `LOGIC-006` клиент должен иметь фолбэк "пин + текст", а BE gap нужно закрыть отдельно, если линия маршрута обязательна для MVP.
 
 ## Целевая структура проекта
@@ -350,8 +350,8 @@ Client rules:
 State:
 
 - slot content.
-- seatsCount 1..3 and not above available max.
-- board choice per seat, derived rentalCount.
+- seatsCount 1..5 and not above available max.
+- equipment choice per seat (своя / прокатная), derived rentalCount.
 - computed total price.
 - actionStatus.
 
@@ -364,8 +364,8 @@ Use cases:
 
 Client rules:
 
-- Do not hardcode route caps or board count.
-- Own board consumes group seat, not rental board.
+- Do not hardcode route caps or rental gear pool.
+- Own equipment consumes a kart seat, not rental gear slot.
 - On `slot_full`, use `details` to update max and show contextual message.
 - On success, update local slot availability opportunistically or invalidate slot/list caches.
 
@@ -386,7 +386,7 @@ Use cases:
 
 Client rules:
 
-- Exactly 2 hours before start is early cancellation.
+- Exactly 1 hour before start is early cancellation.
 - After cancel, replace details with server response and invalidate bookings list/slots.
 - Repeated cancel errors (`already_cancelled`) show snackbar and refresh details.
 
@@ -430,8 +430,7 @@ expect fun RouteMapPreview(
 
 Rules:
 
-- Map preview and interactive sheet must not call Волна REST API.
-- Inputs come from `getSlot` or `getBooking`.
+- Map preview and interactive sheet используют только данные из `getSlot`/`getBooking`, без отдельных map-endpoints.
 - If `route.geometry == null`, show pin + text and treat as Content without line.
 - If map SDK/API/key fails, show text fallback + "Открыть в Яндекс.Картах".
 - `yandex_maps_api_key` must come from remote/build config, never hardcoded in code.
@@ -454,30 +453,30 @@ Compose implementation:
 
 ```text
 core/theme/
-  VolnaTheme.kt
-  VolnaColors.kt
-  VolnaTypography.kt
-  VolnaSpacing.kt
-  VolnaShapes.kt
-  VolnaElevation.kt
-  VolnaComponents.kt
+  ApexTheme.kt
+  ApexColors.kt
+  ApexTypography.kt
+  ApexSpacing.kt
+  ApexShapes.kt
+  ApexElevation.kt
+  ApexComponents.kt
 ```
 
 Token mapping:
 
 | Figma | Compose |
 |---|---|
-| Color variables | `VolnaColorScheme` |
-| Text styles | `VolnaTypography` |
-| Number variables for spacing/radius | `VolnaSpacing`, `VolnaShapes` |
-| Effect styles | `VolnaElevation` |
+| Color variables | `ApexColorScheme` |
+| Text styles | `ApexTypography` |
+| Number variables for spacing/radius | `ApexSpacing`, `ApexShapes` |
+| Effect styles | `ApexElevation` |
 | Components/variants | reusable Compose components |
 
 Theme acceptance:
 
 - No hardcoded colors in feature screens.
 - No hardcoded typography except inside theme.
-- Components read tokens from `VolnaTheme`.
+- Components read tokens from `ApexTheme`.
 - Contrast for primary text/buttons meets WCAG AA and `NFR-1`.
 - All screen states from `LOGIC-008` have tokenized skeleton, empty, error and snackbar visuals.
 - Android/iOS/Web render the same token values, with platform-specific font fallback documented.
@@ -514,7 +513,7 @@ Unit tests in `commonTest`:
 
 - `LOGIC-002` availability boundaries.
 - `LOGIC-003` price calculation.
-- `LOGIC-004` cancellation boundary: `2h+1s`, `2h`, `1h59m59s`, after start.
+- `LOGIC-004` cancellation boundary: `1h+1s`, `1h`, `59m59s`, after start.
 - slot filter query builder.
 - booking grouping upcoming/past.
 - MVI reducers for every screen.
@@ -545,7 +544,7 @@ E2E/manual smoke:
 - [ ] `CMP-01` Add shared dependency catalog, CI commands, formatting and test tasks.
 - [ ] `CMP-02` Implement core architecture: MVI base, DI, config, clock, error model, logging.
 - [ ] `CMP-03` Implement theme skeleton and Figma token import format.
-- [ ] `CMP-04` Extract Figma tokens and finalize `VolnaTheme`.
+- [ ] `CMP-04` Extract Figma tokens and finalize `ApexTheme`.
 - [ ] `CMP-05` Implement network layer and generated/manual DTOs aligned with OpenAPI.
 - [ ] `CMP-06` Implement secure/session storage expect/actual.
 - [ ] `CMP-07` Implement Auth flow `SCR-001`.
