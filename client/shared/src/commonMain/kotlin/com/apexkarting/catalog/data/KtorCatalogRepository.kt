@@ -4,6 +4,7 @@ import com.apexkarting.catalog.InstructorRepository
 import com.apexkarting.catalog.Page
 import com.apexkarting.catalog.PageRequest
 import com.apexkarting.catalog.SlotFilters
+import com.apexkarting.catalog.apiRouteTypes
 import com.apexkarting.catalog.SlotRepository
 import com.apexkarting.domain.model.Instructor
 import com.apexkarting.domain.model.RouteType
@@ -21,7 +22,7 @@ class KtorSlotRepository(
             method = HttpMethod.Get
             filters.dateFrom?.let { parameter("date_from", it.toString()) }
             filters.dateTo?.let { parameter("date_to", it.toString()) }
-            filters.routeTypes.forEach { parameter("route_type", it.toApiValue()) }
+            filters.apiRouteTypes().forEach { parameter("route_type", it.toApiValue()) }
             filters.instructorIds.forEach { parameter("instructor_id", it.value) }
             if (filters.onlyAvailable) parameter("only_available", true)
             parameter("limit", page.limit)

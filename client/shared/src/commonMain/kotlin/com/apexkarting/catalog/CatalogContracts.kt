@@ -11,6 +11,7 @@ data class SlotFilters(
     val dateFrom: Instant? = null,
     val dateTo: Instant? = null,
     val routeTypes: Set<RouteType> = emptySet(),
+    val routeNames: Set<String> = emptySet(),
     val instructorIds: Set<InstructorId> = emptySet(),
     val onlyAvailable: Boolean = false,
 )

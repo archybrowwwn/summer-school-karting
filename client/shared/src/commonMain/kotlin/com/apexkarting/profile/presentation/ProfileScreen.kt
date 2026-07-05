@@ -35,6 +35,7 @@ import com.apexkarting.uikit.icons.ArrowRight
 import com.apexkarting.uikit.icons.Edit
 import com.apexkarting.uikit.icons.Icons
 import com.apexkarting.uikit.icons.ApexIcon
+import com.apexkarting.uikit.icons.ApexIconSpec
 
 @Composable
 fun ProfileScreen(
@@ -93,6 +94,7 @@ fun ProfileScreen(
         ) { data ->
             Snackbar(
                 snackbarData = data,
+                shape = RoundedCornerShape(percent = 50),
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 contentColor = MaterialTheme.colorScheme.onSurface,
             )
@@ -311,6 +313,7 @@ private fun ProfileTextField(
         visualTransformation = visualTransformation,
         label = { Text(label) },
         modifier = Modifier.fillMaxWidth(),
+        shape = ApexShapes.chip(),
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = MaterialTheme.colorScheme.onSurface,
             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
@@ -331,7 +334,7 @@ private fun ProfileInfoRow(
     placeholder: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
-    val rowShape = ApexShapes.control()
+    val rowShape = ApexShapes.chip()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -371,7 +374,7 @@ private fun ProfileInfoRow(
             imageVector = Icons.Edit,
             contentDescription = "Редактировать",
             tint = MaterialTheme.colorScheme.onSurface,
-            size = ApexTheme.tokens.spacing.lg,
+            size = ApexTheme.tokens.sizing.headerIconSize,
         )
     }
 }
@@ -462,7 +465,7 @@ private fun InfoLine(
                 imageVector = Icons.ArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 16.dp,
+                size = ApexIconSpec.SMALL_SIZE,
             )
         }
     }

@@ -50,27 +50,37 @@ internal fun TabScreenHeader(
     leadingContent: (@Composable () -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
 ) {
+    val headerInset = ApexTheme.tokens.sizing.headerInset
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(ApexTheme.tokens.sizing.tabHeaderHeight)
-            .padding(horizontal = ApexTheme.tokens.spacing.md),
+            .padding(horizontal = headerInset),
         contentAlignment = Alignment.Center,
     ) {
         if (leadingContent != null) {
-            Box(modifier = Modifier.align(Alignment.CenterStart)) {
+            Box(
+                modifier = Modifier.align(Alignment.CenterStart),
+                contentAlignment = Alignment.Center,
+            ) {
                 leadingContent()
             }
         }
         Text(
             text = title,
+            modifier = Modifier.padding(
+                horizontal = ApexTheme.tokens.sizing.headerIconTouchSize + headerInset,
+            ),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
         if (trailingContent != null) {
-            Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+            Box(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                contentAlignment = Alignment.Center,
+            ) {
                 trailingContent()
             }
         }

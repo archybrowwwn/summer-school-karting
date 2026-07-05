@@ -18,6 +18,7 @@ import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
 import com.apexkarting.core.time.AppClock
 import com.apexkarting.core.ui.ApexBottomSheet
+import com.apexkarting.core.ui.ApexTextLink
 import com.apexkarting.core.ui.ApexFormSection
 import com.apexkarting.core.ui.ApexSheetContent
 import com.apexkarting.core.ui.DetailScreenLayout
@@ -233,11 +234,9 @@ private fun BookingDetailsMapCard(
             textAlign = TextAlign.Center,
         )
         BookingDetailsMapPreview()
-        Text(
+        ApexTextLink(
             text = "Как добраться",
-            modifier = Modifier.clickable { onOpenMap() },
-            style = MaterialTheme.typography.bodyMedium,
-            color = ApexTheme.colors.link,
+            onClick = onOpenMap,
         )
     }
 }
@@ -327,7 +326,7 @@ private fun BookingDetailsPriceBlock(booking: Booking) {
                 imageVector = Icons.Info,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 16.dp,
+                size = com.apexkarting.uikit.icons.ApexIconSpec.SMALL_SIZE,
             )
             Text(
                 text = "Оплата на месте: наличные или перевод",

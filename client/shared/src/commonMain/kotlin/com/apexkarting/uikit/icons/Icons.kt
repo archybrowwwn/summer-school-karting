@@ -18,7 +18,7 @@ fun ApexIcon(
     contentDescription: String?,
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    size: Dp = 32.dp,
+    size: Dp = ApexIconSpec.SIZE,
 ) {
     Icon(
         imageVector = imageVector,

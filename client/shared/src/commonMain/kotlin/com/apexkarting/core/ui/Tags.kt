@@ -23,16 +23,21 @@ import com.apexkarting.domain.model.RouteType
 private val tagShape
     @Composable get() = RoundedCornerShape(ApexTheme.tokens.radius.sm)
 
+/** Капсула для семантических тегов: уровень и название трассы. */
+private val semanticTagShape
+    @Composable get() = RoundedCornerShape(percent = 50)
+
 @Composable
 internal fun ApexOutlinedTag(
     text: String,
     color: Color,
     modifier: Modifier = Modifier,
+    shape: Shape = tagShape,
 ) {
     Text(
         text = text,
         modifier = modifier
-            .border(width = 1.dp, color = color, shape = tagShape)
+            .border(width = 1.dp, color = color, shape = shape)
             .padding(horizontal = ApexTheme.tokens.spacing.xs, vertical = ApexTheme.tokens.spacing.xxs),
         style = MaterialTheme.typography.labelMedium,
         color = color,
@@ -81,6 +86,7 @@ internal fun NoviceTag(
         text = text,
         color = ApexTheme.colors.tagNovice,
         modifier = modifier,
+        shape = semanticTagShape,
     )
 }
 
@@ -93,6 +99,7 @@ internal fun ExperiencedTag(
         text = text,
         color = ApexTheme.colors.tagExperienced,
         modifier = modifier,
+        shape = semanticTagShape,
     )
 }
 
@@ -107,6 +114,7 @@ internal fun RouteNameTag(
         text = name,
         color = colors.routeNameTagColor(name, routeType),
         modifier = modifier,
+        shape = semanticTagShape,
     )
 }
 

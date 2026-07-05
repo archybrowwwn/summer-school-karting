@@ -1,13 +1,14 @@
 package com.apexkarting
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -52,6 +54,8 @@ import com.apexkarting.uikit.icons.Calendar
 import com.apexkarting.uikit.icons.Icons
 import com.apexkarting.uikit.icons.Options
 import com.apexkarting.uikit.icons.Profile
+import com.apexkarting.uikit.ApexShapes
+import com.apexkarting.uikit.apexClickable
 import com.apexkarting.uikit.icons.ApexIcon
 import com.apexkarting.auth.presentation.AuthIntent
 import com.apexkarting.auth.presentation.AuthScreen
@@ -276,9 +280,7 @@ private fun FloatingNavigationBar(
             .background(
                 color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
-            )
-            .padding(horizontal = ApexTheme.tokens.spacing.lg),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NavItem(
@@ -286,18 +288,21 @@ private fun FloatingNavigationBar(
             selected = selectedTab == MainTab.Slots,
             icon = Icons.Calendar,
             onClick = onTabSelected,
+            modifier = Modifier.weight(1f),
         )
         NavItem(
             tab = MainTab.Bookings,
             selected = selectedTab == MainTab.Bookings,
             icon = Icons.Options,
             onClick = onTabSelected,
+            modifier = Modifier.weight(1f),
         )
         NavItem(
             tab = MainTab.Profile,
             selected = selectedTab == MainTab.Profile,
             icon = Icons.Profile,
             onClick = onTabSelected,
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -308,16 +313,29 @@ private fun NavItem(
     selected: Boolean,
     icon: ImageVector,
     onClick: (MainTab) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    ApexIcon(
-        imageVector = icon,
-        contentDescription = tab.title,
-        modifier = Modifier.clickable { onClick(tab) },
-        tint = if (selected) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        size = ApexTheme.tokens.spacing.xl,
-    )
+    val circleShape = ApexShapes.circle
+    Box(
+        modifier = modifier.fillMaxHeight(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(ApexTheme.tokens.sizing.headerIconTouchSize)
+                .apexClickable(circleShape, onClick = { onClick(tab) }),
+            contentAlignment = Alignment.Center,
+        ) {
+        ApexIcon(
+            imageVector = icon,
+            contentDescription = tab.title,
+            tint = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            size = ApexTheme.tokens.sizing.headerIconSize,
+        )
+        }
+    }
 }

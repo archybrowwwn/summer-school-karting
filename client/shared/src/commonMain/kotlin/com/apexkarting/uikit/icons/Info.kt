@@ -1,44 +1,44 @@
 package com.apexkarting.uikit.icons
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 val Icons.Info: ImageVector
     get() {
-        if (_Info != null) {
-            return _Info!!
-        }
+        if (_Info != null) return _Info!!
         _Info = ImageVector.Builder(
             name = "Info",
-            defaultWidth = 16.dp,
-            defaultHeight = 16.dp,
-            viewportWidth = 16f,
-            viewportHeight = 16f
+            defaultWidth = ApexIconSpec.SIZE,
+            defaultHeight = ApexIconSpec.SIZE,
+            viewportWidth = ApexIconSpec.VIEWPORT,
+            viewportHeight = ApexIconSpec.VIEWPORT,
         ).apply {
             path(
-                stroke = SolidColor(Color(0xFFAAAAAA)),
-                strokeLineWidth = 1f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round
+                stroke = ApexIconSpec.STROKE_COLOR,
+                strokeLineWidth = ApexIconSpec.STROKE,
+                strokeLineCap = ApexIconSpec.STROKE_CAP,
+                strokeLineJoin = ApexIconSpec.STROKE_JOIN,
             ) {
-                moveTo(8f, 10.4f)
-                verticalLineTo(8f)
-                moveTo(8f, 5.6f)
-                horizontalLineTo(8.006f)
-                moveTo(14f, 8f)
-                curveTo(14f, 11.314f, 11.314f, 14f, 8f, 14f)
-                curveTo(4.686f, 14f, 2f, 11.314f, 2f, 8f)
-                curveTo(2f, 4.686f, 4.686f, 2f, 8f, 2f)
-                curveTo(11.314f, 2f, 14f, 4.686f, 14f, 8f)
+                moveTo(12f, 3f)
+                curveTo(7.03f, 3f, 3f, 7.03f, 3f, 12f)
+                curveTo(3f, 16.97f, 7.03f, 21f, 12f, 21f)
+                curveTo(16.97f, 21f, 21f, 16.97f, 21f, 12f)
+                curveTo(21f, 7.03f, 16.97f, 3f, 12f, 3f)
                 close()
             }
+            path(
+                stroke = ApexIconSpec.STROKE_COLOR,
+                strokeLineWidth = ApexIconSpec.STROKE,
+                strokeLineCap = ApexIconSpec.STROKE_CAP,
+                strokeLineJoin = ApexIconSpec.STROKE_JOIN,
+            ) {
+                moveTo(12f, 11f)
+                verticalLineTo(16f)
+                moveTo(12f, 8f)
+                lineTo(12.01f, 8f)
+            }
         }.build()
-
         return _Info!!
     }
 

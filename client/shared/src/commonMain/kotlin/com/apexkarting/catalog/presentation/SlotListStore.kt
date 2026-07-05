@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.apexkarting.catalog.PageRequest
 import com.apexkarting.catalog.InstructorRepository
 import com.apexkarting.catalog.SlotFilters
+import com.apexkarting.catalog.matchesRouteConfigFilter
 import com.apexkarting.catalog.SlotRepository
 import com.apexkarting.core.error.AppFailure
 import com.apexkarting.core.error.asAppFailure
@@ -57,6 +58,7 @@ sealed interface SlotListIntent {
     data object RetryInstructors : SlotListIntent
     data class SelectDatePreset(val preset: SlotDatePreset) : SlotListIntent
     data class ToggleRouteType(val routeType: RouteType) : SlotListIntent
+    data class ToggleRouteName(val routeName: String) : SlotListIntent
     data class ToggleInstructor(val instructorId: InstructorId) : SlotListIntent
     data object ToggleOnlyAvailable : SlotListIntent
     data object Reset : SlotListIntent
@@ -91,6 +93,7 @@ class SlotListStore(
             SlotListIntent.RetryInstructors -> loadInstructors(force = true)
             is SlotListIntent.SelectDatePreset -> selectDatePreset(intent.preset)
             is SlotListIntent.ToggleRouteType -> toggleRouteType(intent.routeType)
+            is SlotListIntent.ToggleRouteName -> toggleRouteName(intent.routeName)
             is SlotListIntent.ToggleInstructor -> toggleInstructor(intent.instructorId)
             SlotListIntent.ToggleOnlyAvailable -> mutableState.update {
                 it.copy(draftFilters = it.draftFilters.copy(onlyAvailable = !it.draftFilters.onlyAvailable))
@@ -109,9 +112,10 @@ class SlotListStore(
             mutableState.update { it.copy(slots = Loadable.Loading) }
             slotRepository.listSlots(filters, PageRequest()).fold(
                 onSuccess = { page ->
+                    val items = page.items.filter { it.matchesRouteConfigFilter(filters) }
                     mutableState.update {
                         it.copy(
-                            slots = if (page.items.isEmpty()) {
+                            slots = if (items.isEmpty()) {
                                 Loadable.Empty(
                                     if (filters == SlotFilters()) {
                                         EmptyReason.NoSlots
@@ -120,7 +124,7 @@ class SlotListStore(
                                     },
                                 )
                             } else {
-                                Loadable.Content(page.items)
+                                Loadable.Content(items)
                             },
                         )
                     }
@@ -203,6 +207,16 @@ class SlotListStore(
             state.copy(
                 draftFilters = state.draftFilters.copy(
                     routeTypes = state.draftFilters.routeTypes.toggle(routeType),
+                ),
+            )
+        }
+    }
+
+    private fun toggleRouteName(routeName: String) {
+        mutableState.update { state ->
+            state.copy(
+                draftFilters = state.draftFilters.copy(
+                    routeNames = state.draftFilters.routeNames.toggle(routeName),
                 ),
             )
         }

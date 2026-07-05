@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
 import com.apexkarting.core.ui.ApexBottomSheet
+import com.apexkarting.core.ui.ApexHeaderIconButton
 import com.apexkarting.core.ui.ApexFormSection
 import com.apexkarting.core.ui.ApexSheetContent
 import com.apexkarting.core.ui.ApexSheetHeader
@@ -38,6 +39,7 @@ import com.apexkarting.core.ui.tabScreenContentPadding
 import com.apexkarting.core.ui.toCardStartText
 import com.apexkarting.core.ui.toFilterDateText
 import com.apexkarting.core.ui.toTagText
+import com.apexkarting.catalog.RouteFilterNames
 import com.apexkarting.domain.model.Instructor
 import com.apexkarting.domain.model.RouteType
 import com.apexkarting.domain.model.Slot
@@ -46,7 +48,7 @@ import com.apexkarting.uikit.ApexShapes
 import com.apexkarting.uikit.apexClickable
 import com.apexkarting.uikit.icons.Icons
 import com.apexkarting.uikit.icons.Tune
-import com.apexkarting.uikit.icons.ApexIcon
+
 
 @Composable
 fun SlotListScreen(
@@ -60,12 +62,10 @@ fun SlotListScreen(
     TabScreenLayout(
         title = "Заезды",
         trailingContent = {
-            ApexIcon(
+            ApexHeaderIconButton(
                 imageVector = Icons.Tune,
                 contentDescription = "Фильтры",
-                modifier = Modifier.clickable { onIntent(SlotListIntent.OpenFilters) },
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                size = ApexTheme.tokens.spacing.xl,
+                onClick = { onIntent(SlotListIntent.OpenFilters) },
             )
         },
     ) {
@@ -127,29 +127,42 @@ private fun SlotFiltersSheet(
             verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
         ) {
                 FilterGroup(title = "Дата старта") {
-                    FilterChipRow {
-                        FilterChipButton("Сегодня", state.draftDatePreset == SlotDatePreset.Today) {
-                            onIntent(SlotListIntent.SelectDatePreset(SlotDatePreset.Today))
-                        }
-                        FilterChipButton("Эта неделя", state.draftDatePreset == SlotDatePreset.NextSevenDays) {
-                            onIntent(SlotListIntent.SelectDatePreset(SlotDatePreset.NextSevenDays))
-                        }
-                        FilterChipButton("Выходные", state.draftDatePreset == SlotDatePreset.Weekend) {
-                            onIntent(SlotListIntent.SelectDatePreset(SlotDatePreset.Weekend))
-                        }
-                    }
+                    FilterChipGrid(
+                        columns = 3,
+                        chips = listOf(
+                            FilterChipSpec("Сегодня", state.draftDatePreset == SlotDatePreset.Today) {
+                                onIntent(SlotListIntent.SelectDatePreset(SlotDatePreset.Today))
+                            },
+                            FilterChipSpec("Эта неделя", state.draftDatePreset == SlotDatePreset.NextSevenDays) {
+                                onIntent(SlotListIntent.SelectDatePreset(SlotDatePreset.NextSevenDays))
+                            },
+                            FilterChipSpec("Выходные", state.draftDatePreset == SlotDatePreset.Weekend) {
+                                onIntent(SlotListIntent.SelectDatePreset(SlotDatePreset.Weekend))
+                            },
+                        ),
+                    )
                     DateRangePreviewRow(state)
                 }
 
-                FilterGroup(title = "Тип трассы") {
-                    FilterChipRow {
-                        FilterChipButton("Новичковый", RouteType.Novice in state.draftFilters.routeTypes) {
-                            onIntent(SlotListIntent.ToggleRouteType(RouteType.Novice))
-                        }
-                        FilterChipButton("Опытный", RouteType.Experienced in state.draftFilters.routeTypes) {
-                            onIntent(SlotListIntent.ToggleRouteType(RouteType.Experienced))
-                        }
-                    }
+                FilterGroup(title = "Уровень") {
+                    LevelFilterChips(
+                        routeTypes = state.draftFilters.routeTypes,
+                        onToggleRouteType = { onIntent(SlotListIntent.ToggleRouteType(it)) },
+                    )
+                }
+
+                FilterGroup(title = "Маршрут") {
+                    RouteNameFilterChips(
+                        routeNames = state.draftFilters.routeNames,
+                        onToggleRouteName = { onIntent(SlotListIntent.ToggleRouteName(it)) },
+                    )
+                }
+
+                ApexFormSection(title = "Доступность") {
+                    AvailabilitySwitchRow(
+                        checked = state.draftFilters.onlyAvailable,
+                        onToggle = { onIntent(SlotListIntent.ToggleOnlyAvailable) },
+                    )
                 }
 
                 InstructorFilterSection(
@@ -158,18 +171,11 @@ private fun SlotFiltersSheet(
                     onToggle = { onIntent(SlotListIntent.ToggleInstructor(it.id)) },
                     onRetry = { onIntent(SlotListIntent.RetryInstructors) },
                 )
-
-                ApexFormSection(title = "Доступность") {
-                    AvailabilitySwitchRow(
-                        checked = state.draftFilters.onlyAvailable,
-                        onToggle = { onIntent(SlotListIntent.ToggleOnlyAvailable) },
-                    )
-                }
         }
         Button(
             onClick = { onIntent(SlotListIntent.ApplyFilters) },
             modifier = Modifier
-                .contentWidthModifier()
+                .fillMaxWidth()
                 .height(ApexTheme.tokens.sizing.buttonHeight),
             shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
             colors = ButtonDefaults.buttonColors(
@@ -193,12 +199,66 @@ private fun FilterGroup(
 }
 
 @Composable
-private fun FilterChipRow(content: @Composable () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
-        content = { content() },
+private fun LevelFilterChips(
+    routeTypes: Set<RouteType>,
+    onToggleRouteType: (RouteType) -> Unit,
+) {
+    FilterChipGrid(
+        chips = listOf(
+            FilterChipSpec("Новичковый", RouteType.Novice in routeTypes) {
+                onToggleRouteType(RouteType.Novice)
+            },
+            FilterChipSpec("Опытный", RouteType.Experienced in routeTypes) {
+                onToggleRouteType(RouteType.Experienced)
+            },
+        ),
     )
+}
+
+@Composable
+private fun RouteNameFilterChips(
+    routeNames: Set<String>,
+    onToggleRouteName: (String) -> Unit,
+) {
+    FilterChipGrid(
+        chips = RouteFilterNames.all.map { name ->
+            FilterChipSpec(name, name in routeNames) { onToggleRouteName(name) }
+        },
+    )
+}
+
+private data class FilterChipSpec(
+    val label: String,
+    val selected: Boolean,
+    val onClick: () -> Unit,
+)
+
+@Composable
+private fun FilterChipGrid(
+    chips: List<FilterChipSpec>,
+    columns: Int = 2,
+) {
+    val gap = ApexTheme.tokens.spacing.xs
+    Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+        chips.chunked(columns).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(gap),
+            ) {
+                row.forEach { chip ->
+                    FilterChipButton(
+                        label = chip.label,
+                        selected = chip.selected,
+                        onClick = chip.onClick,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                repeat(columns - row.size) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -206,20 +266,25 @@ private fun FilterChipButton(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val chipShape = ApexShapes.chip()
     Text(
         text = label,
-        modifier = Modifier
+        modifier = modifier
+            .fillMaxWidth()
             .height(40.dp)
             .apexClickable(chipShape, onClick = onClick)
             .background(
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                 shape = chipShape,
             )
-            .padding(horizontal = ApexTheme.tokens.spacing.sm, vertical = 10.dp),
+            .padding(horizontal = ApexTheme.tokens.spacing.xs, vertical = 10.dp),
+        textAlign = TextAlign.Center,
         style = MaterialTheme.typography.bodyLarge,
         color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
@@ -245,17 +310,19 @@ private fun DateRangeField(
     text: String,
     modifier: Modifier = Modifier,
 ) {
+    val fieldShape = ApexShapes.chip()
     Text(
         text = text,
         modifier = modifier
+            .height(40.dp)
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(12.dp),
+                shape = fieldShape,
             )
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(12.dp),
+                shape = fieldShape,
             )
             .padding(horizontal = ApexTheme.tokens.spacing.sm, vertical = 10.dp),
         textAlign = TextAlign.Center,
@@ -315,19 +382,15 @@ private fun InstructorFilterSection(
             }
         }
         is Loadable.Content -> FilterGroup("Маршал") {
-            Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs)) {
-                instructors.value.chunked(2).forEach { row ->
-                    FilterChipRow {
-                        row.forEach { instructor ->
-                            FilterChipButton(
-                                label = instructor.name,
-                                selected = instructor.id in selected,
-                                onClick = { onToggle(instructor) },
-                            )
-                        }
-                    }
-                }
-            }
+            FilterChipGrid(
+                chips = instructors.value.map { instructor ->
+                    FilterChipSpec(
+                        label = instructor.name,
+                        selected = instructor.id in selected,
+                        onClick = { onToggle(instructor) },
+                    )
+                },
+            )
         }
     }
 }

@@ -22,7 +22,7 @@ internal fun ApexBackButton(
     onClick: () -> Unit,
     style: BackButtonStyle = BackButtonStyle.Offset,
     modifier: Modifier = Modifier,
-    floatingIconSize: Dp = 20.dp,
+    floatingIconSize: Dp = ApexTheme.tokens.sizing.headerIconSize,
 ) {
     when (style) {
         BackButtonStyle.Offset -> ApexIcon(
@@ -32,10 +32,10 @@ internal fun ApexBackButton(
                 .offset(x = ApexTheme.tokens.spacing.md, y = ApexTheme.tokens.sizing.backButtonY)
                 .clickable { onClick() },
             tint = MaterialTheme.colorScheme.onSurface,
-            size = ApexTheme.tokens.spacing.xl,
+            size = ApexTheme.tokens.sizing.headerIconSize,
         )
 
-        BackButtonStyle.Floating -> FloatingCircleIconButton(
+        BackButtonStyle.Floating -> ApexHeaderIconButton(
             imageVector = Icons.Back,
             contentDescription = "Назад",
             onClick = onClick,

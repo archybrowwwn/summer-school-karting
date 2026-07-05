@@ -3,7 +3,6 @@
 package com.apexkarting.core.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +24,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,34 +38,49 @@ internal fun ApexBottomSheet(
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val sheetPadding = ApexTheme.tokens.spacing.md
+    val sheetShape = RoundedCornerShape(
+        topStart = ApexTheme.tokens.spacing.xl,
+        topEnd = ApexTheme.tokens.spacing.xl,
+    )
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        shape = RoundedCornerShape(
-            topStart = ApexTheme.tokens.spacing.xl,
-            topEnd = ApexTheme.tokens.spacing.xl,
-        ),
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = { ApexSheetDragHandle() },
+        shape = RectangleShape,
+        containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
+        dragHandle = null,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = ApexTheme.tokens.spacing.lg),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
-            content = content,
-        )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = ApexTheme.tokens.sizing.screenMaxWidth)
+                    .background(color = MaterialTheme.colorScheme.surface, shape = sheetShape)
+                    .verticalScroll(rememberScrollState())
+                    .padding(
+                        start = sheetPadding,
+                        end = sheetPadding,
+                        top = sheetPadding,
+                        bottom = ApexTheme.tokens.spacing.lg,
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(sheetPadding),
+            ) {
+                ApexSheetDragHandle()
+                content()
+            }
+        }
     }
 }
 
 @Composable
 internal fun ApexSheetDragHandle() {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = ApexTheme.tokens.spacing.xs),
+        modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
     ) {
         Box(
@@ -89,25 +106,20 @@ internal fun ApexSheetHeader(
             .height(ApexTheme.tokens.sizing.tabHeaderHeight),
         contentAlignment = Alignment.Center,
     ) {
-        Box(modifier = Modifier.contentWidthModifier()) {
-            Text(
-                text = title,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
+        Text(
+            text = title,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (actionText != null && onActionClick != null) {
+            ApexTextLink(
+                text = actionText,
+                onClick = onActionClick,
+                modifier = Modifier.align(Alignment.CenterEnd),
             )
-            if (actionText != null && onActionClick != null) {
-                Text(
-                    text = actionText,
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .clickable(onClick = onActionClick),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
         }
     }
 }
@@ -119,7 +131,7 @@ internal fun ApexSheetContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier.contentWidthModifier(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = verticalArrangement,
         content = content,
     )

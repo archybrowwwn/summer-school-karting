@@ -358,7 +358,7 @@ private fun BookingPriceDetails(
                 imageVector = Icons.Info,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 16.dp,
+                size = com.apexkarting.uikit.icons.ApexIconSpec.SMALL_SIZE,
             )
             Text(
                 text = "Оплата на месте: наличные или перевод",
@@ -500,7 +500,7 @@ private fun BookingSuccessSummaryCard(
                     imageVector = Icons.Info,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 16.dp,
+                    size = com.apexkarting.uikit.icons.ApexIconSpec.SMALL_SIZE,
                 )
                 Text(
                     text = "Оплата на месте: наличные или перевод",

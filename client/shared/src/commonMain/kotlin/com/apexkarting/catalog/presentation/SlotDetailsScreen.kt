@@ -2,7 +2,6 @@ package com.apexkarting.catalog.presentation
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,8 +23,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.core.ui.ApexTextLink
 import com.apexkarting.core.ui.DetailScreenLayout
-import com.apexkarting.core.ui.FloatingCircleIconButton
+
 import com.apexkarting.core.ui.ListStateMessage
 import com.apexkarting.core.ui.ListStatePlacement
 import com.apexkarting.core.ui.Loadable
@@ -42,8 +42,7 @@ import com.apexkarting.domain.model.Slot
 import com.apexkarting.domain.model.SlotId
 import com.apexkarting.domain.policy.AvailabilityPolicy
 import com.apexkarting.map.RouteMapSheet
-import com.apexkarting.uikit.icons.Icons
-import com.apexkarting.uikit.icons.Share
+
 
 @Composable
 fun SlotDetailsScreen(
@@ -60,13 +59,6 @@ fun SlotDetailsScreen(
         DetailScreenLayout(
             title = "Заезд",
             onBack = onBack,
-            trailingContent = {
-                FloatingCircleIconButton(
-                    imageVector = Icons.Share,
-                    contentDescription = "Поделиться",
-                    onClick = {},
-                )
-            },
         ) {
             when (val slot = state.slot) {
                 Loadable.Initial,
@@ -118,38 +110,7 @@ private fun SlotDetailsContent(
             .padding(detailScreenContentPadding()),
         verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
     ) {
-        SlotDetailsPreviewPhoto()
-        TagFlowRow {
-            RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
-            RouteNameTag(name = slot.route.name, routeType = slot.route.type)
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
-                )
-                .padding(ApexTheme.tokens.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
-        ) {
-            Text(
-                text = slot.startAt.toCardStartText(),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = "Заезд на трассе «${slot.route.name}» займёт ${slot.route.durationMin} минут и подойдёт ${slot.route.type.toDetailsAudienceText()}.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = "Маршал: ${slot.instructor.name}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        SlotDetailsEventCard(slot = slot)
         SlotDetailsMapCard(slot = slot, onOpenMap = onOpenMap)
         Column(
             modifier = Modifier
@@ -187,6 +148,42 @@ private fun SlotDetailsContent(
         ) {
             Text(if (availability.canBook) "Записаться" else "Карт нет", fontWeight = FontWeight.Bold)
         }
+    }
+}
+
+@Composable
+private fun SlotDetailsEventCard(slot: Slot) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
+            )
+            .padding(ApexTheme.tokens.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
+    ) {
+        SlotDetailsPreviewPhoto()
+        TagFlowRow {
+            RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
+            RouteNameTag(name = slot.route.name, routeType = slot.route.type)
+        }
+        Text(
+            text = slot.startAt.toCardStartText(),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = "Заезд на трассе «${slot.route.name}» займёт ${slot.route.durationMin} минут и подойдёт ${slot.route.type.toDetailsAudienceText()}.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = "Маршал: ${slot.instructor.name}",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
@@ -245,11 +242,9 @@ private fun SlotDetailsMapCard(
             color = MaterialTheme.colorScheme.onSurface,
         )
         SlotDetailsMapPreview()
-        Text(
+        ApexTextLink(
             text = "Как добраться",
-            modifier = Modifier.clickable { onOpenMap() },
-            style = MaterialTheme.typography.bodyMedium,
-            color = ApexTheme.colors.link,
+            onClick = onOpenMap,
         )
     }
 }
