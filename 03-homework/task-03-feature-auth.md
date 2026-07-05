@@ -72,7 +72,7 @@
 MVI AuthStore: шаги Phone → Code → Name (если is_new).
 AuthScreen: маска телефона +7, 4–6 цифр кода, resend timer из ttl_seconds.
 После verify сохрани access_token в SessionStorage, при 401 — clear и редирект на auth.
-Подключи к VolnaApp root navigation.
+Подключи к ApexApp root navigation.
 ```
 
 ---

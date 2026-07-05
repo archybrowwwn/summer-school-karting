@@ -18,7 +18,7 @@ data class ApiErrorDetailsDto(
     @SerialName("available_seats")
     val availableSeats: Int? = null,
     @SerialName("available_rental_gear")
-    val availableRentalBoards: Int? = null,
+    val availableRentalGear: Int? = null,
 )
 
 fun ApiErrorDto.toFailure(): AppFailure.Api = AppFailure.Api(
@@ -27,7 +27,7 @@ fun ApiErrorDto.toFailure(): AppFailure.Api = AppFailure.Api(
     details = details?.let {
         ErrorDetails(
             availableSeats = it.availableSeats,
-            availableRentalBoards = it.availableRentalBoards,
+            availableRentalGear = it.availableRentalGear,
         )
     },
 )

@@ -3,13 +3,13 @@ services:
     image: postgres:16-alpine
     profiles: ["db", "app", "migrations", "k6"]
     environment:
-      POSTGRES_DB: volna
-      POSTGRES_USER: volna
-      POSTGRES_PASSWORD: volna
+      POSTGRES_DB: apex
+      POSTGRES_USER: apex
+      POSTGRES_PASSWORD: apex
     ports:
       - "5433:5432"  # 5433 на хосте: локальный PostgreSQL часто занимает 5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U volna -d volna"]
+      test: ["CMD-SHELL", "pg_isready -U apex -d apex"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -21,7 +21,7 @@ services:
     profiles: ["app", "k6"]
     environment:
       HTTP_ADDR: ":8080"
-      DATABASE_URL: "postgres://volna:volna@db:5432/volna?sslmode=disable"
+      DATABASE_URL: "postgres://apex:apex@db:5432/apex?sslmode=disable"
     ports:
       - "8080:8080"
     depends_on:
@@ -33,13 +33,13 @@ services:
     profiles: ["migrations"]
     working_dir: /src
     environment:
-      DATABASE_URL: "postgres://volna:volna@db:5432/volna?sslmode=disable"
+      DATABASE_URL: "postgres://apex:apex@db:5432/apex?sslmode=disable"
     volumes:
       - .:/src
     depends_on:
       db:
         condition: service_healthy
-    command: go run github.com/pressly/goose/v3/cmd/goose@v3.24.1 -dir migrations postgres "postgres://volna:volna@db:5432/volna?sslmode=disable" up
+    command: go run github.com/pressly/goose/v3/cmd/goose@v3.24.1 -dir migrations postgres "postgres://apex:apex@db:5432/apex?sslmode=disable" up
 
   k6:
     image: grafana/k6:2.0.0

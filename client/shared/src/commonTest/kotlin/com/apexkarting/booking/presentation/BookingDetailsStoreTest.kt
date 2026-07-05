@@ -128,7 +128,7 @@ class BookingDetailsStoreTest {
             instructor = Instructor(InstructorId("instructor-1"), "Мария"),
             totalSeats = 8,
             freeSeats = 4,
-            freeRentalBoards = 4,
+            freeRentalGear = 4,
             price = MoneyRub(2_500),
             rentalPrice = MoneyRub(800),
             meetingPoint = MeetingPoint("Павильон у стартовой прямой", GeoPoint(59.978, 30.262)),

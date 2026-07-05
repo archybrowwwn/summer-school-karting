@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 data class BookingFormState(
     val slot: Slot? = null,
     val seatsCount: Int = 1,
-    val boardSelections: List<BoardSelection> = listOf(BoardSelection.Own),
+    val equipmentSelections: List<EquipmentSelection> = listOf(EquipmentSelection.Own),
     val actionStatus: ActionStatus = ActionStatus.Idle,
     val message: String? = null,
     val createdBooking: Booking? = null,
@@ -34,7 +34,7 @@ data class BookingFormState(
 ) {
     val isSubmitting: Boolean = actionStatus == ActionStatus.Submitting
     val availability = slot?.let(AvailabilityPolicy::availability)
-    val rentalCount: Int = boardSelections.count { it == BoardSelection.Rental }
+    val rentalCount: Int = equipmentSelections.count { it == EquipmentSelection.Rental }
     val totalPrice: MoneyRub? = slot?.let {
         BookingPriceCalculator.calculate(it, seatsCount, rentalCount)
     }
@@ -61,7 +61,7 @@ data class BookingPayload(
     val rentalCount: Int,
 )
 
-enum class BoardSelection {
+enum class EquipmentSelection {
     Own,
     Rental,
 }
@@ -70,7 +70,7 @@ sealed interface BookingFormIntent {
     data class Open(val slot: Slot) : BookingFormIntent
     data object IncrementSeats : BookingFormIntent
     data object DecrementSeats : BookingFormIntent
-    data class SetBoardSelection(val seatIndex: Int, val selection: BoardSelection) : BookingFormIntent
+    data class SetEquipmentSelection(val seatIndex: Int, val selection: EquipmentSelection) : BookingFormIntent
     data object Submit : BookingFormIntent
     data object MessageShown : BookingFormIntent
     data object SuccessDismissed : BookingFormIntent
@@ -97,7 +97,7 @@ class BookingFormStore(
             is BookingFormIntent.Open -> open(intent.slot)
             BookingFormIntent.IncrementSeats -> changeSeats(delta = 1)
             BookingFormIntent.DecrementSeats -> changeSeats(delta = -1)
-            is BookingFormIntent.SetBoardSelection -> setBoardSelection(intent.seatIndex, intent.selection)
+            is BookingFormIntent.SetEquipmentSelection -> setEquipmentSelection(intent.seatIndex, intent.selection)
             BookingFormIntent.Submit -> submit()
             BookingFormIntent.MessageShown -> mutableState.update { it.copy(message = null) }
             BookingFormIntent.SuccessDismissed -> mutableState.update { it.copy(createdBooking = null) }
@@ -112,7 +112,7 @@ class BookingFormStore(
         mutableState.value = BookingFormState(
             slot = slot,
             seatsCount = 1.coerceAtMost(maxSeats),
-            boardSelections = List(1.coerceAtMost(maxSeats)) { BoardSelection.Own },
+            equipmentSelections = List(1.coerceAtMost(maxSeats)) { EquipmentSelection.Own },
         )
     }
 
@@ -120,18 +120,18 @@ class BookingFormStore(
         mutableState.update { state ->
             val maxSeats = state.availability?.maxSeatsForBooking ?: 1
             val nextSeats = (state.seatsCount + delta).coerceIn(1, maxSeats.coerceAtLeast(1))
-            val nextSelections = state.boardSelections
+            val nextSelections = state.equipmentSelections
                 .take(nextSeats)
                 .let { current ->
                     if (current.size == nextSeats) current
-                    else current + List(nextSeats - current.size) { BoardSelection.Own }
+                    else current + List(nextSeats - current.size) { EquipmentSelection.Own }
                 }
             state.copy(
                 seatsCount = nextSeats,
-                boardSelections = enforceRentalAvailability(
+                equipmentSelections = enforceRentalAvailability(
                     nextSelections,
                     nextSeats,
-                    state.slot?.freeRentalBoards ?: 0
+                    state.slot?.freeRentalGear ?: 0
                 ),
                 idempotencyKey = null,
                 idempotencyPayload = null,
@@ -140,16 +140,16 @@ class BookingFormStore(
         }
     }
 
-    private fun setBoardSelection(seatIndex: Int, selection: BoardSelection) {
+    private fun setEquipmentSelection(seatIndex: Int, selection: EquipmentSelection) {
         mutableState.update { state ->
             if (seatIndex !in 0 until state.seatsCount) return@update state
-            val updatedSelections = state.boardSelections.toMutableList()
+            val updatedSelections = state.equipmentSelections.toMutableList()
             updatedSelections[seatIndex] = selection
             state.copy(
-                boardSelections = enforceRentalAvailability(
+                equipmentSelections = enforceRentalAvailability(
                     selections = updatedSelections,
                     seatsCount = state.seatsCount,
-                    freeRentalBoards = state.slot?.freeRentalBoards ?: 0,
+                    freeRentalGear = state.slot?.freeRentalGear ?: 0,
                 ),
                 idempotencyKey = null,
                 idempotencyPayload = null,
@@ -224,7 +224,7 @@ class BookingFormStore(
             val updatedSlot = if (appFailure is AppFailure.Api && appFailure.code == ApiErrorCode.SlotFull) {
                 state.slot?.copy(
                     freeSeats = appFailure.details?.availableSeats ?: state.slot.freeSeats,
-                    freeRentalBoards = appFailure.details?.availableRentalBoards ?: state.slot.freeRentalBoards,
+                    freeRentalGear = appFailure.details?.availableRentalGear ?: state.slot.freeRentalGear,
                 )
             } else {
                 state.slot
@@ -237,10 +237,10 @@ class BookingFormStore(
             state.copy(
                 slot = updatedSlot,
                 seatsCount = updatedSeatsCount,
-                boardSelections = enforceRentalAvailability(
-                    selections = state.boardSelections.take(updatedSeatsCount),
+                equipmentSelections = enforceRentalAvailability(
+                    selections = state.equipmentSelections.take(updatedSeatsCount),
                     seatsCount = updatedSeatsCount,
-                    freeRentalBoards = updatedSlot?.freeRentalBoards ?: state.rentalCount,
+                    freeRentalGear = updatedSlot?.freeRentalGear ?: state.rentalCount,
                 ),
                 actionStatus = ActionStatus.Idle,
                 message = appFailure.toUserMessage(),
@@ -250,21 +250,21 @@ class BookingFormStore(
 }
 
 private fun enforceRentalAvailability(
-    selections: List<BoardSelection>,
+    selections: List<EquipmentSelection>,
     seatsCount: Int,
-    freeRentalBoards: Int,
-): List<BoardSelection> {
+    freeRentalGear: Int,
+): List<EquipmentSelection> {
     val trimmed = selections.take(seatsCount).let { current ->
         if (current.size == seatsCount) current
-        else current + List(seatsCount - current.size) { BoardSelection.Own }
+        else current + List(seatsCount - current.size) { EquipmentSelection.Own }
     }
-    var rentalLeft = freeRentalBoards.coerceAtLeast(0)
+    var rentalLeft = freeRentalGear.coerceAtLeast(0)
     return trimmed.map { selection ->
-        if (selection == BoardSelection.Rental && rentalLeft > 0) {
+        if (selection == EquipmentSelection.Rental && rentalLeft > 0) {
             rentalLeft -= 1
-            BoardSelection.Rental
+            EquipmentSelection.Rental
         } else {
-            BoardSelection.Own
+            EquipmentSelection.Own
         }
     }
 }
@@ -272,7 +272,7 @@ private fun enforceRentalAvailability(
 private fun AvailabilityViolation.toUserMessage(): String = when (this) {
     AvailabilityViolation.NoSeats -> "В этом заезде больше нет свободных картов"
     AvailabilityViolation.SlotCancelled -> "Заезд отменён"
-    is AvailabilityViolation.TooManyRentalBoards -> "Доступно прокатных комплектов: $freeRentalBoards"
+    is AvailabilityViolation.TooManyRentalGear -> "Доступно прокатных комплектов: $freeRentalGear"
     is AvailabilityViolation.TooManySeats -> "Можно выбрать не больше $maxSeats картов"
 }
 

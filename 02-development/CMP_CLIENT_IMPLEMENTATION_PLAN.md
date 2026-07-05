@@ -86,11 +86,11 @@ client/
   gradle/libs.versions.toml
   shared/
     build.gradle.kts
-    src/commonMain/kotlin/com/volna/app/
-    src/commonTest/kotlin/com/volna/app/
-    src/androidMain/kotlin/com/volna/app/
-    src/iosMain/kotlin/com/volna/app/
-    src/wasmJsMain/kotlin/com/volna/app/
+    src/commonMain/kotlin/com/apexkarting/
+    src/commonTest/kotlin/com/apexkarting/
+    src/androidMain/kotlin/com/apexkarting/
+    src/iosMain/kotlin/com/apexkarting/
+    src/wasmJsMain/kotlin/com/apexkarting/
   androidApp/
   iosApp/
   webApp/
@@ -131,7 +131,7 @@ platform adapters -> shared interfaces
 Пакеты:
 
 ```text
-com.volna.app.core
+com.apexkarting.core
   config
   error
   network
@@ -141,12 +141,12 @@ com.volna.app.core
   ui
   theme
   navigation
-com.volna.app.auth
-com.volna.app.profile
-com.volna.app.catalog
-com.volna.app.booking
-com.volna.app.map
-com.volna.app.notifications
+com.apexkarting.auth
+com.apexkarting.profile
+com.apexkarting.catalog
+com.apexkarting.booking
+com.apexkarting.map
+com.apexkarting.notifications
 ```
 
 ## Domain model
@@ -168,7 +168,7 @@ data class Slot(
     val instructor: Instructor,
     val totalSeats: Int,
     val freeSeats: Int,
-    val freeRentalBoards: Int,
+    val freeRentalGear: Int,
     val price: MoneyRub,
     val rentalPrice: MoneyRub,
     val meetingPoint: MeetingPoint,

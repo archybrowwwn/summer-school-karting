@@ -102,10 +102,10 @@ private fun BookingFormContent(
         )
         if (slot != null) {
             BookingBoardsSection(
-                boardSelections = state.boardSelections,
-                freeRentalBoards = slot.freeRentalBoards,
-                onBoardSelectionChange = { seatIndex, selection ->
-                    onIntent(BookingFormIntent.SetBoardSelection(seatIndex, selection))
+                equipmentSelections = state.equipmentSelections,
+                freeRentalGear = slot.freeRentalGear,
+                onEquipmentSelectionChange = { seatIndex, selection ->
+                    onIntent(BookingFormIntent.SetEquipmentSelection(seatIndex, selection))
                 },
             )
         }
@@ -249,9 +249,9 @@ private fun BookingCounterButton(
 
 @Composable
 private fun BookingBoardsSection(
-    boardSelections: List<BoardSelection>,
-    freeRentalBoards: Int,
-    onBoardSelectionChange: (Int, BoardSelection) -> Unit,
+    equipmentSelections: List<EquipmentSelection>,
+    freeRentalGear: Int,
+    onEquipmentSelectionChange: (Int, EquipmentSelection) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm)) {
         Text(
@@ -259,19 +259,19 @@ private fun BookingBoardsSection(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        boardSelections.forEachIndexed { index, selection ->
+        equipmentSelections.forEachIndexed { index, selection ->
             val seatNumber = index + 1
             BookingBoardRow(
                 label = if (seatNumber == 1) "Карт 1 (вы)" else "Карт $seatNumber (гость)",
-                rentalSelected = selection == BoardSelection.Rental,
-                rentalEnabled = selection == BoardSelection.Rental ||
-                        boardSelections.count { it == BoardSelection.Rental } < freeRentalBoards,
-                onOwn = { onBoardSelectionChange(index, BoardSelection.Own) },
-                onRental = { onBoardSelectionChange(index, BoardSelection.Rental) },
+                rentalSelected = selection == EquipmentSelection.Rental,
+                rentalEnabled = selection == EquipmentSelection.Rental ||
+                        equipmentSelections.count { it == EquipmentSelection.Rental } < freeRentalGear,
+                onOwn = { onEquipmentSelectionChange(index, EquipmentSelection.Own) },
+                onRental = { onEquipmentSelectionChange(index, EquipmentSelection.Rental) },
             )
         }
         Text(
-            text = "Прокатных комплектов: ${boardSelections.count { it == BoardSelection.Rental }} из $freeRentalBoards",
+            text = "Прокатных комплектов: ${equipmentSelections.count { it == EquipmentSelection.Rental }} из $freeRentalGear",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.labelMedium,

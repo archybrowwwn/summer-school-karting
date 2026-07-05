@@ -7,7 +7,7 @@ import kotlin.math.min
 
 data class Availability(
     val maxSeatsForBooking: Int,
-    val freeRentalBoards: Int,
+    val freeRentalGear: Int,
     val canBook: Boolean,
 )
 
@@ -15,7 +15,7 @@ sealed interface AvailabilityViolation {
     data object SlotCancelled : AvailabilityViolation
     data object NoSeats : AvailabilityViolation
     data class TooManySeats(val maxSeats: Int) : AvailabilityViolation
-    data class TooManyRentalBoards(val freeRentalBoards: Int) : AvailabilityViolation
+    data class TooManyRentalGear(val freeRentalGear: Int) : AvailabilityViolation
 }
 
 object AvailabilityPolicy {
@@ -29,7 +29,7 @@ object AvailabilityPolicy {
         }
         return Availability(
             maxSeatsForBooking = maxSeats,
-            freeRentalBoards = slot.freeRentalBoards,
+            freeRentalGear = slot.freeRentalGear,
             canBook = maxSeats > 0,
         )
     }
@@ -42,9 +42,9 @@ object AvailabilityPolicy {
             draft.seatsCount !in 1..availability.maxSeatsForBooking ->
                 AvailabilityViolation.TooManySeats(availability.maxSeatsForBooking)
             draft.rentalCount !in 0..draft.seatsCount ->
-                AvailabilityViolation.TooManyRentalBoards(draft.seatsCount)
-            draft.rentalCount > availability.freeRentalBoards ->
-                AvailabilityViolation.TooManyRentalBoards(availability.freeRentalBoards)
+                AvailabilityViolation.TooManyRentalGear(draft.seatsCount)
+            draft.rentalCount > availability.freeRentalGear ->
+                AvailabilityViolation.TooManyRentalGear(availability.freeRentalGear)
             else -> null
         }
     }

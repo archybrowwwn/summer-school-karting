@@ -2,7 +2,7 @@ package com.apexkarting.core.error
 
 data class ErrorDetails(
     val availableSeats: Int? = null,
-    val availableRentalBoards: Int? = null,
+    val availableRentalGear: Int? = null,
 )
 
 enum class ApiErrorCode {

@@ -169,12 +169,12 @@ func TestCreateBookingConcurrencyDoesNotOverbook(t *testing.T) {
 		t.Fatalf("successes=%d conflicts=%d, want 8/4", successes, conflicts)
 	}
 
-	var freeSeats, freeBoards int
-	if err := db.QueryRow(ctx, `SELECT free_seats, free_rental_boards FROM slots WHERE id = '55555555-5555-5555-5555-555555555555'`).Scan(&freeSeats, &freeBoards); err != nil {
+	var freeSeats, freeGear int
+	if err := db.QueryRow(ctx, `SELECT free_seats, free_rental_gear FROM slots WHERE id = '55555555-5555-5555-5555-555555555555'`).Scan(&freeSeats, &freeGear); err != nil {
 		t.Fatalf("read availability: %v", err)
 	}
-	if freeSeats != 0 || freeBoards != 4 {
-		t.Fatalf("availability seats=%d boards=%d, want 0/4", freeSeats, freeBoards)
+	if freeSeats != 0 || freeGear != 4 {
+		t.Fatalf("availability seats=%d gear=%d, want 0/4", freeSeats, freeGear)
 	}
 }
 
@@ -287,7 +287,7 @@ func TestCancelBookingEarlyLateAndAfterStart(t *testing.T) {
 	router := bookingRouter(db)
 
 	earlyID := "cccccccc-cccc-cccc-cccc-cccccccccccc"
-	if _, err := db.Exec(ctx, `UPDATE slots SET free_seats = 6, free_rental_boards = 11 WHERE id = '55555555-5555-5555-5555-555555555555'`); err != nil {
+	if _, err := db.Exec(ctx, `UPDATE slots SET free_seats = 6, free_rental_gear = 11 WHERE id = '55555555-5555-5555-5555-555555555555'`); err != nil {
 		t.Fatalf("update early slot: %v", err)
 	}
 	insertBooking(t, ctx, db, earlyID, "55555555-5555-5555-5555-555555555555", clientID, 2, 1)
@@ -314,7 +314,7 @@ func TestCancelBookingEarlyLateAndAfterStart(t *testing.T) {
 	}
 
 	lateID := "dddddddd-dddd-dddd-dddd-dddddddddddd"
-	if _, err := db.Exec(ctx, `UPDATE slots SET start_at = $1, free_seats = 10, free_rental_boards = 9 WHERE id = '66666666-6666-6666-6666-666666666666'`, time.Now().Add(30*time.Minute)); err != nil {
+	if _, err := db.Exec(ctx, `UPDATE slots SET start_at = $1, free_seats = 10, free_rental_gear = 9 WHERE id = '66666666-6666-6666-6666-666666666666'`, time.Now().Add(30*time.Minute)); err != nil {
 		t.Fatalf("update late slot: %v", err)
 	}
 	insertBooking(t, ctx, db, lateID, "66666666-6666-6666-6666-666666666666", clientID, 2, 1)
@@ -361,7 +361,7 @@ func TestCancelBookingConcurrencyReturnsAvailabilityOnce(t *testing.T) {
 	clientID := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 	bookingID := "cccccccc-cccc-cccc-cccc-cccccccccccc"
 	insertClientSession(t, ctx, db, clientID, "+79990005001", token)
-	if _, err := db.Exec(ctx, `UPDATE slots SET free_seats = 6, free_rental_boards = 11 WHERE id = '55555555-5555-5555-5555-555555555555'`); err != nil {
+	if _, err := db.Exec(ctx, `UPDATE slots SET free_seats = 6, free_rental_gear = 11 WHERE id = '55555555-5555-5555-5555-555555555555'`); err != nil {
 		t.Fatalf("update slot: %v", err)
 	}
 	insertBooking(t, ctx, db, bookingID, "55555555-5555-5555-5555-555555555555", clientID, 2, 1)
@@ -396,12 +396,12 @@ func TestCancelBookingConcurrencyReturnsAvailabilityOnce(t *testing.T) {
 		t.Fatalf("successes=%d conflicts=%d", successes, conflicts)
 	}
 
-	var freeSeats, freeBoards int
-	if err := db.QueryRow(ctx, `SELECT free_seats, free_rental_boards FROM slots WHERE id = '55555555-5555-5555-5555-555555555555'`).Scan(&freeSeats, &freeBoards); err != nil {
+	var freeSeats, freeGear int
+	if err := db.QueryRow(ctx, `SELECT free_seats, free_rental_gear FROM slots WHERE id = '55555555-5555-5555-5555-555555555555'`).Scan(&freeSeats, &freeGear); err != nil {
 		t.Fatalf("read availability: %v", err)
 	}
-	if freeSeats != 8 || freeBoards != 12 {
-		t.Fatalf("availability seats=%d boards=%d, want 8/12", freeSeats, freeBoards)
+	if freeSeats != 8 || freeGear != 12 {
+		t.Fatalf("availability seats=%d gear=%d, want 8/12", freeSeats, freeGear)
 	}
 }
 

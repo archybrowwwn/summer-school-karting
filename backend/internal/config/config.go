@@ -21,7 +21,7 @@ func Load() (Config, error) {
 
 	return Config{
 		HTTPAddr:        stringFromEnv("HTTP_ADDR", ":8080"),
-		DatabaseURL:     stringFromEnv("DATABASE_URL", "postgres://volna:volna@localhost:5432/volna?sslmode=disable"),
+		DatabaseURL:     stringFromEnv("DATABASE_URL", "postgres://apex:apex@localhost:5433/apex?sslmode=disable"),
 		ShutdownTimeout: shutdownTimeout,
 	}, nil
 }

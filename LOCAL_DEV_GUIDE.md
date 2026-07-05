@@ -1,8 +1,8 @@
 # Локальный запуск BE, DB и клиента
 
 > **Проект:** мобильное приложение картинг-центра «Апекс» (ветка аналитики — в `01-analysis/`).
-> Скелет `backend/` и `client/` взят из учебного шаблона Surf; домен, тексты, seed и UI-бренд
-> адаптированы под картинг-центр «Апекс» (внутренние имена пакетов `com.volna.app` — наследие шаблона).
+> Проект картинг-центра «Апекс»: клиент `com.apexkarting`, домен, тексты, seed и UI-бренд
+> соответствуют аналитике в `01-analysis/`.
 
 Краткий guide для локальной разработки: база и backend запускаются из `backend/`, клиент — из `client/`.
 
@@ -35,13 +35,16 @@ docker compose --profile db up -d db
 make migrate
 ```
 
+> Если раньше использовалась БД `volna`, пересоздайте volume: `docker compose --profile db down -v`,
+> затем снова `docker compose --profile db up -d db` и `make migrate` (включая `00005_rename_rental_boards_to_gear`).
+
 4. Если нужны готовые состояния для проверки клиентских экранов, примените mock-seed:
 
 ```bash
-docker compose -f compose.yaml exec -T db psql -U volna -d volna < seed/mock_client_app_states.sql
+docker compose -f compose.yaml exec -T db psql -U apex -d apex < seed/mock_client_app_states.sql
 ```
 
-Подключение по умолчанию: `postgres://volna:volna@localhost:5432/volna?sslmode=disable`.
+Подключение по умолчанию: `postgres://apex:apex@localhost:5433/apex?sslmode=disable` (порт 5433 на хосте — см. `compose.yaml`).
 
 ## 3. BE: запуск API
 

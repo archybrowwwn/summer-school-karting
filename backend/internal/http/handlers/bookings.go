@@ -155,7 +155,7 @@ func writeBookingError(w http.ResponseWriter, err error) {
 func availabilityDetails(availability booking.Availability) map[string]int {
 	return map[string]int{
 		"available_seats":         availability.AvailableSeats,
-		"available_rental_gear": availability.AvailableRentalBoards,
+		"available_rental_gear": availability.AvailableRentalGear,
 	}
 }
 
@@ -238,7 +238,7 @@ func bookingSlotDTO(value booking.Slot) (bookingsapi.Slot, error) {
 		StartAt:          value.StartAt,
 		TotalSeats:       value.TotalSeats,
 		FreeSeats:        value.FreeSeats,
-		FreeRentalGear: value.FreeRentalBoards,
+		FreeRentalGear: value.FreeRentalGear,
 		Price:            value.Price,
 		RentalPrice:      value.RentalPrice,
 		MeetingPoint:     value.MeetingPoint,

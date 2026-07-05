@@ -39,7 +39,7 @@ func main() {
 UPDATE slots
 SET start_at = $2,
     free_seats = total_seats,
-    free_rental_boards = rental_boards_total,
+    free_rental_gear = rental_gear_total,
     status = 'scheduled'
 WHERE id = $1`, bookingSlotID, now.Add(24*time.Hour)); err != nil {
 		logger.Error("reset booking slot", "error", err)
@@ -49,7 +49,7 @@ WHERE id = $1`, bookingSlotID, now.Add(24*time.Hour)); err != nil {
 UPDATE slots
 SET start_at = $2,
     free_seats = total_seats - 1,
-    free_rental_boards = rental_boards_total - 1,
+    free_rental_gear = rental_gear_total - 1,
     status = 'scheduled'
 WHERE id = $1`, cancelSlotID, now.Add(24*time.Hour)); err != nil {
 		logger.Error("reset cancel slot", "error", err)

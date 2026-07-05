@@ -14,7 +14,7 @@ import (
 	"summer-school-2026/backend/internal/storage/postgres/testutil"
 )
 
-func TestCatalogSlotsFiltersAndDetails(t *testing.T) {
+func TestSlotsFiltersAndDetails(t *testing.T) {
 	databaseURL := testutil.PrepareDatabase(t)
 
 	ctx := context.Background()
@@ -77,7 +77,7 @@ func TestCatalogSlotsFiltersAndDetails(t *testing.T) {
 	}
 }
 
-func TestCatalogInstructorsPagination(t *testing.T) {
+func TestInstructorsPagination(t *testing.T) {
 	databaseURL := testutil.PrepareDatabase(t)
 
 	ctx := context.Background()

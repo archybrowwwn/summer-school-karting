@@ -53,7 +53,7 @@ type Slot struct {
 	StartAt          time.Time
 	TotalSeats       int
 	FreeSeats        int
-	FreeRentalBoards int
+	FreeRentalGear int
 	Price            int
 	RentalPrice      int
 	MeetingPoint     string
@@ -84,7 +84,7 @@ type BookingList struct {
 
 type Availability struct {
 	AvailableSeats        int
-	AvailableRentalBoards int
+	AvailableRentalGear int
 }
 
 type AvailabilityError struct {

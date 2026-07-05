@@ -40,7 +40,7 @@ export default function () {
     'create booking documented status': (r) => [201, 401, 409, 410, 422].includes(r.status),
     'no negative availability in response': (r) => {
       if (r.status !== 201) return true;
-      return r.json('slot.free_seats') >= 0 && r.json('slot.free_rental_boards') >= 0;
+      return r.json('slot.free_seats') >= 0 && r.json('slot.free_rental_gear') >= 0;
     },
   });
 

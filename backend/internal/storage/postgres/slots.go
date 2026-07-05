@@ -23,7 +23,7 @@ type Slot struct {
 	StartAt          time.Time
 	TotalSeats       int
 	FreeSeats        int
-	FreeRentalBoards int
+	FreeRentalGear int
 	Price            int
 	RentalPrice      int
 	MeetingPoint     string
@@ -68,7 +68,7 @@ SELECT
     s.start_at,
     s.total_seats,
     s.free_seats,
-    s.free_rental_boards,
+    s.free_rental_gear,
     s.price,
     s.rental_price,
     s.meeting_point,
@@ -97,7 +97,7 @@ func scanSlot(scanner slotScanner) (Slot, error) {
 		&slot.StartAt,
 		&slot.TotalSeats,
 		&slot.FreeSeats,
-		&slot.FreeRentalBoards,
+		&slot.FreeRentalGear,
 		&slot.Price,
 		&slot.RentalPrice,
 		&slot.MeetingPoint,

@@ -24,24 +24,24 @@ import kotlin.time.Duration.Companion.seconds
 class DomainPolicyTest {
     @Test
     fun availabilityIsLimitedByFreeSeatsRouteCapAndClientMaximum() {
-        val slot = slot(freeSeats = 10, capacityCap = 8, freeRentalBoards = 12)
+        val slot = slot(freeSeats = 10, capacityCap = 8, freeRentalGear = 12)
 
         val availability = AvailabilityPolicy.availability(slot)
 
         assertEquals(5, availability.maxSeatsForBooking)
-        assertEquals(12, availability.freeRentalBoards)
+        assertEquals(12, availability.freeRentalGear)
     }
 
     @Test
-    fun rentalBoardsCannotExceedFreeRentalBoards() {
+    fun rentalGearCannotExceedFreeRentalGear() {
         val draft = com.apexkarting.domain.model.BookingDraft(
-            slot = slot(freeSeats = 3, capacityCap = 8, freeRentalBoards = 1),
+            slot = slot(freeSeats = 3, capacityCap = 8, freeRentalGear = 1),
             seatsCount = 2,
             rentalCount = 2,
         )
 
         assertEquals(
-            AvailabilityViolation.TooManyRentalBoards(1),
+            AvailabilityViolation.TooManyRentalGear(1),
             AvailabilityPolicy.validate(draft),
         )
     }
@@ -49,7 +49,7 @@ class DomainPolicyTest {
     @Test
     fun validDraftHasNoAvailabilityViolation() {
         val draft = com.apexkarting.domain.model.BookingDraft(
-            slot = slot(freeSeats = 3, capacityCap = 8, freeRentalBoards = 2),
+            slot = slot(freeSeats = 3, capacityCap = 8, freeRentalGear = 2),
             seatsCount = 2,
             rentalCount = 1,
         )
@@ -100,7 +100,7 @@ class DomainPolicyTest {
     private fun slot(
         freeSeats: Int = 5,
         capacityCap: Int = 8,
-        freeRentalBoards: Int = 5,
+        freeRentalGear: Int = 5,
         price: Int = 2_500,
         rentalPrice: Int = 800,
     ): Slot = Slot(
@@ -116,7 +116,7 @@ class DomainPolicyTest {
         instructor = Instructor(InstructorId("instructor-1"), "Мария"),
         totalSeats = capacityCap,
         freeSeats = freeSeats,
-        freeRentalBoards = freeRentalBoards,
+        freeRentalGear = freeRentalGear,
         price = MoneyRub(price),
         rentalPrice = MoneyRub(rentalPrice),
         meetingPoint = MeetingPoint("Павильон у стартовой прямой", GeoPoint(59.978, 30.262)),

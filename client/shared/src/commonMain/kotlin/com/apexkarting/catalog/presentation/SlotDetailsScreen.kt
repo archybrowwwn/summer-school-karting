@@ -266,7 +266,7 @@ private fun SlotDetailsSheetContent(
             ) {
                 DetailsInfoRow("Свободно карт", "${slot.freeSeats} из ${slot.totalSeats}")
                 DetailsInfoRow(
-                    "Прокатная экипировка (доступно ${availability.freeRentalBoards} шт.)",
+                    "Прокатная экипировка (доступно ${availability.freeRentalGear} шт.)",
                     "${slot.rentalPrice.value} ₽",
                     boldValue = true
                 )

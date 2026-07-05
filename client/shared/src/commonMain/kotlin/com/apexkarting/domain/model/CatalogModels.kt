@@ -47,7 +47,7 @@ data class Slot(
     val instructor: Instructor,
     val totalSeats: Int,
     val freeSeats: Int,
-    val freeRentalBoards: Int,
+    val freeRentalGear: Int,
     val price: MoneyRub,
     val rentalPrice: MoneyRub,
     val meetingPoint: MeetingPoint,

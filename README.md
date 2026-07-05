@@ -9,7 +9,7 @@
 | `01-analysis/` | Аналитика и ТЗ по проекту «Апекс» (бриф, требования, экраны, OpenAPI) |
 | `02-development/` | Планы реализации backend и CMP-клиента |
 | `03-homework/` | Журнал домашнего задания летней школы (п.1–4) |
-| `backend/` | Go API + PostgreSQL (скелет из шаблона Volna) |
+| `backend/` | Go API + PostgreSQL для картинг-центра «Апекс» |
 | `client/` | Kotlin Compose Multiplatform — Android, Web, iOS |
 
 ## Быстрый старт

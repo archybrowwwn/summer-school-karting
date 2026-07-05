@@ -48,8 +48,8 @@ WITH fixed_slots (
     start_at,
     total_seats,
     free_seats,
-    rental_boards_total,
-    free_rental_boards,
+    rental_gear_total,
+    free_rental_gear,
     price,
     rental_price,
     meeting_point,
@@ -162,14 +162,14 @@ generated_slots AS (
             WHEN 4 THEN 1
             ELSE 6
         END AS free_seats,
-        12 AS rental_boards_total,
+        12 AS rental_gear_total,
         CASE slot_idx
             WHEN 1 THEN 12
             WHEN 2 THEN 5
             WHEN 3 THEN 0
             WHEN 4 THEN 2
             ELSE 7
-        END AS free_rental_boards,
+        END AS free_rental_gear,
         CASE slot_idx
             WHEN 1 THEN 2500
             WHEN 2 THEN 3200
@@ -228,8 +228,8 @@ INSERT INTO slots (
     start_at,
     total_seats,
     free_seats,
-    rental_boards_total,
-    free_rental_boards,
+    rental_gear_total,
+    free_rental_gear,
     price,
     rental_price,
     meeting_point,
@@ -239,13 +239,13 @@ INSERT INTO slots (
 )
 SELECT
     id::uuid, route_id::uuid, instructor_id::uuid, start_at::timestamptz, total_seats::integer, free_seats::integer,
-    rental_boards_total::integer, free_rental_boards::integer, price::integer, rental_price::integer,
+    rental_gear_total::integer, free_rental_gear::integer, price::integer, rental_price::integer,
     meeting_point::text, meeting_point_lat::double precision, meeting_point_lng::double precision, status::text
 FROM fixed_slots
 UNION ALL
 SELECT
-    id, route_id, instructor_id, start_at, total_seats, free_seats, rental_boards_total,
-    free_rental_boards, price, rental_price, meeting_point, meeting_point_lat, meeting_point_lng, status
+    id, route_id, instructor_id, start_at, total_seats, free_seats, rental_gear_total,
+    free_rental_gear, price, rental_price, meeting_point, meeting_point_lat, meeting_point_lng, status
 FROM generated_slots;
 
 INSERT INTO bookings (id, slot_id, client_id, seats_count, rental_count, status, created_at, cancelled_at)

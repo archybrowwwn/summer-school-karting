@@ -22,7 +22,7 @@ run:
 	go run ./cmd/api
 
 migrate:
-	go run github.com/pressly/goose/v3/cmd/goose@v3.24.1 -dir migrations postgres "$${DATABASE_URL:-postgres://volna:volna@localhost:5432/volna?sslmode=disable}" up
+	go run github.com/pressly/goose/v3/cmd/goose@v3.24.1 -dir migrations postgres "$${DATABASE_URL:-postgres://apex:apex@localhost:5433/apex?sslmode=disable}" up
 
 k6-seed:
 	go run ./cmd/k6seed

@@ -149,7 +149,7 @@ func fullSlot(slot postgres.Slot) (slotsapi.Slot, error) {
 		StartAt:          slot.StartAt,
 		TotalSeats:       slot.TotalSeats,
 		FreeSeats:        slot.FreeSeats,
-		FreeRentalGear:   slot.FreeRentalBoards,
+		FreeRentalGear:   slot.FreeRentalGear,
 		Price:            slot.Price,
 		RentalPrice:      slot.RentalPrice,
 		MeetingPoint:     slot.MeetingPoint,

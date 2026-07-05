@@ -1,6 +1,6 @@
 # Backend API
 
-Go REST API for the Volna SUP club client app. The implementation follows the OpenAPI contracts from `../01-analysis/api` and keeps client-visible resources in MVP scope only.
+Go REST API for the Apex karting center client app. The implementation follows the OpenAPI contracts from `../01-analysis/api` and keeps client-visible resources in MVP scope only.
 
 ## Requirements
 
@@ -29,7 +29,7 @@ Start PostgreSQL:
 docker compose --profile db up -d db
 ```
 
-Apply migrations and seed read-only catalog data:
+Apply migrations and seed read-only slot data:
 
 ```bash
 make migrate
@@ -105,7 +105,7 @@ go test -race ./...
 PostgreSQL integration tests:
 
 ```bash
-TEST_DATABASE_URL=postgres://volna:volna@localhost:5432/volna?sslmode=disable go test ./internal/http/handlers ./internal/storage/postgres -count=1
+TEST_DATABASE_URL=postgres://apex:apex@localhost:5433/apex?sslmode=disable go test ./internal/http/handlers ./internal/storage/postgres -count=1
 ```
 
 Integration tests create isolated schemas and skip automatically when `TEST_DATABASE_URL` is not set.

@@ -23,7 +23,7 @@ internal fun Int.pluralPlaces(): String = when {
     else -> "картов"
 }
 
-internal fun Int.pluralRentalBoards(): String = when {
+internal fun Int.pluralRentalGear(): String = when {
     this % 10 == 1 && this % 100 != 11 -> "прокатный комплект"
     this % 10 in 2..4 && this % 100 !in 12..14 -> "прокатных комплекта"
     else -> "прокатных комплектов"

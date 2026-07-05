@@ -43,7 +43,7 @@
 - Keep OpenAPI operationIds and schemas aligned with `01-analysis/api`; generated types are acceptable at the transport boundary, but do not leak them into domain models.
 - Use explicit DTO mapping between OpenAPI/generated models, application commands/results, and domain entities.
 - Put business invariants in use cases/domain, not in handlers or SQL alone. SQL constraints and transactions should protect the same invariants at persistence level.
-- Booking and cancellation flows must run inside explicit database transactions and use row-level locking or equivalent concurrency control to prevent double booking, overbooking, and incorrect board inventory updates.
+- Booking and cancellation flows must run inside explicit database transactions and use row-level locking or equivalent concurrency control to prevent double booking, overbooking, and incorrect rental gear inventory updates.
 - Implement idempotent `createBooking` handling with persisted idempotency keys bound to the authenticated client and request payload semantics.
 - Prefer context-aware methods (`context.Context`) for all request-scoped operations, repository calls, and external integrations.
 - Use structured errors: domain/application errors should be typed or comparable and mapped once at the HTTP boundary to the documented API error responses.
@@ -60,7 +60,7 @@
 - Current domains are `auth`, `slots`, `bookings`, `profile`, and `instructors`; add new domains to `redocly.yaml` or Redocly will not lint/bundle them.
 
 ## MVP Scope Traps
-- In scope: client role only, phone/OTP auth, slot list/filtering, slot card, booking self plus 1-2 guests, own/rental board choice, own bookings, cancel booking, profile, reminders/push registration where specified.
+- In scope: client role only, phone/OTP auth, slot list/filtering, slot card, booking self plus 1-2 guests, own/rental gear choice, own bookings, cancel booking, profile, reminders/push registration where specified.
 - Out of scope: instructor/admin UI, schedule CRUD, slot creation/editing, ratings, public reviews, online payment, auto-weather cancellation, loyalty, no-show handling.
 - Slots, routes, and instructors are read-only projections from existing infrastructure; client code/API must not create or edit them.
 - Payment is offline; the product only shows price and records booking details.
@@ -68,8 +68,8 @@
 ## Domain Invariants To Protect
 - Booking must be atomic and must prevent double booking and overbooking under parallel requests.
 - `createBooking` supports `Idempotency-Key`; use it for safe retry after network failure.
-- `seats_count` is 1..3 and `rental_count` is 0..`seats_count`; own-board places consume group seats but not rental boards.
-- Do not hardcode route caps or board inventory in FE; use slot/route data even though docs mention 8/12 and 12 boards.
-- Late cancellation is `< 2h` before slot start and does not free seats or rental boards; exactly `2h` is early cancellation and frees them.
+- `seats_count` is 1..5 and `rental_count` is 0..`seats_count`; own-gear places consume group seats but not rental gear inventory.
+- Do not hardcode route caps or rental gear inventory in FE; use slot/route data even though docs mention 8/12 and 12 gear units.
+- Late cancellation is `< 2h` before slot start and does not free seats or rental gear; exactly `2h` is early cancellation and frees them.
 - "Past" is derived from `slot.start_at`, not a stored status. Booking status is `active`, `cancelled`, or `late_cancel`; slot status is `scheduled` or `cancelled`.
 - Client data access is only to the current user's profile/bookings; cross-client access must return forbidden/unauthorized behavior per common API responses.

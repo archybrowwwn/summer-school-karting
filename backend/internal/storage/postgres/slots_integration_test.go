@@ -33,8 +33,8 @@ func TestSlotRepositoryListReadsSeedSlots(t *testing.T) {
 	if list.Items[0].ID != "55555555-5555-5555-5555-555555555555" {
 		t.Fatalf("first slot id = %q", list.Items[0].ID)
 	}
-	if list.Items[0].FreeSeats != 8 || list.Items[0].FreeRentalBoards != 12 {
-		t.Fatalf("unexpected availability: seats=%d boards=%d", list.Items[0].FreeSeats, list.Items[0].FreeRentalBoards)
+	if list.Items[0].FreeSeats != 8 || list.Items[0].FreeRentalGear != 12 {
+		t.Fatalf("unexpected availability: seats=%d gear=%d", list.Items[0].FreeSeats, list.Items[0].FreeRentalGear)
 	}
 	if list.Items[0].RouteName == "" || list.Items[0].InstructorName == "" {
 		t.Fatal("slot must include route and instructor data")

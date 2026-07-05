@@ -79,13 +79,13 @@ func (r *BookingRepository) Create(ctx context.Context, clientID string, command
 		return booking.Booking{}, err
 	}
 	if slot.Status == "cancelled" {
-		return booking.Booking{}, booking.AvailabilityError{Err: booking.ErrSlotCancelled, Availability: booking.Availability{AvailableSeats: slot.FreeSeats, AvailableRentalBoards: slot.FreeRentalBoards}}
+		return booking.Booking{}, booking.AvailabilityError{Err: booking.ErrSlotCancelled, Availability: booking.Availability{AvailableSeats: slot.FreeSeats, AvailableRentalGear: slot.FreeRentalGear}}
 	}
 	if !now.Before(slot.StartAt) {
 		return booking.Booking{}, booking.ErrSlotStarted
 	}
-	if slot.FreeSeats < command.SeatsCount || slot.FreeRentalBoards < command.RentalCount {
-		return booking.Booking{}, booking.AvailabilityError{Err: booking.ErrSlotFull, Availability: booking.Availability{AvailableSeats: slot.FreeSeats, AvailableRentalBoards: slot.FreeRentalBoards}}
+	if slot.FreeSeats < command.SeatsCount || slot.FreeRentalGear < command.RentalCount {
+		return booking.Booking{}, booking.AvailabilityError{Err: booking.ErrSlotFull, Availability: booking.Availability{AvailableSeats: slot.FreeSeats, AvailableRentalGear: slot.FreeRentalGear}}
 	}
 
 	var alreadyBooked bool
@@ -103,7 +103,7 @@ SELECT EXISTS (
 	if _, err := tx.Exec(ctx, `
 UPDATE slots
 SET free_seats = free_seats - $2,
-    free_rental_boards = free_rental_boards - $3
+    free_rental_gear = free_rental_gear - $3
 WHERE id = $1`, command.SlotID, command.SeatsCount, command.RentalCount); err != nil {
 		return booking.Booking{}, fmt.Errorf("update slot availability: %w", err)
 	}
@@ -265,7 +265,7 @@ WHERE id = $1`, bookingID, status, now); err != nil {
 		if _, err := tx.Exec(ctx, `
 UPDATE slots
 SET free_seats = free_seats + $2,
-    free_rental_boards = free_rental_boards + $3
+    free_rental_gear = free_rental_gear + $3
 WHERE id = $1`, locked.SlotID, locked.SeatsCount, locked.RentalCount); err != nil {
 			return booking.Booking{}, fmt.Errorf("return slot availability: %w", err)
 		}
@@ -340,7 +340,7 @@ SELECT
     s.start_at,
     s.total_seats,
     s.free_seats,
-    s.free_rental_boards,
+    s.free_rental_gear,
     s.price,
     s.rental_price,
     s.meeting_point,
@@ -363,7 +363,7 @@ FOR UPDATE OF s`, slotID).Scan(
 		&slot.StartAt,
 		&slot.TotalSeats,
 		&slot.FreeSeats,
-		&slot.FreeRentalBoards,
+		&slot.FreeRentalGear,
 		&slot.Price,
 		&slot.RentalPrice,
 		&slot.MeetingPoint,
@@ -420,7 +420,7 @@ SELECT
     s.start_at,
     s.total_seats,
     s.free_seats,
-    s.free_rental_boards,
+    s.free_rental_gear,
     s.price,
     s.rental_price,
     s.meeting_point,
@@ -468,7 +468,7 @@ func bookingScanDest(b *booking.Booking) []any {
 		&b.Slot.StartAt,
 		&b.Slot.TotalSeats,
 		&b.Slot.FreeSeats,
-		&b.Slot.FreeRentalBoards,
+		&b.Slot.FreeRentalGear,
 		&b.Slot.Price,
 		&b.Slot.RentalPrice,
 		&b.Slot.MeetingPoint,
