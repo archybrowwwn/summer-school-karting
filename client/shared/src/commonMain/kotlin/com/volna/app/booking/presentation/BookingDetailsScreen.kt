@@ -153,7 +153,7 @@ private fun BookingDetailsContent(
                 .width(138.dp)
                 .height(4.dp)
                 .align(androidx.compose.ui.Alignment.CenterHorizontally)
-                .background(Color(0xFFCCCCCC), RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
         )
         Spacer(Modifier.height(VolnaTheme.tokens.spacing.xs))
     }
@@ -185,10 +185,21 @@ private fun BookingDetailsEventCard(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs)) {
             slot?.let {
-                BookingTag(text = it.route.type.toTagText(), color = Color(0xFF92FF9A))
+                BookingTag(
+                    text = it.route.type.toTagText(),
+                    backgroundColor = when (it.route.type) {
+                        com.volna.app.domain.model.RouteType.Novice -> VolnaTheme.colors.tagNoviceBackground
+                        com.volna.app.domain.model.RouteType.Experienced -> VolnaTheme.colors.tagRouteBackground
+                    },
+                    contentColor = when (it.route.type) {
+                        com.volna.app.domain.model.RouteType.Novice -> VolnaTheme.colors.tagNoviceText
+                        com.volna.app.domain.model.RouteType.Experienced -> VolnaTheme.colors.tagRouteText
+                    },
+                )
                 BookingTag(
                     text = it.route.name,
-                    color = Color(0xFFFFF897),
+                    backgroundColor = VolnaTheme.colors.tagRouteBackground,
+                    contentColor = VolnaTheme.colors.tagRouteText,
                     modifier = Modifier.weight(1f, fill = false),
                 )
             }
@@ -213,19 +224,20 @@ private fun BookingStatusPill(
     modifier: Modifier = Modifier,
 ) {
     val active = status == "Активна"
+    val colors = VolnaTheme.colors
     Text(
         text = status,
         modifier = modifier
             .width(100.dp)
             .height(36.dp)
             .background(
-                color = if (active) Color(0xFFE4FFE5) else MaterialTheme.colorScheme.surface,
+                color = if (active) colors.statusActiveBackground else MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(10.dp),
             )
             .padding(top = 9.dp),
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.bodyMedium,
-        color = if (active) Color(0xFF007108) else MaterialTheme.colorScheme.onSurfaceVariant,
+        color = if (active) colors.statusActiveText else MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
 
@@ -256,7 +268,7 @@ private fun BookingDetailsMapCard(
             text = "Как добраться",
             modifier = Modifier.clickable { onOpenMap() },
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF0093CC),
+            color = VolnaTheme.colors.link,
         )
     }
 }
@@ -452,7 +464,7 @@ private fun CancelConfirmSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = Color(0xFFF2F2F2),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(VolnaTheme.tokens.radius.lg),
                     )
                     .padding(VolnaTheme.tokens.spacing.sm),

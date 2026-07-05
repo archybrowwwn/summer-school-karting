@@ -254,13 +254,14 @@ private fun AuthHeader(
             text = title,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
         Text(
             text = description,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
@@ -282,7 +283,11 @@ private fun AuthTextField(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xs),
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
@@ -290,7 +295,7 @@ private fun AuthTextField(
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             visualTransformation = visualTransformation,
             textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
@@ -299,10 +304,14 @@ private fun AuthTextField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(VolnaTheme.tokens.sizing.fieldHeight)
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(VolnaTheme.tokens.radius.md),
+                        )
                         .border(
                             width = VolnaTheme.tokens.spacing.xxs / 2,
                             color = if (fieldError == null) {
-                                MaterialTheme.colorScheme.primary
+                                MaterialTheme.colorScheme.outline
                             } else {
                                 MaterialTheme.colorScheme.error
                             },
@@ -342,7 +351,11 @@ private fun OtpCodeInput(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xs),
     ) {
-        Text("Код из SMS", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = "Код из SMS",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         BasicTextField(
             value = value,
             onValueChange = { onValueChange(it.filter(Char::isDigit).take(4)) },
@@ -389,9 +402,17 @@ private fun CodeBox(
     Box(
         modifier = modifier
             .height(VolnaTheme.tokens.sizing.fieldHeight)
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(VolnaTheme.tokens.radius.md),
+            )
             .border(
                 width = VolnaTheme.tokens.spacing.xxs / 2,
-                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                color = when {
+                    isError -> MaterialTheme.colorScheme.error
+                    digit.isNotBlank() -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.outline
+                },
                 shape = RoundedCornerShape(VolnaTheme.tokens.radius.md),
             ),
         contentAlignment = Alignment.Center,
@@ -399,6 +420,7 @@ private fun CodeBox(
         Text(
             text = digit.ifBlank { " " },
             style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
     }
@@ -452,7 +474,7 @@ private fun SubmitButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            disabledContainerColor = VolnaTheme.colors.surfaceElevated,
             disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
         modifier = modifier

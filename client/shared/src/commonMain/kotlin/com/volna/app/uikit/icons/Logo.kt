@@ -5,10 +5,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import com.volna.app.core.theme.ApexBrandColors
+import com.volna.app.core.theme.ApexPalette
 
 /**
- * Марка «Апекс»: клетчатый флаг (картинг) + буква A.
+ * Марка «Апекс»: клетчатый флаг + буква A (акцент Grok-orange).
  * Многоцветная — tint = [androidx.compose.ui.graphics.Color.Unspecified].
  */
 val Icons.Logo: ImageVector
@@ -27,9 +27,9 @@ val Icons.Logo: ImageVector
             for (row in 0 until 4) {
                 for (col in 0 until 4) {
                     val fill = if ((row + col) % 2 == 0) {
-                        ApexBrandColors.checkeredDark
+                        Color(ApexPalette.CheckeredDark)
                     } else {
-                        ApexBrandColors.checkeredLight
+                        Color(ApexPalette.CheckeredLight)
                     }
                     val x0 = col * cell
                     val y0 = row * cell
@@ -42,7 +42,7 @@ val Icons.Logo: ImageVector
                     }
                 }
             }
-            path(fill = SolidColor(ApexBrandColors.red)) {
+            path(fill = SolidColor(Color(ApexPalette.Accent))) {
                 moveTo(30f, 52f)
                 lineTo(38f, 20f)
                 lineTo(46f, 52f)
@@ -52,7 +52,7 @@ val Icons.Logo: ImageVector
                 lineTo(34f, 52f)
                 close()
             }
-            path(fill = SolidColor(Color.White)) {
+            path(fill = SolidColor(Color(ApexPalette.OnAccent))) {
                 moveTo(35.8f, 40f)
                 lineTo(40.2f, 40f)
                 lineTo(38.5f, 32f)

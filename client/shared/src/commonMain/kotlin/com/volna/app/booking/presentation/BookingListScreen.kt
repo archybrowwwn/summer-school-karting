@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -215,9 +216,19 @@ private fun BookingEmptyCard(
             .padding(VolnaTheme.tokens.spacing.md),
         verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xs),
     ) {
-        Text(title, fontWeight = FontWeight.Bold)
+        Text(
+            title,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         Text(description, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        OutlinedButton(onClick = onBookWalk, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+            onClick = onBookWalk,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.primary,
+            ),
+        ) {
             Text("Записаться")
         }
     }
@@ -246,10 +257,21 @@ private fun BookingCard(
         Column(verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs)) {
             Row(horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs)) {
                 slot?.let {
-                    BookingTag(text = it.route.type.toTagText(), color = Color(0xFF92FF9A))
+                    BookingTag(
+                        text = it.route.type.toTagText(),
+                        backgroundColor = when (it.route.type) {
+                            com.volna.app.domain.model.RouteType.Novice -> VolnaTheme.colors.tagNoviceBackground
+                            com.volna.app.domain.model.RouteType.Experienced -> VolnaTheme.colors.tagRouteBackground
+                        },
+                        contentColor = when (it.route.type) {
+                            com.volna.app.domain.model.RouteType.Novice -> VolnaTheme.colors.tagNoviceText
+                            com.volna.app.domain.model.RouteType.Experienced -> VolnaTheme.colors.tagRouteText
+                        },
+                    )
                     BookingTag(
                         text = it.route.name,
-                        color = Color(0xFFFFF897),
+                        backgroundColor = VolnaTheme.colors.tagRouteBackground,
+                        contentColor = VolnaTheme.colors.tagRouteText,
                         modifier = Modifier.weight(1f, fill = false),
                     )
                 }
@@ -309,16 +331,17 @@ internal fun BookingPreviewPhoto() {
 @Composable
 internal fun BookingTag(
     text: String,
-    color: Color,
+    backgroundColor: Color,
+    contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
     Text(
         text = text,
         modifier = modifier
-            .background(color, RoundedCornerShape(VolnaTheme.tokens.radius.sm))
+            .background(backgroundColor, RoundedCornerShape(VolnaTheme.tokens.radius.sm))
             .padding(horizontal = VolnaTheme.tokens.spacing.xs, vertical = VolnaTheme.tokens.spacing.xxs),
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = contentColor,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
@@ -327,18 +350,19 @@ internal fun BookingTag(
 @Composable
 private fun BookingStatusBadge(status: String) {
     val active = status == "Активна"
+    val colors = VolnaTheme.colors
     Text(
         text = status,
         modifier = Modifier
             .fillMaxWidth()
             .height(36.dp)
             .background(
-                color = if (active) Color(0xFFE4FFE5) else MaterialTheme.colorScheme.surface,
+                color = if (active) colors.statusActiveBackground else MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(VolnaTheme.tokens.radius.lg),
             )
             .padding(top = 9.dp),
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.bodyMedium,
-        color = if (active) Color(0xFF007108) else MaterialTheme.colorScheme.onSurfaceVariant,
+        color = if (active) colors.statusActiveText else MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }

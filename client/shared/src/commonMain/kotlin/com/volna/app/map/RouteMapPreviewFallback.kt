@@ -42,7 +42,7 @@ fun RouteMapPreviewFallback(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = Color(0xFFF2F2F2),
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(VolnaTheme.tokens.radius.lg),
             )
             .padding(spacing.md),

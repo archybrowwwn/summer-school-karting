@@ -48,7 +48,7 @@ fun RouteMapSheet(
                         .fillMaxWidth(0.12f)
                         .height(4.dp)
                         .background(
-                            color = Color(0xFFCCCCCC).copy(alpha = 0.4f),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                             shape = RoundedCornerShape(VolnaTheme.tokens.radius.pill),
                         ),
                 )
@@ -87,8 +87,22 @@ fun RouteMapSheet(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs),
             ) {
-                RouteMapTag(text = route.type.toUiText(), color = Color(0xFF92FF9A))
-                RouteMapTag(text = route.name, color = Color(0xFFFFF897))
+                RouteMapTag(
+                    text = route.type.toUiText(),
+                    backgroundColor = when (route.type) {
+                        RouteType.Novice -> VolnaTheme.colors.tagNoviceBackground
+                        RouteType.Experienced -> VolnaTheme.colors.tagRouteBackground
+                    },
+                    contentColor = when (route.type) {
+                        RouteType.Novice -> VolnaTheme.colors.tagNoviceText
+                        RouteType.Experienced -> VolnaTheme.colors.tagRouteText
+                    },
+                )
+                RouteMapTag(
+                    text = route.name,
+                    backgroundColor = VolnaTheme.colors.tagRouteBackground,
+                    contentColor = VolnaTheme.colors.tagRouteText,
+                )
             }
             RouteMapPreview(
                 route = route,
@@ -99,7 +113,7 @@ fun RouteMapSheet(
                 text = "Заезд на трассе займёт ${route.durationMin} минут",
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF797979),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             Button(
@@ -134,14 +148,18 @@ fun RouteMapSheet(
 }
 
 @Composable
-private fun RouteMapTag(text: String, color: Color) {
+private fun RouteMapTag(
+    text: String,
+    backgroundColor: Color,
+    contentColor: Color,
+) {
     Text(
         text = text,
         modifier = Modifier
-            .background(color = color, shape = RoundedCornerShape(VolnaTheme.tokens.radius.sm))
+            .background(color = backgroundColor, shape = RoundedCornerShape(VolnaTheme.tokens.radius.sm))
             .padding(horizontal = VolnaTheme.tokens.spacing.xs, vertical = VolnaTheme.tokens.spacing.xxs),
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = contentColor,
     )
 }
 

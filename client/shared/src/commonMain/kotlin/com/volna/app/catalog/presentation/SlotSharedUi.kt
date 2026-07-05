@@ -49,22 +49,77 @@ internal fun SkeletonCard(
 @Composable
 internal fun SlotTag(
     text: String,
-    color: Color,
+    backgroundColor: Color,
+    contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
     Text(
         text = text,
         modifier = modifier
             .background(
-                color = color,
+                color = backgroundColor,
                 shape = RoundedCornerShape(VolnaTheme.tokens.radius.sm),
             )
             .padding(horizontal = VolnaTheme.tokens.spacing.xs, vertical = VolnaTheme.tokens.spacing.xxs),
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = contentColor,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
+}
+
+@Composable
+internal fun NoviceSlotTag(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = VolnaTheme.colors
+    SlotTag(
+        text = text,
+        backgroundColor = colors.tagNoviceBackground,
+        contentColor = colors.tagNoviceText,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun RouteSlotTag(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = VolnaTheme.colors
+    SlotTag(
+        text = text,
+        backgroundColor = colors.tagRouteBackground,
+        contentColor = colors.tagRouteText,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun NeutralSlotTag(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = VolnaTheme.colors
+    SlotTag(
+        text = text,
+        backgroundColor = colors.tagNeutralBackground,
+        contentColor = colors.tagNeutralText,
+        modifier = modifier,
+    )
+}
+
+@Composable
+internal fun RouteTypeSlotTag(
+    type: RouteType,
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    when (type) {
+        RouteType.Novice -> NoviceSlotTag(text = text, modifier = modifier)
+        RouteType.Experienced -> RouteSlotTag(text = text, modifier = modifier)
+    }
 }
 
 @Composable
@@ -125,7 +180,7 @@ internal fun StateMessage(
             text = description,
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFF797979),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
         if (buttonText != null && onClick != null) {
@@ -136,7 +191,10 @@ internal fun StateMessage(
                     .fillMaxWidth()
                     .height(VolnaTheme.tokens.sizing.buttonHeight),
                 shape = RoundedCornerShape(VolnaTheme.tokens.radius.pill),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
             ) {
                 Text(buttonText)
             }

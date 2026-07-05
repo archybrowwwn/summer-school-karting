@@ -117,7 +117,7 @@ private fun SlotFiltersSheet(
                         .width(40.dp)
                         .height(4.dp)
                         .background(
-                            color = Color(0xFFCCCCCC).copy(alpha = 0.4f),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
                             shape = RoundedCornerShape(VolnaTheme.tokens.radius.lg),
                         ),
                 )
@@ -143,7 +143,12 @@ private fun SlotFiltersSheet(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 ) {
-                    Text("Фильтры", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Фильтры",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                     Text(
                         text = "Сбросить",
                         modifier = Modifier.clickable { onIntent(SlotListIntent.ResetFilters) },
@@ -201,7 +206,10 @@ private fun SlotFiltersSheet(
                     .width(VolnaTheme.tokens.sizing.contentWidth)
                     .height(VolnaTheme.tokens.sizing.buttonHeight),
                 shape = RoundedCornerShape(VolnaTheme.tokens.radius.pill),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
             ) {
                 Text("Применить", fontWeight = FontWeight.Bold)
             }
@@ -209,7 +217,7 @@ private fun SlotFiltersSheet(
                 modifier = Modifier
                     .width(138.dp)
                     .height(4.dp)
-                    .background(Color(0xFFCCCCCC), RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
             )
             Spacer(Modifier.height(VolnaTheme.tokens.spacing.xs))
         }
@@ -222,7 +230,11 @@ private fun FilterGroup(
     content: @Composable () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xs)) {
-        Text(title, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         content()
     }
 }
@@ -339,7 +351,12 @@ private fun InstructorFilterSection(
         is Loadable.Empty -> Unit
         is Loadable.Error -> FilterGroup("Маршал") {
             Text("Не удалось загрузить маршалов", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            OutlinedButton(onClick = onRetry) {
+            OutlinedButton(
+                onClick = onRetry,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+            ) {
                 Text("Обновить")
             }
         }
@@ -426,13 +443,9 @@ private fun SlotCard(
             SlotPreviewPhoto()
             Column(verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs)) {
-                    SlotTag(
-                        text = slot.route.type.toTagText(),
-                        color = Color(0xFF92FF9A),
-                    )
-                    SlotTag(
+                    RouteTypeSlotTag(type = slot.route.type, text = slot.route.type.toTagText())
+                    RouteSlotTag(
                         text = slot.route.name,
-                        color = Color(0xFFFFF897),
                         modifier = Modifier.weight(1f, fill = false),
                     )
                 }

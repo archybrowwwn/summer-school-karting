@@ -68,6 +68,7 @@ fun ProfileScreen(
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Box(
             modifier = Modifier
@@ -95,7 +96,13 @@ fun ProfileScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(VolnaTheme.tokens.spacing.md),
-            )
+            ) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
     }
 
@@ -204,6 +211,10 @@ private fun ProfileEditContent(
         onClick = { onIntent(ProfileIntent.SaveClicked) },
         enabled = state.canSave,
         shape = RoundedCornerShape(VolnaTheme.tokens.radius.pill),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .height(VolnaTheme.tokens.sizing.buttonHeight),
@@ -214,6 +225,9 @@ private fun ProfileEditContent(
         onClick = { onIntent(ProfileIntent.EditCancelled) },
         enabled = !state.isSubmitting,
         shape = RoundedCornerShape(VolnaTheme.tokens.radius.pill),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .height(VolnaTheme.tokens.sizing.buttonHeight),
@@ -231,6 +245,7 @@ private fun ProfilePhoneConfirmContent(
         text = "Подтвердите новый номер кодом из SMS",
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
     )
     Text(
         text = formatPhoneNumber(state.pendingPhone ?: state.phoneInput),
@@ -249,6 +264,10 @@ private fun ProfilePhoneConfirmContent(
         onClick = { onIntent(ProfileIntent.ConfirmPhoneClicked) },
         enabled = state.canConfirmPhone,
         shape = RoundedCornerShape(VolnaTheme.tokens.radius.pill),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .height(VolnaTheme.tokens.sizing.buttonHeight),
@@ -266,6 +285,7 @@ private fun ProfilePhoneConfirmContent(
             } else {
                 "Отправить код повторно"
             },
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
     OutlinedButton(
@@ -298,6 +318,16 @@ private fun ProfileTextField(
         visualTransformation = visualTransformation,
         label = { Text(label) },
         modifier = Modifier.fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+        ),
     )
 }
 
@@ -328,13 +358,13 @@ private fun ProfileInfoRow(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF797979),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (placeholder) Color(0xFF797979) else MaterialTheme.colorScheme.onSurface,
+                color = if (placeholder) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
             )
         }
         VolnaIcon(
@@ -363,7 +393,7 @@ private fun ProfileLinks(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(Color(0xFFF2F2F2)),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
         )
         InfoLine(
             label = "Правила картодрома",
@@ -419,19 +449,19 @@ private fun InfoLine(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF797979),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (value != null) {
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF797979),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
             VolnaIcon(
                 imageVector = Icons.ArrowRight,
                 contentDescription = null,
-                tint = Color(0xFF797979),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 16.dp,
             )
         }
@@ -449,8 +479,18 @@ private fun ProfileError(
         verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.sm),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Не удалось загрузить профиль", textAlign = TextAlign.Center)
-        Button(onClick = onRetry) {
+        Text(
+            "Не удалось загрузить профиль",
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Button(
+            onClick = onRetry,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+        ) {
             Text("Повторить")
         }
     }

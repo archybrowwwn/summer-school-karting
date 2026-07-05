@@ -14,6 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.volna.app.catalog.presentation.NeutralSlotTag
+import com.volna.app.catalog.presentation.RouteSlotTag
+import com.volna.app.catalog.presentation.RouteTypeSlotTag
 import com.volna.app.core.theme.VolnaTheme
 import com.volna.app.domain.model.Booking
 import com.volna.app.domain.model.Slot
@@ -135,7 +138,7 @@ private fun BookingFormContent(
                 .width(138.dp)
                 .height(4.dp)
                 .align(androidx.compose.ui.Alignment.CenterHorizontally)
-                .background(Color(0xFFCCCCCC), RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
         )
         Spacer(Modifier.height(VolnaTheme.tokens.spacing.xs))
     }
@@ -160,15 +163,13 @@ private fun BookingSlotSummaryCard(slot: Slot) {
             color = MaterialTheme.colorScheme.onSurface,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs)) {
-            SlotTag(text = slot.route.type.toTagText(), color = Color(0xFF92FF9A))
-            SlotTag(
+            RouteTypeSlotTag(type = slot.route.type, text = slot.route.type.toTagText())
+            RouteSlotTag(
                 text = slot.route.name,
-                color = Color(0xFFFFF897),
                 modifier = Modifier.weight(1f, fill = false),
             )
-            SlotTag(
+            NeutralSlotTag(
                 text = "Маршал: ${slot.instructor.name}",
-                color = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.weight(1f, fill = false),
             )
         }
@@ -453,7 +454,7 @@ private fun BookingSuccessSheet(
                 .padding(top = VolnaTheme.tokens.spacing.lg, bottom = VolnaTheme.tokens.spacing.xs)
                 .width(138.dp)
                 .height(4.dp)
-                .background(Color(0xFFCCCCCC), RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
         )
     }
 }
@@ -485,15 +486,13 @@ private fun BookingSuccessSummaryCard(
             )
             slot?.let {
                 Row(horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs)) {
-                    SlotTag(text = it.route.type.toTagText(), color = Color(0xFF92FF9A))
-                    SlotTag(
+                    RouteTypeSlotTag(type = it.route.type, text = it.route.type.toTagText())
+                    RouteSlotTag(
                         text = it.route.name,
-                        color = Color(0xFFFFF897),
                         modifier = Modifier.weight(1f, fill = false),
                     )
-                    SlotTag(
+                    NeutralSlotTag(
                         text = "Маршал: ${it.instructor.name}",
-                        color = MaterialTheme.colorScheme.surface,
                         modifier = Modifier.weight(1f, fill = false),
                     )
                 }
@@ -554,7 +553,11 @@ private fun CounterRow(
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(title, fontWeight = FontWeight.Bold)
+        Text(
+            title,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         Row(
             horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.sm),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
@@ -566,8 +569,14 @@ private fun CounterRow(
                     .clickable { onMinus() },
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
             )
-            Text(value.toString(), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+            Text(
+                value.toString(),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
             Text(
                 text = "+",
                 modifier = Modifier
@@ -575,6 +584,7 @@ private fun CounterRow(
                     .clickable { onPlus() },
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
@@ -603,27 +613,6 @@ private fun CircleActionButton(
             size = 20.dp,
         )
     }
-}
-
-@Composable
-private fun SlotTag(
-    text: String,
-    color: Color,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        modifier = modifier
-            .background(
-                color = color,
-                shape = RoundedCornerShape(VolnaTheme.tokens.radius.sm),
-            )
-            .padding(horizontal = VolnaTheme.tokens.spacing.xs, vertical = VolnaTheme.tokens.spacing.xxs),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-    )
 }
 
 @Composable

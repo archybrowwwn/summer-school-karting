@@ -1,10 +1,12 @@
 package com.volna.app.core.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
@@ -67,46 +69,89 @@ data class VolnaTokens(
 )
 
 val LocalVolnaTokens = staticCompositionLocalOf {
-    VolnaTokens(colors = VolnaLightColors)
+    VolnaTokens(colors = ApexDarkColors)
 }
 
+/**
+ * Корневая тема приложения. Всегда тёмная (Grok-style), независимо от системной темы.
+ */
 @Composable
 fun VolnaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val tokens = VolnaTokens(colors = VolnaLightColors)
-    androidx.compose.runtime.CompositionLocalProvider(LocalVolnaTokens provides tokens) {
+    val tokens = VolnaTokens(colors = ApexDarkColors)
+    CompositionLocalProvider(LocalVolnaTokens provides tokens) {
         MaterialTheme(
-            colorScheme = tokens.colors.toMaterialColorScheme(darkTheme),
-            typography = Typography(),
-            content = content,
+            colorScheme = tokens.colors.toMaterialColorScheme(),
+            typography = apexTypography(tokens.colors),
+            content = {
+                CompositionLocalProvider(
+                    LocalContentColor provides tokens.colors.textPrimary,
+                ) {
+                    content()
+                }
+            },
         )
     }
+}
+
+private fun apexTypography(colors: VolnaColorScheme): Typography {
+    val base = Typography()
+    return base.copy(
+        displayLarge = base.displayLarge.copy(color = colors.textPrimary),
+        displayMedium = base.displayMedium.copy(color = colors.textPrimary),
+        displaySmall = base.displaySmall.copy(color = colors.textPrimary),
+        headlineLarge = base.headlineLarge.copy(color = colors.textPrimary),
+        headlineMedium = base.headlineMedium.copy(color = colors.textPrimary),
+        headlineSmall = base.headlineSmall.copy(color = colors.textPrimary),
+        titleLarge = base.titleLarge.copy(color = colors.textPrimary),
+        titleMedium = base.titleMedium.copy(color = colors.textPrimary),
+        titleSmall = base.titleSmall.copy(color = colors.textPrimary),
+        bodyLarge = base.bodyLarge.copy(color = colors.textPrimary),
+        bodyMedium = base.bodyMedium.copy(color = colors.textPrimary),
+        bodySmall = base.bodySmall.copy(color = colors.textSecondary),
+        labelLarge = base.labelLarge.copy(color = colors.textPrimary),
+        labelMedium = base.labelMedium.copy(color = colors.textPrimary),
+        labelSmall = base.labelSmall.copy(color = colors.textSecondary),
+    )
 }
 
 object VolnaTheme {
     val tokens: VolnaTokens
         @Composable get() = LocalVolnaTokens.current
+
+    val colors: VolnaColorScheme
+        @Composable get() = tokens.colors
 }
 
-private fun VolnaColorScheme.toMaterialColorScheme(darkTheme: Boolean): ColorScheme {
-    val base = if (darkTheme) {
-        androidx.compose.material3.darkColorScheme()
-    } else {
-        androidx.compose.material3.lightColorScheme()
-    }
-    return base.copy(
+private fun VolnaColorScheme.toMaterialColorScheme(): ColorScheme {
+    return darkColorScheme(
         primary = brand,
         onPrimary = onBrand,
+        primaryContainer = brand.copy(alpha = 0.18f),
+        onPrimaryContainer = textPrimary,
+        secondary = surfaceElevated,
+        onSecondary = textPrimary,
+        secondaryContainer = surfaceElevated,
+        onSecondaryContainer = textSecondary,
+        tertiary = brandHover,
+        onTertiary = onBrand,
         background = background,
-        surface = surface,
-        surfaceVariant = surfaceVariant,
         onBackground = textPrimary,
+        surface = surface,
         onSurface = textPrimary,
+        surfaceVariant = surfaceElevated,
         onSurfaceVariant = textSecondary,
+        surfaceContainer = surface,
+        surfaceContainerHigh = surfaceElevated,
+        surfaceContainerHighest = surfaceElevated,
+        surfaceContainerLow = background,
         outline = border,
+        outlineVariant = border,
         error = error,
-        onError = Color.White,
+        onError = textPrimary,
+        inverseSurface = textPrimary,
+        inverseOnSurface = background,
+        inversePrimary = brand,
     )
 }

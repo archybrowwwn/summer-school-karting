@@ -200,15 +200,14 @@ private fun SlotDetailsSheetContent(
                 modifier = Modifier
                     .width(40.dp)
                     .height(4.dp)
-                    .background(Color(0xFFCCCCCC).copy(alpha = 0.4f), RoundedCornerShape(VolnaTheme.tokens.radius.lg)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f), RoundedCornerShape(VolnaTheme.tokens.radius.lg)),
             )
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xxs)) {
-                SlotTag(text = slot.route.type.toTagText(), color = Color(0xFF92FF9A))
-                SlotTag(
+                RouteTypeSlotTag(type = slot.route.type, text = slot.route.type.toTagText())
+                RouteSlotTag(
                     text = slot.route.name,
-                    color = Color(0xFFFFF897),
                     modifier = Modifier.weight(1f, fill = false),
                 )
             }
@@ -292,7 +291,7 @@ private fun SlotDetailsSheetContent(
                 modifier = Modifier
                     .width(138.dp)
                     .height(4.dp)
-                    .background(Color(0xFFCCCCCC), RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(VolnaTheme.tokens.radius.pill)),
             )
         }
     }
@@ -325,7 +324,7 @@ private fun SlotDetailsMapCard(
             text = "Как добраться",
             modifier = Modifier.clickable { onOpenMap() },
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF0093CC),
+            color = VolnaTheme.colors.link,
         )
     }
 }
