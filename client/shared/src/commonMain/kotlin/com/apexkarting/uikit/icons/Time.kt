@@ -18,7 +18,7 @@ val Icons.Time: ImageVector
             viewportWidth = 16f,
             viewportHeight = 16f
         ).apply {
-            path(fill = SolidColor(Color(0xFF797979))) {
+            path(fill = SolidColor(Color(0xFFAAAAAA))) {
                 moveTo(8f, 15f)
                 curveTo(4.14f, 15f, 1f, 11.86f, 1f, 8f)
                 curveTo(1f, 4.14f, 4.14f, 1f, 8f, 1f)
@@ -32,7 +32,7 @@ val Icons.Time: ImageVector
                 curveTo(14f, 4.69f, 11.31f, 2f, 8f, 2f)
                 close()
             }
-            path(fill = SolidColor(Color(0xFF797979))) {
+            path(fill = SolidColor(Color(0xFFAAAAAA))) {
                 moveTo(10f, 10.5f)
                 curveTo(9.91f, 10.5f, 9.82f, 10.48f, 9.74f, 10.43f)
                 lineTo(7.24f, 8.93f)

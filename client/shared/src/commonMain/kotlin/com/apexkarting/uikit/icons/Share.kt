@@ -18,7 +18,7 @@ val Icons.Share: ImageVector
             viewportWidth = 16f,
             viewportHeight = 16f
         ).apply {
-            path(fill = SolidColor(Color(0xFF797979))) {
+            path(fill = SolidColor(Color(0xFFAAAAAA))) {
                 moveTo(12f, 16f)
                 curveTo(11.333f, 16f, 10.767f, 15.767f, 10.3f, 15.3f)
                 curveTo(9.833f, 14.833f, 9.6f, 14.267f, 9.6f, 13.6f)

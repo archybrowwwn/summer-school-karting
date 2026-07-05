@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
 import com.apexkarting.domain.model.MeetingPoint
 import com.apexkarting.domain.model.Route
@@ -31,13 +32,13 @@ fun RouteMapPreviewFallback(
     onOpenExternal: () -> Unit,
 ) {
     val spacing = ApexTheme.tokens.spacing
-    val waterColor = Color(0xFF8BD1F1)
-    val landColor = Color(0xFFF6F3ED)
-    val parkColor = Color(0xFFD5F3BA)
-    val streetColor = Color.White
-    val roadStrokeColor = Color(0xFFE5DED6)
-    val routeColor = Color(0xFF00A59D)
-    val pinColor = Color(0xFF00A59D)
+    val waterColor = Color(ApexPalette.MapWater)
+    val landColor = Color(ApexPalette.MapLand)
+    val parkColor = Color(ApexPalette.MapPark)
+    val streetColor = Color(ApexPalette.MapStreet)
+    val roadStrokeColor = Color(ApexPalette.Border)
+    val routeColor = Color(ApexPalette.MapRoute)
+    val pinColor = Color(ApexPalette.MapPin)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -183,7 +184,7 @@ private fun MockRouteScreenshot(
             center = pinCenter,
         )
         drawCircle(
-            color = Color.White,
+            color = Color(ApexPalette.TextPrimary),
             radius = 3.dp.toPx(),
             center = pinCenter,
         )

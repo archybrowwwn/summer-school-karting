@@ -18,18 +18,23 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
 import com.apexkarting.uikit.ApexCard
 import com.apexkarting.uikit.ApexShapes
 import com.apexkarting.uikit.apexClickable
-import com.apexkarting.core.ui.ListSkeletonCard
 import com.apexkarting.core.ui.ListStateMessage
 import com.apexkarting.core.ui.Loadable
-import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.BookingStatusTag
+import com.apexkarting.core.ui.RouteNameTag
 import com.apexkarting.core.ui.RouteTypeTag
-import com.apexkarting.core.ui.ScreenHeaderTitle
+import com.apexkarting.core.ui.ListStatePlacement
+import com.apexkarting.core.ui.TabLoadingSkeletons
+import com.apexkarting.core.ui.TabScreenLayout
+import com.apexkarting.core.ui.TagFlowRow
+import com.apexkarting.core.ui.contentWidthModifier
+import com.apexkarting.core.ui.tabScreenContentPadding
 import com.apexkarting.core.ui.toCardStartText
 import com.apexkarting.core.ui.toTagText
 import com.apexkarting.domain.model.Booking
@@ -53,14 +58,10 @@ fun BookingListScreen(
             onIntent(BookingListIntent.MessageShown)
         }
     }
-    Box(Modifier.fillMaxSize()) {
-        ScreenHeaderTitle("Мои записи")
+    TabScreenLayout(title = "Мои записи") {
         when (val bookings = state.bookings) {
             Loadable.Initial,
-            Loadable.Loading -> {
-                ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
-                ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
-            }
+            Loadable.Loading -> TabLoadingSkeletons()
             is Loadable.Content -> BookingGroupsContent(
                 groups = bookings.value,
                 refreshing = bookings.refreshing,
@@ -74,6 +75,7 @@ fun BookingListScreen(
                 buttonText = "Записаться",
                 onClick = onBookWalk,
                 artwork = null,
+                placement = ListStatePlacement.TabContent,
             )
             is Loadable.Error -> ListStateMessage(
                 title = "Не удалось загрузить записи",
@@ -81,6 +83,7 @@ fun BookingListScreen(
                 buttonText = "Обновить",
                 onClick = { onIntent(BookingListIntent.Retry) },
                 artwork = null,
+                placement = ListStatePlacement.TabContent,
             )
         }
     }
@@ -99,18 +102,11 @@ private fun BookingGroupsContent(
         BookingListTab.Upcoming -> groups.upcoming
         BookingListTab.Past -> groups.past
     }
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopCenter,
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .width(ApexTheme.tokens.sizing.contentWidth)
-                .fillMaxHeight(),
-            contentPadding = PaddingValues(
-                top = ApexTheme.tokens.sizing.listCardTopY,
-                bottom = ApexTheme.tokens.sizing.navContentBottomPadding + ApexTheme.tokens.spacing.lg,
-            ),
+    LazyColumn(
+        modifier = Modifier
+            .contentWidthModifier()
+            .fillMaxHeight(),
+        contentPadding = tabScreenContentPadding(),
             verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
         ) {
             if (refreshing) {
@@ -155,7 +151,6 @@ private fun BookingGroupsContent(
                 }
             }
         }
-    }
 }
 
 private enum class BookingListTab {
@@ -180,11 +175,13 @@ private fun BookingTabs(
             text = "Предстоящие",
             selected = selected == BookingListTab.Upcoming,
             onClick = { onSelected(BookingListTab.Upcoming) },
+            modifier = Modifier.weight(1f),
         )
         BookingTabButton(
             text = "Прошедшие",
             selected = selected == BookingListTab.Past,
             onClick = { onSelected(BookingListTab.Past) },
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -194,23 +191,26 @@ private fun BookingTabButton(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val chipShape = ApexShapes.chip()
-    Text(
-        text = text,
-        modifier = Modifier
-            .width(180.dp)
-            .height(40.dp)
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
             .apexClickable(chipShape, onClick = onClick)
             .background(
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
                 shape = chipShape,
-            )
-            .padding(top = 10.dp),
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.bodyMedium,
-        color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-    )
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        )
+    }
 }
 
 @Composable
@@ -255,13 +255,10 @@ private fun BookingCard(
         Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm)) {
         BookingPreviewPhoto()
         Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-                slot?.let {
+            slot?.let {
+                TagFlowRow {
                     RouteTypeTag(type = it.route.type, text = it.route.type.toTagText())
-                    RouteTag(
-                        text = it.route.name,
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
+                    RouteNameTag(name = it.route.name, routeType = it.route.type)
                 }
             }
             Text(
@@ -269,8 +266,6 @@ private fun BookingCard(
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
             )
         }
         Text(
@@ -286,7 +281,9 @@ private fun BookingCard(
         ) {
             Text(
                 text = "${booking.seatsCount} ${booking.seatsCount.pluralPlaces()} · ${booking.rentalCount} ${booking.rentalCount.pluralRentalGear()}",
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -297,7 +294,15 @@ private fun BookingCard(
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-        BookingStatusBadge(status)
+        BookingStatusTag(
+            status = status,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(36.dp)
+                .padding(top = 9.dp),
+            textStyle = MaterialTheme.typography.bodyMedium,
+            shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
+        )
         }
     }
 }
@@ -310,7 +315,11 @@ internal fun BookingPreviewPhoto() {
             .height(120.dp)
             .background(
                 brush = Brush.horizontalGradient(
-                    colors = listOf(Color(0xFFD8EEF0), Color(0xFFF7F0D8), Color(0xFFCFE4E8)),
+                    colors = listOf(
+                        Color(ApexPalette.PhotoGradientStart),
+                        Color(ApexPalette.PhotoGradientMid),
+                        Color(ApexPalette.PhotoGradientEnd),
+                    ),
                 ),
                 shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
             ),
@@ -318,23 +327,3 @@ internal fun BookingPreviewPhoto() {
 }
 
 
-
-@Composable
-private fun BookingStatusBadge(status: String) {
-    val active = status == "Активна"
-    val colors = ApexTheme.colors
-    Text(
-        text = status,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(36.dp)
-            .background(
-                color = if (active) colors.statusActiveBackground else MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
-            )
-            .padding(top = 9.dp),
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.bodyMedium,
-        color = if (active) colors.statusActiveText else MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}

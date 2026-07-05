@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
@@ -24,9 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apexkarting.core.phone.formatPhoneNumber
 import com.apexkarting.core.theme.ApexTheme
-import com.apexkarting.core.ui.ApexBackButton
-import com.apexkarting.core.ui.BackButtonStyle
+import com.apexkarting.core.ui.DetailScreenLayout
 import com.apexkarting.core.ui.PhoneNumberVisualTransformation
+import com.apexkarting.core.ui.TabScreenLayout
+import com.apexkarting.core.ui.contentWidthModifier
+import com.apexkarting.core.ui.detailScreenContentPadding
 import com.apexkarting.uikit.ApexBrandHeader
 import com.apexkarting.uikit.icons.ApexIcon
 
@@ -50,7 +51,6 @@ fun AuthScreen(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.TopCenter,
     ) {
         when (state.step) {
             AuthStep.Phone -> PhoneStep(state, onIntent)
@@ -77,11 +77,10 @@ private fun PhoneStep(
     state: AuthState,
     onIntent: (AuthIntent) -> Unit,
 ) {
-    AuthStepLayout(topLogo = { AuthLogo() }) {
-        AuthHeader(
-            title = "Вход",
-            description = "Войдите по номеру телефона, чтобы\nзаписаться на заезд",
-        )
+    TabScreenLayout(title = "Вход") {
+        AuthFormColumn {
+            ApexBrandHeader(modifier = Modifier.padding(bottom = ApexTheme.tokens.spacing.sm))
+            AuthDescription("Войдите по номеру телефона, чтобы\nзаписаться на заезд")
         AuthTextField(
             value = state.phoneInput,
             onValueChange = { onIntent(AuthIntent.PhoneChanged(it)) },
@@ -104,6 +103,7 @@ private fun PhoneStep(
             enabled = state.canRequestCode,
             onClick = { onIntent(AuthIntent.RequestCode) },
         )
+        }
     }
 }
 
@@ -112,12 +112,12 @@ private fun OtpStep(
     state: AuthState,
     onIntent: (AuthIntent) -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        AuthStepLayout {
-            AuthHeader(
-                title = "Подтверждение",
-                description = "Мы отправили код на ${formatPhoneNumber(state.phoneInput)}",
-            )
+    DetailScreenLayout(
+        title = "Подтверждение",
+        onBack = { onIntent(AuthIntent.BackToPhone) },
+    ) {
+        AuthFormColumn {
+            AuthDescription("Мы отправили код на ${formatPhoneNumber(state.phoneInput)}")
             OtpCodeInput(
                 value = state.codeInput,
                 onValueChange = { onIntent(AuthIntent.CodeChanged(it)) },
@@ -153,18 +153,6 @@ private fun OtpStep(
                 onClick = { onIntent(AuthIntent.VerifyCode) },
             )
         }
-
-        ApexBackButton(
-            onClick = { onIntent(AuthIntent.BackToPhone) },
-            style = BackButtonStyle.Floating,
-            floatingIconSize = 16.dp,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(
-                    start = ApexTheme.tokens.spacing.md,
-                    top = ApexTheme.tokens.sizing.backButtonY,
-                ),
-        )
     }
 }
 
@@ -173,11 +161,9 @@ private fun NameStep(
     state: AuthState,
     onIntent: (AuthIntent) -> Unit,
 ) {
-    AuthStepLayout {
-        AuthHeader(
-            title = "Как вас зовут?",
-            description = "Имя будет отображаться в вашем\nпрофиле",
-        )
+    TabScreenLayout(title = "Как вас зовут?") {
+        AuthFormColumn {
+            AuthDescription("Имя будет отображаться в вашем\nпрофиле")
         AuthTextField(
             value = state.nameInput,
             onValueChange = { onIntent(AuthIntent.NameChanged(it)) },
@@ -194,72 +180,34 @@ private fun NameStep(
             enabled = state.canContinueName,
             onClick = { onIntent(AuthIntent.ContinueWithName) },
         )
+        }
     }
 }
 
 @Composable
-private fun AuthStepLayout(
-    topLogo: (@Composable () -> Unit)? = null,
+private fun AuthFormColumn(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .contentWidthModifier()
             .verticalScroll(rememberScrollState())
-            .padding(
-                horizontal = ApexTheme.tokens.spacing.md,
-                vertical = ApexTheme.tokens.spacing.xl,
-            ),
+            .padding(detailScreenContentPadding()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
-    ) {
-        topLogo?.invoke()
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = ApexTheme.tokens.sizing.contentWidth),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
-            content = content,
-        )
-    }
-}
-
-@Composable
-private fun AuthLogo() {
-    ApexBrandHeader(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = ApexTheme.tokens.sizing.authLogoY),
+        content = content,
     )
 }
 
 @Composable
-private fun AuthHeader(
-    title: String,
-    description: String,
-) {
-    Column(
+private fun AuthDescription(description: String) {
+    Text(
+        text = description,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
-    }
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Composable

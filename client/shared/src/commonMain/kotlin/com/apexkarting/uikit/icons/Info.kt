@@ -21,7 +21,7 @@ val Icons.Info: ImageVector
             viewportHeight = 16f
         ).apply {
             path(
-                stroke = SolidColor(Color(0xFF797979)),
+                stroke = SolidColor(Color(0xFFAAAAAA)),
                 strokeLineWidth = 1f,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round

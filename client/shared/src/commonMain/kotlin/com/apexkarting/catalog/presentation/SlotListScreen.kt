@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -17,14 +18,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
-import com.apexkarting.core.ui.ListSkeletonCard
+import com.apexkarting.core.ui.ApexBottomSheet
+import com.apexkarting.core.ui.ApexFormSection
+import com.apexkarting.core.ui.ApexSheetContent
+import com.apexkarting.core.ui.ApexSheetHeader
 import com.apexkarting.core.ui.ListStateMessage
+import com.apexkarting.core.ui.ListStatePlacement
 import com.apexkarting.core.ui.Loadable
 import com.apexkarting.core.ui.StateArtwork
-import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.RouteNameTag
 import com.apexkarting.core.ui.RouteTypeTag
-import com.apexkarting.core.ui.ScreenHeaderTitle
+import com.apexkarting.core.ui.TabLoadingSkeletons
+import com.apexkarting.core.ui.TabScreenLayout
+import com.apexkarting.core.ui.TagFlowRow
+import com.apexkarting.core.ui.contentWidthModifier
+import com.apexkarting.core.ui.tabScreenContentPadding
 import com.apexkarting.core.ui.toCardStartText
 import com.apexkarting.core.ui.toFilterDateText
 import com.apexkarting.core.ui.toTagText
@@ -47,48 +57,47 @@ fun SlotListScreen(
     LaunchedEffect(Unit) {
         onIntent(SlotListIntent.Load)
     }
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            ScreenHeaderTitle("Заезды")
+    TabScreenLayout(
+        title = "Заезды",
+        trailingContent = {
             ApexIcon(
                 imageVector = Icons.Tune,
                 contentDescription = "Фильтры",
-                modifier = Modifier
-                    .align(androidx.compose.ui.Alignment.CenterEnd)
-                    .padding(end = ApexTheme.tokens.sizing.screenMaxWidth - ApexTheme.tokens.sizing.filterIconX - ApexTheme.tokens.spacing.xl)
-                    .clickable { onIntent(SlotListIntent.OpenFilters) },
+                modifier = Modifier.clickable { onIntent(SlotListIntent.OpenFilters) },
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 size = ApexTheme.tokens.spacing.xl,
             )
-        }
-        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            when (val slots = state.slots) {
-                Loadable.Initial -> SlotInitialLoader()
-                Loadable.Loading -> SlotLoadingSkeleton()
-                is Loadable.Content -> SlotCards(slots.value, onSlotClick)
-                is Loadable.Empty -> if (slots.reason == com.apexkarting.core.ui.EmptyReason.NoSlotsByFilters) {
-                    ListStateMessage(
-                        title = "Нет слотов по условиям",
-                        description = "Попробуйте изменить фильтры",
-                        buttonText = "Фильтры",
-                        artwork = StateArtwork.Empty,
-                        onClick = { onIntent(SlotListIntent.OpenFilters) },
-                    )
-                } else {
-                    ListStateMessage(
-                        title = "Пока нет доступных заездов",
-                        description = "Загляните позже",
-                    )
-                }
-
-                is Loadable.Error -> ListStateMessage(
-                    title = "Не удалось загрузить",
-                    description = "Проверьте соединение и попробуйте снова",
-                    buttonText = "Обновить",
-                    artwork = StateArtwork.Error,
-                    onClick = { onIntent(SlotListIntent.Retry) },
+        },
+    ) {
+        when (val slots = state.slots) {
+            Loadable.Initial -> SlotInitialLoader()
+            Loadable.Loading -> TabLoadingSkeletons(cardHeight = 160.dp)
+            is Loadable.Content -> SlotCards(slots.value, onSlotClick)
+            is Loadable.Empty -> if (slots.reason == com.apexkarting.core.ui.EmptyReason.NoSlotsByFilters) {
+                ListStateMessage(
+                    title = "Нет слотов по условиям",
+                    description = "Попробуйте изменить фильтры",
+                    buttonText = "Фильтры",
+                    artwork = StateArtwork.Empty,
+                    onClick = { onIntent(SlotListIntent.OpenFilters) },
+                    placement = ListStatePlacement.TabContent,
+                )
+            } else {
+                ListStateMessage(
+                    title = "Пока нет доступных заездов",
+                    description = "Загляните позже",
+                    placement = ListStatePlacement.TabContent,
                 )
             }
+
+            is Loadable.Error -> ListStateMessage(
+                title = "Не удалось загрузить",
+                description = "Проверьте соединение и попробуйте снова",
+                buttonText = "Обновить",
+                artwork = StateArtwork.Error,
+                onClick = { onIntent(SlotListIntent.Retry) },
+                placement = ListStatePlacement.TabContent,
+            )
         }
     }
     if (state.filtersVisible) {
@@ -105,74 +114,18 @@ private fun SlotFiltersSheet(
     state: SlotListState,
     onIntent: (SlotListIntent) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-    )
-
-    ModalBottomSheet(
+    ApexBottomSheet(
         onDismissRequest = { onIntent(SlotListIntent.CloseFilters) },
-        sheetState = sheetState,
-        shape = RoundedCornerShape(
-            topStart = ApexTheme.tokens.spacing.xl,
-            topEnd = ApexTheme.tokens.spacing.xl,
-        ),
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                contentAlignment = androidx.compose.ui.Alignment.TopCenter,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(4.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
-                        ),
-                )
-            }
-        },
     ) {
         // CMP-13 / BS-001: filter form only collects conditions; SCR-002 reloads after apply.
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
+        ApexSheetHeader(
+            title = "Фильтры",
+            actionText = "Сбросить",
+            onActionClick = { onIntent(SlotListIntent.ResetFilters) },
+        )
+        ApexSheetContent(
+            verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(androidx.compose.ui.Alignment.Center)
-                        .padding(horizontal = ApexTheme.tokens.spacing.md),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                ) {
-                    Text(
-                        "Фильтры",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = "Сбросить",
-                        modifier = Modifier.clickable { onIntent(SlotListIntent.ResetFilters) },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
-            Column(
-                modifier = Modifier.width(ApexTheme.tokens.sizing.contentWidth),
-                verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.lg),
-            ) {
                 FilterGroup(title = "Дата старта") {
                     FilterChipRow {
                         FilterChipButton("Сегодня", state.draftDatePreset == SlotDatePreset.Today) {
@@ -206,32 +159,25 @@ private fun SlotFiltersSheet(
                     onRetry = { onIntent(SlotListIntent.RetryInstructors) },
                 )
 
-                AvailabilitySwitchRow(
-                    checked = state.draftFilters.onlyAvailable,
-                    onToggle = { onIntent(SlotListIntent.ToggleOnlyAvailable) },
-                )
-            }
-
-            Button(
-                onClick = { onIntent(SlotListIntent.ApplyFilters) },
-                modifier = Modifier
-                    .width(ApexTheme.tokens.sizing.contentWidth)
-                    .height(ApexTheme.tokens.sizing.buttonHeight),
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-            ) {
-                Text("Применить", fontWeight = FontWeight.Bold)
-            }
-            Box(
-                modifier = Modifier
-                    .width(138.dp)
-                    .height(4.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(ApexTheme.tokens.radius.pill)),
-            )
-            Spacer(Modifier.height(ApexTheme.tokens.spacing.xs))
+                ApexFormSection(title = "Доступность") {
+                    AvailabilitySwitchRow(
+                        checked = state.draftFilters.onlyAvailable,
+                        onToggle = { onIntent(SlotListIntent.ToggleOnlyAvailable) },
+                    )
+                }
+        }
+        Button(
+            onClick = { onIntent(SlotListIntent.ApplyFilters) },
+            modifier = Modifier
+                .contentWidthModifier()
+                .height(ApexTheme.tokens.sizing.buttonHeight),
+            shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+        ) {
+            Text("Применить", fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -241,12 +187,7 @@ private fun FilterGroup(
     title: String,
     content: @Composable () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs)) {
-        Text(
-            title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+    ApexFormSection(title = title) {
         content()
     }
 }
@@ -396,8 +337,8 @@ private fun SlotInitialLoader() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .offset(y = 309.dp),
-        contentAlignment = androidx.compose.ui.Alignment.TopCenter,
+            .padding(top = ApexTheme.tokens.spacing.xl),
+        contentAlignment = Alignment.TopCenter,
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(40.dp),
@@ -409,24 +350,16 @@ private fun SlotInitialLoader() {
 }
 
 @Composable
-private fun SlotLoadingSkeleton() {
-    ListSkeletonCard(y = 136.dp, height = 160.dp)
-    ListSkeletonCard(y = 308.dp, height = 160.dp)
-}
-
-@Composable
 private fun SlotCards(
     slots: List<Slot>,
     onSlotClick: (Slot) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(
-            start = ApexTheme.tokens.spacing.md,
-            end = ApexTheme.tokens.spacing.md,
-            bottom = ApexTheme.tokens.sizing.navContentBottomPadding,
-        ),
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
+        modifier = Modifier
+            .contentWidthModifier()
+            .fillMaxHeight(),
+        contentPadding = tabScreenContentPadding(),
+        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
     ) {
         items(slots, key = { it.id.value }) { slot ->
             SlotCard(slot, onSlotClick)
@@ -451,12 +384,9 @@ private fun SlotCard(
             Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs)) {
                 SlotPreviewPhoto()
                 Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
+                    TagFlowRow {
                         RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
-                        RouteTag(
-                            text = slot.route.name,
-                            modifier = Modifier.weight(1f, fill = false),
-                        )
+                        RouteNameTag(name = slot.route.name, routeType = slot.route.type)
                     }
                     Text(
                         text = slot.startAt.toCardStartText(),
@@ -475,7 +405,9 @@ private fun SlotCard(
                 text = "Маршал: ${slot.instructor.name}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
             )
             Text(
                 text = "${slot.price.value} ₽",
@@ -520,9 +452,9 @@ private fun SlotPreviewPhoto() {
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
-                        Color(0xFFD8EEF0),
-                        Color(0xFFF7F0D8),
-                        Color(0xFFCFE4E8),
+                        Color(ApexPalette.PhotoGradientStart),
+                        Color(ApexPalette.PhotoGradientMid),
+                        Color(ApexPalette.PhotoGradientEnd),
                     ),
                 ),
                 shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
@@ -535,7 +467,7 @@ private fun SlotPreviewPhoto() {
                 .align(androidx.compose.ui.Alignment.BottomCenter)
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.36f)),
+                        colors = listOf(Color.Transparent, Color(ApexPalette.Background).copy(alpha = 0.5f)),
                     ),
                     shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
                 ),

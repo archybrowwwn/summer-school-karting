@@ -4,8 +4,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -13,26 +14,27 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
-import com.apexkarting.uikit.ApexShapes
-import com.apexkarting.uikit.apexClickable
-import com.apexkarting.core.ui.ApexBackButton
-import com.apexkarting.core.ui.ListSkeletonCard
+import com.apexkarting.core.ui.DetailScreenLayout
+import com.apexkarting.core.ui.FloatingCircleIconButton
 import com.apexkarting.core.ui.ListStateMessage
+import com.apexkarting.core.ui.ListStatePlacement
 import com.apexkarting.core.ui.Loadable
-import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.RouteNameTag
 import com.apexkarting.core.ui.RouteTypeTag
-import com.apexkarting.core.ui.ScreenHeaderTitle
+import com.apexkarting.core.ui.TabLoadingSkeletons
+import com.apexkarting.core.ui.TagFlowRow
+import com.apexkarting.core.ui.contentWidthModifier
+import com.apexkarting.core.ui.detailScreenContentPadding
 import com.apexkarting.core.ui.toCardStartText
 import com.apexkarting.core.ui.toDetailsAudienceText
 import com.apexkarting.core.ui.toTagText
@@ -40,10 +42,8 @@ import com.apexkarting.domain.model.Slot
 import com.apexkarting.domain.model.SlotId
 import com.apexkarting.domain.policy.AvailabilityPolicy
 import com.apexkarting.map.RouteMapSheet
-import com.apexkarting.uikit.icons.Back
 import com.apexkarting.uikit.icons.Icons
 import com.apexkarting.uikit.icons.Share
-import com.apexkarting.uikit.icons.ApexIcon
 
 @Composable
 fun SlotDetailsScreen(
@@ -57,32 +57,40 @@ fun SlotDetailsScreen(
         onIntent(SlotDetailsIntent.Load(slotId))
     }
     Box(Modifier.fillMaxSize()) {
-        when (val slot = state.slot) {
-            Loadable.Initial,
-            Loadable.Loading -> {
-                ApexBackButton(onClick = onBack)
-                ScreenHeaderTitle("Заезд")
-                ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
-                ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
+        DetailScreenLayout(
+            title = "Заезд",
+            onBack = onBack,
+            trailingContent = {
+                FloatingCircleIconButton(
+                    imageVector = Icons.Share,
+                    contentDescription = "Поделиться",
+                    onClick = {},
+                )
+            },
+        ) {
+            when (val slot = state.slot) {
+                Loadable.Initial,
+                Loadable.Loading -> TabLoadingSkeletons()
+                is Loadable.Content -> SlotDetailsContent(
+                    slot = slot.value,
+                    onBook = { onBook(slot.value) },
+                    onOpenMap = { onIntent(SlotDetailsIntent.OpenRouteMap) },
+                )
+                is Loadable.Empty -> ListStateMessage(
+                    title = "Заезд недоступен",
+                    description = "Попробуйте выбрать другой слот",
+                    buttonText = "Назад",
+                    onClick = onBack,
+                    placement = ListStatePlacement.TabContent,
+                )
+                is Loadable.Error -> ListStateMessage(
+                    title = "Не удалось загрузить",
+                    description = "Проверьте соединение и попробуйте снова",
+                    buttonText = "Повторить",
+                    onClick = { onIntent(SlotDetailsIntent.Retry) },
+                    placement = ListStatePlacement.TabContent,
+                )
             }
-            is Loadable.Content -> SlotDetailsContent(
-                slot = slot.value,
-                onBack = onBack,
-                onBook = { onBook(slot.value) },
-                onOpenMap = { onIntent(SlotDetailsIntent.OpenRouteMap) },
-            )
-            is Loadable.Empty -> ListStateMessage(
-                title = "Заезд недоступен",
-                description = "Попробуйте выбрать другой слот",
-                buttonText = "Назад",
-                onClick = onBack,
-            )
-            is Loadable.Error -> ListStateMessage(
-                title = "Не удалось загрузить",
-                description = "Проверьте соединение и попробуйте снова",
-                buttonText = "Повторить",
-                onClick = { onIntent(SlotDetailsIntent.Retry) },
-            )
         }
         if (state.showRouteMap) {
             (state.slot as? Loadable.Content)?.value?.let { slot ->
@@ -99,213 +107,118 @@ fun SlotDetailsScreen(
 @Composable
 private fun SlotDetailsContent(
     slot: Slot,
-    onBack: () -> Unit,
     onBook: () -> Unit,
     onOpenMap: () -> Unit,
 ) {
     val availability = AvailabilityPolicy.availability(slot)
-    Column(Modifier.fillMaxSize()) {
-        Box {
-            SlotDetailsHero()
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = ApexTheme.tokens.spacing.md,
-                        end = ApexTheme.tokens.spacing.md,
-                        top = ApexTheme.tokens.sizing.backButtonY,
-                    ),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                CircleActionButton(icon = Icons.Back, contentDescription = "Назад", onClick = onBack)
-                CircleActionButton(icon = Icons.Share, contentDescription = "Поделиться", onClick = {})
-            }
+    Column(
+        modifier = Modifier
+            .contentWidthModifier()
+            .verticalScroll(rememberScrollState())
+            .padding(detailScreenContentPadding()),
+        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
+    ) {
+        SlotDetailsPreviewPhoto()
+        TagFlowRow {
+            RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
+            RouteNameTag(name = slot.route.name, routeType = slot.route.type)
         }
-        SlotDetailsSheetContent(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(
-                        topStart = ApexTheme.tokens.spacing.xl,
-                        topEnd = ApexTheme.tokens.spacing.xl,
-                    ),
-                ),
-            slot = slot,
-            availability = availability,
-            onBook = onBook,
-            onOpenMap = onOpenMap,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
+                )
+                .padding(ApexTheme.tokens.spacing.md),
+            verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
+        ) {
+            Text(
+                text = slot.startAt.toCardStartText(),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "Заезд на трассе «${slot.route.name}» займёт ${slot.route.durationMin} минут и подойдёт ${slot.route.type.toDetailsAudienceText()}.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "Маршал: ${slot.instructor.name}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        SlotDetailsMapCard(slot = slot, onOpenMap = onOpenMap)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
+                )
+                .padding(ApexTheme.tokens.spacing.md),
+            verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
+        ) {
+            DetailsInfoRow("Свободно карт", "${slot.freeSeats} из ${slot.totalSeats}")
+            DetailsInfoRow(
+                "Прокатная экипировка (доступно ${availability.freeRentalGear} шт.)",
+                "${slot.rentalPrice.value} ₽",
+                boldValue = true,
+            )
+            DetailsInfoRow("Цена", "${slot.price.value} ₽", boldValue = true)
+        }
+        Text(
+            text = "Оплата на месте: наличные или перевод",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Button(
+            onClick = onBook,
+            enabled = availability.canBook,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ApexTheme.tokens.sizing.buttonHeight),
+            shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+        ) {
+            Text(if (availability.canBook) "Записаться" else "Карт нет", fontWeight = FontWeight.Bold)
+        }
     }
 }
 
 @Composable
-private fun SlotDetailsHero() {
+private fun SlotDetailsPreviewPhoto() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(188.dp)
+            .height(120.dp)
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
-                        Color(0xFFC8E5E8),
-                        Color(0xFFF5ECD2),
-                        Color(0xFFABC7CF),
+                        Color(ApexPalette.PhotoGradientStart),
+                        Color(ApexPalette.PhotoGradientMid),
+                        Color(ApexPalette.PhotoGradientEnd),
                     ),
                 ),
+                shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
             ),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(96.dp)
+                .height(44.dp)
                 .align(androidx.compose.ui.Alignment.BottomCenter)
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.20f)),
+                        colors = listOf(Color.Transparent, Color(ApexPalette.Background).copy(alpha = 0.5f)),
                     ),
+                    shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
                 ),
         )
-    }
-}
-
-@Composable
-private fun CircleActionButton(
-    icon: ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit,
-) {
-    val circleShape = ApexShapes.circle
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .shadow(4.dp, circleShape)
-            .apexClickable(circleShape, onClick = onClick)
-            .background(MaterialTheme.colorScheme.surface, circleShape),
-        contentAlignment = androidx.compose.ui.Alignment.Center,
-    ) {
-        ApexIcon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.primary,
-            size = 20.dp,
-        )
-    }
-}
-
-@Composable
-private fun SlotDetailsSheetContent(
-    slot: Slot,
-    availability: com.apexkarting.domain.policy.Availability,
-    onBook: () -> Unit,
-    onOpenMap: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(bottom = ApexTheme.tokens.spacing.xs),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
-    ) {
-        item {
-            Box(
-                modifier = Modifier
-                    .width(40.dp)
-                    .height(4.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f), RoundedCornerShape(ApexTheme.tokens.radius.lg)),
-            )
-        }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-                RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
-                RouteTag(
-                    text = slot.route.name,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
-            }
-        }
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
-                    )
-                    .padding(ApexTheme.tokens.spacing.md),
-                verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
-            ) {
-                Text(
-                    text = slot.startAt.toCardStartText(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = "Заезд на трассе «${slot.route.name}» займёт ${slot.route.durationMin} минут и подойдёт ${slot.route.type.toDetailsAudienceText()}.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = "Маршал: ${slot.instructor.name}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        item {
-            SlotDetailsMapCard(slot = slot, onOpenMap = onOpenMap)
-        }
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
-                    )
-                    .padding(ApexTheme.tokens.spacing.md),
-                verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
-            ) {
-                DetailsInfoRow("Свободно карт", "${slot.freeSeats} из ${slot.totalSeats}")
-                DetailsInfoRow(
-                    "Прокатная экипировка (доступно ${availability.freeRentalGear} шт.)",
-                    "${slot.rentalPrice.value} ₽",
-                    boldValue = true
-                )
-                DetailsInfoRow("Цена", "${slot.price.value} ₽", boldValue = true)
-            }
-        }
-        item {
-            Text(
-                text = "Оплата на месте: наличные или перевод",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        item {
-            Button(
-                onClick = onBook,
-                enabled = availability.canBook,
-                modifier = Modifier
-                    .width(ApexTheme.tokens.sizing.contentWidth)
-                    .height(ApexTheme.tokens.sizing.buttonHeight),
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            ) {
-                Text(if (availability.canBook) "Записаться" else "Карт нет", fontWeight = FontWeight.Bold)
-            }
-        }
-        item {
-            Box(
-                modifier = Modifier
-                    .width(138.dp)
-                    .height(4.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(ApexTheme.tokens.radius.pill)),
-            )
-        }
     }
 }
 
@@ -347,28 +260,28 @@ private fun SlotDetailsMapPreview() {
         modifier = Modifier
             .fillMaxWidth()
             .height(156.dp)
-            .background(Color.White, RoundedCornerShape(ApexTheme.tokens.radius.sm)),
+            .background(Color(ApexPalette.MapSurface), RoundedCornerShape(ApexTheme.tokens.radius.sm)),
     ) {
         val corner = 12.dp.toPx()
         drawRoundRect(
-            color = Color(0xFF8AD0F0),
+            color = Color(ApexPalette.MapWater),
             cornerRadius = CornerRadius(corner, corner),
         )
         drawRoundRect(
-            color = Color(0xFFDDF3CC),
+            color = Color(ApexPalette.MapPark),
             topLeft = Offset(size.width * 0.02f, 0f),
             size = androidx.compose.ui.geometry.Size(size.width * 0.22f, size.height),
             cornerRadius = CornerRadius(corner, corner),
         )
         drawRoundRect(
-            color = Color(0xFFDDF3CC),
+            color = Color(ApexPalette.MapPark),
             topLeft = Offset(size.width * 0.84f, 0f),
             size = androidx.compose.ui.geometry.Size(size.width * 0.16f, size.height),
             cornerRadius = CornerRadius(corner, corner),
         )
         listOf(0.22f, 0.50f, 0.78f).forEach { y ->
             drawLine(
-                color = Color(0xFFF9F6F0),
+                color = Color(ApexPalette.MapStreet),
                 start = Offset(0f, size.height * y),
                 end = Offset(size.width, size.height * (y - 0.12f)),
                 strokeWidth = 6.dp.toPx(),
@@ -382,15 +295,15 @@ private fun SlotDetailsMapPreview() {
         )
         routePoints.zipWithNext().forEach { (start, end) ->
             drawLine(
-                color = Color(0xFF00A59D),
+                color = Color(ApexPalette.MapRoute),
                 start = start,
                 end = end,
                 strokeWidth = 4.dp.toPx(),
                 cap = StrokeCap.Round,
             )
         }
-        drawCircle(Color(0xFFFF6B4A), radius = 6.dp.toPx(), center = routePoints.first())
-        drawCircle(Color.White, radius = 2.5.dp.toPx(), center = routePoints.first())
+        drawCircle(Color(ApexPalette.MapPin), radius = 6.dp.toPx(), center = routePoints.first())
+        drawCircle(Color(ApexPalette.TextPrimary), radius = 2.5.dp.toPx(), center = routePoints.first())
     }
 }
 

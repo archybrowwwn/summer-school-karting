@@ -7,16 +7,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.core.ui.DetailScreenLayout
 import com.apexkarting.core.ui.NeutralTag
-import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.TagFlowRow
+import com.apexkarting.core.ui.contentWidthModifier
+import com.apexkarting.core.ui.detailScreenContentPadding
+import com.apexkarting.core.ui.RouteNameTag
 import com.apexkarting.core.ui.RouteTypeTag
 import com.apexkarting.core.ui.toCardStartText
 import com.apexkarting.core.ui.toTagText
@@ -25,7 +25,6 @@ import com.apexkarting.domain.model.Slot
 import com.apexkarting.domain.policy.BookingPriceCalculator
 import com.apexkarting.uikit.ApexShapes
 import com.apexkarting.uikit.apexClickable
-import com.apexkarting.uikit.icons.Back
 import com.apexkarting.uikit.icons.Icons
 import com.apexkarting.uikit.icons.Info
 import com.apexkarting.uikit.icons.ApexIcon
@@ -42,35 +41,20 @@ fun BookingFormScreen(
     LaunchedEffect(slot.id) {
         onIntent(BookingFormIntent.Open(slot))
     }
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = ApexTheme.tokens.spacing.md, vertical = 18.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
-        ) {
-            CircleActionButton(icon = Icons.Back, contentDescription = "Назад", onClick = onBack)
-            Text(
-                text = "Оформление записи",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        DetailScreenLayout(title = "Оформление записи", onBack = onBack) {
             BookingFormContent(
                 state = state,
                 onIntent = onIntent,
             )
-            state.createdBooking?.let { booking ->
-                BookingSuccessSheet(
-                    booking = booking,
-                    fallbackPrice = state.totalPrice?.value ?: 0,
-                    onDone = onDone,
-                    onOpenBookings = onOpenBookings,
-                )
-            }
+        }
+        state.createdBooking?.let { booking ->
+            BookingSuccessSheet(
+                booking = booking,
+                fallbackPrice = state.totalPrice?.value ?: 0,
+                onDone = onDone,
+                onOpenBookings = onOpenBookings,
+            )
         }
     }
 }
@@ -88,10 +72,10 @@ private fun BookingFormContent(
     val rentalTotal = rentalPrice * state.rentalCount
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .contentWidthModifier()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = ApexTheme.tokens.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.lg),
+            .padding(detailScreenContentPadding()),
+        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
     ) {
         slot?.let {
             BookingSlotSummaryCard(it)
@@ -137,14 +121,6 @@ private fun BookingFormContent(
         ) {
             Text(if (state.isSubmitting) "Записываем..." else "Записаться", fontWeight = FontWeight.Bold)
         }
-        Box(
-            modifier = Modifier
-                .width(138.dp)
-                .height(4.dp)
-                .align(androidx.compose.ui.Alignment.CenterHorizontally)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(ApexTheme.tokens.radius.pill)),
-        )
-        Spacer(Modifier.height(ApexTheme.tokens.spacing.xs))
     }
 }
 
@@ -166,16 +142,10 @@ private fun BookingSlotSummaryCard(slot: Slot) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
+        TagFlowRow {
             RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
-            RouteTag(
-                text = slot.route.name,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            NeutralTag(
-                text = "Маршал: ${slot.instructor.name}",
-                modifier = Modifier.weight(1f, fill = false),
-            )
+            RouteNameTag(name = slot.route.name, routeType = slot.route.type)
+            NeutralTag(text = "Маршал: ${slot.instructor.name}")
         }
     }
 }
@@ -369,13 +339,33 @@ private fun BookingPriceDetails(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(width = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(0.dp))
-            .padding(top = ApexTheme.tokens.spacing.sm),
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
+            )
+            .padding(ApexTheme.tokens.spacing.md),
         verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
     ) {
         BookingPriceRow("Карты: $seatPrice ₽ × $seatsCount", "$seatsTotal ₽")
         BookingPriceRow("Прокат: $rentalPrice ₽ × $rentalCount", "$rentalTotal ₽")
         BookingPriceRow("Итого", "$total ₽", bold = true)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        ) {
+            ApexIcon(
+                imageVector = Icons.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 16.dp,
+            )
+            Text(
+                text = "Оплата на месте: наличные или перевод",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -413,55 +403,44 @@ private fun BookingSuccessSheet(
     onOpenBookings: () -> Unit,
 ) {
     // CMP-15 / BS-002: successful createBooking summary; no network requests on open.
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = ApexTheme.tokens.spacing.md),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+            .background(MaterialTheme.colorScheme.background),
     ) {
-        Text(
-            text = "Вы записаны",
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(y = ApexTheme.tokens.sizing.topTitleY),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        BookingSuccessSummaryCard(
-            booking = booking,
-            fallbackPrice = fallbackPrice,
-            modifier = Modifier.offset(y = 142.dp),
-        )
-        Spacer(Modifier.weight(1f))
-        Button(
-            onClick = onOpenBookings,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(ApexTheme.tokens.sizing.buttonHeight),
-            shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-        ) {
-            Text("Мои бронирования", fontWeight = FontWeight.Bold)
+        DetailScreenLayout(title = "Вы записаны", onBack = onDone) {
+            Column(
+                modifier = Modifier
+                    .contentWidthModifier()
+                    .verticalScroll(rememberScrollState())
+                    .padding(detailScreenContentPadding()),
+                verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
+            ) {
+                BookingSuccessSummaryCard(
+                    booking = booking,
+                    fallbackPrice = fallbackPrice,
+                )
+                Button(
+                    onClick = onOpenBookings,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ApexTheme.tokens.sizing.buttonHeight),
+                    shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                ) {
+                    Text("Мои бронирования", fontWeight = FontWeight.Bold)
+                }
+                OutlinedButton(
+                    onClick = onDone,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ApexTheme.tokens.sizing.buttonHeight),
+                    shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
+                ) {
+                    Text("Готово", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                }
+            }
         }
-        OutlinedButton(
-            onClick = onDone,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(ApexTheme.tokens.sizing.buttonHeight),
-            shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
-        ) {
-            Text("Готово", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-        }
-        Box(
-            modifier = Modifier
-                .padding(top = ApexTheme.tokens.spacing.lg, bottom = ApexTheme.tokens.spacing.xs)
-                .width(138.dp)
-                .height(4.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(ApexTheme.tokens.radius.pill)),
-        )
     }
 }
 
@@ -469,13 +448,12 @@ private fun BookingSuccessSheet(
 private fun BookingSuccessSummaryCard(
     booking: Booking,
     fallbackPrice: Int,
-    modifier: Modifier = Modifier,
 ) {
     val slot = booking.slot
     val total = BookingPriceCalculator.calculate(booking)?.value ?: fallbackPrice
     Column(
-        modifier = modifier
-            .width(ApexTheme.tokens.sizing.contentWidth)
+        modifier = Modifier
+            .fillMaxWidth()
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
@@ -491,16 +469,10 @@ private fun BookingSuccessSummaryCard(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             slot?.let {
-                Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
+                TagFlowRow {
                     RouteTypeTag(type = it.route.type, text = it.route.type.toTagText())
-                    RouteTag(
-                        text = it.route.name,
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
-                    NeutralTag(
-                        text = "Маршал: ${it.instructor.name}",
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
+                    RouteNameTag(name = it.route.name, routeType = it.route.type)
+                    NeutralTag(text = "Маршал: ${it.instructor.name}")
                 }
             }
             Column(
@@ -537,89 +509,6 @@ private fun BookingSuccessSummaryCard(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun CounterRow(
-    title: String,
-    value: Int,
-    onMinus: () -> Unit,
-    onPlus: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(ApexTheme.tokens.sizing.buttonHeight)
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
-            )
-            .padding(horizontal = ApexTheme.tokens.spacing.md),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            title,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-        ) {
-            val counterShape = ApexShapes.control()
-            Text(
-                text = "−",
-                modifier = Modifier
-                    .size(ApexTheme.tokens.spacing.xl)
-                    .apexClickable(counterShape, onClick = onMinus),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                value.toString(),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = "+",
-                modifier = Modifier
-                    .size(ApexTheme.tokens.spacing.xl)
-                    .apexClickable(counterShape, onClick = onPlus),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
-}
-
-
-
-@Composable
-private fun CircleActionButton(
-    icon: ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit,
-) {
-    val circleShape = ApexShapes.circle
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .shadow(4.dp, circleShape)
-            .apexClickable(circleShape, onClick = onClick)
-            .background(MaterialTheme.colorScheme.surface, circleShape),
-        contentAlignment = androidx.compose.ui.Alignment.Center,
-    ) {
-        ApexIcon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.primary,
-            size = 20.dp,
-        )
     }
 }
 

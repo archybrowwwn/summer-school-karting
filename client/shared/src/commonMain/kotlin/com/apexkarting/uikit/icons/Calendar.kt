@@ -18,7 +18,7 @@ val Icons.Calendar: ImageVector
             viewportWidth = 32f,
             viewportHeight = 32f
         ).apply {
-            path(fill = SolidColor(Color(0xFF797979))) {
+            path(fill = SolidColor(Color(0xFFAAAAAA))) {
                 moveTo(22.667f, 6.667f)
                 verticalLineTo(5.333f)
                 curveTo(22.667f, 4.533f, 22.133f, 4f, 21.333f, 4f)
@@ -52,7 +52,7 @@ val Icons.Calendar: ImageVector
                 horizontalLineTo(6.667f)
                 close()
             }
-            path(fill = SolidColor(Color(0xFF797979))) {
+            path(fill = SolidColor(Color(0xFFAAAAAA))) {
                 moveTo(22.667f, 24f)
                 curveTo(23.403f, 24f, 24f, 23.403f, 24f, 22.667f)
                 curveTo(24f, 21.93f, 23.403f, 21.333f, 22.667f, 21.333f)
@@ -60,7 +60,7 @@ val Icons.Calendar: ImageVector
                 curveTo(21.333f, 23.403f, 21.93f, 24f, 22.667f, 24f)
                 close()
             }
-            path(fill = SolidColor(Color(0xFF797979))) {
+            path(fill = SolidColor(Color(0xFFAAAAAA))) {
                 moveTo(18.667f, 24f)
                 curveTo(19.403f, 24f, 20f, 23.403f, 20f, 22.667f)
                 curveTo(20f, 21.93f, 19.403f, 21.333f, 18.667f, 21.333f)

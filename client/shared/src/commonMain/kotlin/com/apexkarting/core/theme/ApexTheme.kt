@@ -34,13 +34,14 @@ data class ApexRadius(
 @Immutable
 data class ApexSizing(
     val screenMaxWidth: Dp = 393.dp,
-    val contentWidth: Dp = 360.dp,
+    val contentWidth: Dp = 376.dp,
     val topTitleY: Dp = 80.dp,
     val authLogoY: Dp = 89.dp,
     val authTitleY: Dp = 190.dp,
     val authInputY: Dp = 315.dp,
     val authTermsY: Dp = 403.dp,
     val authButtonY: Dp = 464.dp,
+    val tabHeaderHeight: Dp = 56.dp,
     val listCardTopY: Dp = 136.dp,
     val listCardSecondY: Dp = 448.dp,
     val listCardHeight: Dp = 300.dp,
@@ -72,7 +73,7 @@ val LocalApexTokens = staticCompositionLocalOf {
 }
 
 /**
- * Корневая тема приложения. Всегда тёмная (Grok-style), независимо от системной темы.
+ * Корневая тема приложения. Всегда тёмная (Nothing-style), независимо от системной темы.
  */
 @Composable
 fun ApexTheme(

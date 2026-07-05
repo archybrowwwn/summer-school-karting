@@ -25,6 +25,11 @@ import com.apexkarting.uikit.ApexShapes
 import com.apexkarting.uikit.apexClickable
 import com.apexkarting.core.ui.ActionStatus
 import com.apexkarting.core.ui.Loadable
+import com.apexkarting.core.ui.ApexBottomSheet
+import com.apexkarting.core.ui.ApexSheetContent
+import com.apexkarting.core.ui.TabScreenLayout
+import com.apexkarting.core.ui.contentWidthModifier
+import com.apexkarting.core.ui.tabScreenContentPadding
 import com.apexkarting.core.ui.PhoneNumberVisualTransformation
 import com.apexkarting.uikit.icons.ArrowRight
 import com.apexkarting.uikit.icons.Edit
@@ -57,26 +62,12 @@ fun ProfileScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        Text(
-            text = "Профиль",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(26.dp),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .widthIn(max = ApexTheme.tokens.sizing.screenMaxWidth),
-        ) {
+        TabScreenLayout(title = "Профиль") {
             when (val profile = state.profile) {
                 Loadable.Initial,
                 Loadable.Loading -> CircularProgressIndicator(
@@ -93,18 +84,18 @@ fun ProfileScreen(
                 is Loadable.Error -> ProfileError(onRetry = { onIntent(ProfileIntent.Load) })
                 is Loadable.Empty -> ProfileError(onRetry = { onIntent(ProfileIntent.Load) })
             }
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(ApexTheme.tokens.spacing.md),
-            ) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                )
-            }
+        }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(ApexTheme.tokens.spacing.md),
+        ) { data ->
+            Snackbar(
+                snackbarData = data,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 
@@ -133,9 +124,9 @@ private fun ProfileContent(
 ) {
     Column(
         modifier = Modifier
-            .width(ApexTheme.tokens.sizing.contentWidth)
+            .contentWidthModifier()
             .verticalScroll(rememberScrollState())
-            .padding(start = ApexTheme.tokens.spacing.md),
+            .padding(tabScreenContentPadding()),
         verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
     ) {
         when (state.mode) {
@@ -483,8 +474,8 @@ private fun ProfileError(
 ) {
     Column(
         modifier = Modifier
-            .width(ApexTheme.tokens.sizing.contentWidth)
-            .padding(start = ApexTheme.tokens.spacing.md),
+            .contentWidthModifier()
+            .padding(top = ApexTheme.tokens.spacing.xl),
         verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -510,20 +501,13 @@ private fun LogoutConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Выйти из аккаунта?") },
-        text = { Text("После выхода для записи на заезд нужно будет снова ввести телефон и код.") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Выйти")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Не выходить")
-            }
-        },
+    ProfileConfirmSheet(
+        title = "Выйти из аккаунта?",
+        message = "После выхода для записи на заезд нужно будет снова ввести телефон и код.",
+        confirmText = "Выйти",
+        dismissText = "Не выходить",
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
     )
 }
 
@@ -532,19 +516,78 @@ private fun DeleteAccountConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Удалить аккаунт?") },
-        text = { Text("Профиль будет удалён. Для новых записей потребуется зарегистрироваться снова.") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Удалить", color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Отменить")
-            }
-        },
+    ProfileConfirmSheet(
+        title = "Удалить аккаунт?",
+        message = "Профиль будет удалён. Для новых записей потребуется зарегистрироваться снова.",
+        confirmText = "Удалить",
+        dismissText = "Отменить",
+        confirmError = true,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProfileConfirmSheet(
+    title: String,
+    message: String,
+    confirmText: String,
+    dismissText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    confirmError: Boolean = false,
+) {
+    ApexBottomSheet(onDismissRequest = onDismiss) {
+        ApexSheetContent {
+            Text(
+                text = title,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = message,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ApexTheme.tokens.sizing.buttonHeight),
+                shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
+                colors = if (confirmError) {
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError,
+                    )
+                } else {
+                    ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    )
+                },
+                border = if (confirmError) null else BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+            ) {
+                Text(confirmText, fontWeight = FontWeight.Bold)
+            }
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ApexTheme.tokens.sizing.buttonHeight),
+                shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+            ) {
+                Text(dismissText, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
 }

@@ -14,16 +14,23 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
 import com.apexkarting.core.time.AppClock
-import com.apexkarting.core.ui.ApexBackButton
-import com.apexkarting.core.ui.BackButtonStyle
-import com.apexkarting.core.ui.ListSkeletonCard
+import com.apexkarting.core.ui.ApexBottomSheet
+import com.apexkarting.core.ui.ApexFormSection
+import com.apexkarting.core.ui.ApexSheetContent
+import com.apexkarting.core.ui.DetailScreenLayout
 import com.apexkarting.core.ui.ListStateMessage
+import com.apexkarting.core.ui.ListStatePlacement
 import com.apexkarting.core.ui.Loadable
-import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.BookingStatusTag
+import com.apexkarting.core.ui.RouteNameTag
 import com.apexkarting.core.ui.RouteTypeTag
-import com.apexkarting.core.ui.ScreenHeaderTitle
+import com.apexkarting.core.ui.TabLoadingSkeletons
+import com.apexkarting.core.ui.TagFlowRow
+import com.apexkarting.core.ui.contentWidthModifier
+import com.apexkarting.core.ui.detailScreenContentPadding
 import com.apexkarting.core.ui.toCardStartText
 import com.apexkarting.core.ui.toTagText
 import com.apexkarting.core.ui.toUiText
@@ -48,22 +55,11 @@ fun BookingDetailsScreen(
     LaunchedEffect(bookingId) {
         onIntent(BookingDetailsIntent.Load(bookingId))
     }
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = ApexTheme.tokens.spacing.md, vertical = 18.dp),
-        ) {
-            ApexBackButton(onClick = onBack, style = BackButtonStyle.Floating)
-            ScreenHeaderTitle("Детали записи")
-        }
-        Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        DetailScreenLayout(title = "Детали записи", onBack = onBack) {
             when (val booking = state.booking) {
                 Loadable.Initial,
-                Loadable.Loading -> {
-                    ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
-                    ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
-                }
+                Loadable.Loading -> TabLoadingSkeletons()
 
                 is Loadable.Content -> BookingDetailsContent(
                     booking = booking.value,
@@ -78,6 +74,7 @@ fun BookingDetailsScreen(
                     buttonText = "Назад",
                     onClick = onBack,
                     artwork = null,
+                    placement = ListStatePlacement.TabContent,
                 )
 
                 is Loadable.Error -> ListStateMessage(
@@ -86,23 +83,24 @@ fun BookingDetailsScreen(
                     buttonText = "Обновить",
                     onClick = { onIntent(BookingDetailsIntent.Retry) },
                     artwork = null,
+                    placement = ListStatePlacement.TabContent,
                 )
             }
-            if (state.showCancelConfirm) {
-                CancelConfirmSheet(
-                    state = state,
-                    clock = clock,
-                    onIntent = onIntent,
+        }
+        if (state.showCancelConfirm) {
+            CancelConfirmSheet(
+                state = state,
+                clock = clock,
+                onIntent = onIntent,
+            )
+        }
+        if (state.showRouteMap) {
+            state.currentBooking?.slot?.let { slot ->
+                RouteMapSheet(
+                    route = slot.route,
+                    meetingPoint = slot.meetingPoint,
+                    onDismiss = { onIntent(BookingDetailsIntent.DismissRouteMap) },
                 )
-            }
-            if (state.showRouteMap) {
-                state.currentBooking?.slot?.let { slot ->
-                    RouteMapSheet(
-                        route = slot.route,
-                        meetingPoint = slot.meetingPoint,
-                        onDismiss = { onIntent(BookingDetailsIntent.DismissRouteMap) },
-                    )
-                }
             }
         }
     }
@@ -119,10 +117,10 @@ private fun BookingDetailsContent(
     val canCancel = state.canCancel(clock)
     Column(
         modifier = Modifier
-            .width(ApexTheme.tokens.sizing.contentWidth)
-            .padding(start = ApexTheme.tokens.spacing.md)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
+            .contentWidthModifier()
+            .verticalScroll(rememberScrollState())
+            .padding(detailScreenContentPadding()),
+        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
     ) {
         BookingDetailsEventCard(
             booking = booking,
@@ -160,14 +158,6 @@ private fun BookingDetailsContent(
         ) {
             Text(if (canCancel) "Отменить" else "Отмена недоступна")
         }
-        Box(
-            modifier = Modifier
-                .width(138.dp)
-                .height(4.dp)
-                .align(androidx.compose.ui.Alignment.CenterHorizontally)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(ApexTheme.tokens.radius.pill)),
-        )
-        Spacer(Modifier.height(ApexTheme.tokens.spacing.xs))
     }
 }
 
@@ -189,19 +179,21 @@ private fun BookingDetailsEventCard(
     ) {
         Box {
             BookingPreviewPhoto()
-            BookingStatusPill(
+            BookingStatusTag(
                 status = status,
                 modifier = Modifier
-                    .offset(x = ApexTheme.tokens.spacing.xs, y = ApexTheme.tokens.spacing.xs),
+                    .offset(x = ApexTheme.tokens.spacing.xs, y = ApexTheme.tokens.spacing.xs)
+                    .width(100.dp)
+                    .height(36.dp)
+                    .padding(top = 9.dp),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                shape = RoundedCornerShape(10.dp),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-            slot?.let {
+        slot?.let {
+            TagFlowRow {
                 RouteTypeTag(type = it.route.type, text = it.route.type.toTagText())
-                RouteTag(
-                    text = it.route.name,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
+                RouteNameTag(name = it.route.name, routeType = it.route.type)
             }
         }
         Text(
@@ -216,29 +208,6 @@ private fun BookingDetailsEventCard(
             color = MaterialTheme.colorScheme.onSurface,
         )
     }
-}
-
-@Composable
-private fun BookingStatusPill(
-    status: String,
-    modifier: Modifier = Modifier,
-) {
-    val active = status == "Активна"
-    val colors = ApexTheme.colors
-    Text(
-        text = status,
-        modifier = modifier
-            .width(100.dp)
-            .height(36.dp)
-            .background(
-                color = if (active) colors.statusActiveBackground else MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(10.dp),
-            )
-            .padding(top = 9.dp),
-        textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.bodyMedium,
-        color = if (active) colors.statusActiveText else MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 }
 
 @Composable
@@ -279,25 +248,25 @@ private fun BookingDetailsMapPreview() {
         modifier = Modifier
             .fillMaxWidth()
             .height(156.dp)
-            .background(Color.White, RoundedCornerShape(ApexTheme.tokens.radius.sm)),
+            .background(Color(ApexPalette.MapSurface), RoundedCornerShape(ApexTheme.tokens.radius.sm)),
     ) {
         val corner = 12.dp.toPx()
-        drawRoundRect(Color(0xFF8AD0F0), cornerRadius = CornerRadius(corner, corner))
+        drawRoundRect(Color(ApexPalette.MapWater), cornerRadius = CornerRadius(corner, corner))
         drawRoundRect(
-            color = Color(0xFFDDF3CC),
+            color = Color(ApexPalette.MapPark),
             topLeft = Offset(size.width * 0.02f, 0f),
             size = androidx.compose.ui.geometry.Size(size.width * 0.22f, size.height),
             cornerRadius = CornerRadius(corner, corner),
         )
         drawRoundRect(
-            color = Color(0xFFDDF3CC),
+            color = Color(ApexPalette.MapPark),
             topLeft = Offset(size.width * 0.84f, 0f),
             size = androidx.compose.ui.geometry.Size(size.width * 0.16f, size.height),
             cornerRadius = CornerRadius(corner, corner),
         )
         listOf(0.22f, 0.50f, 0.78f).forEach { y ->
             drawLine(
-                color = Color(0xFFF9F6F0),
+                color = Color(ApexPalette.MapStreet),
                 start = Offset(0f, size.height * y),
                 end = Offset(size.width, size.height * (y - 0.12f)),
                 strokeWidth = 6.dp.toPx(),
@@ -310,10 +279,10 @@ private fun BookingDetailsMapPreview() {
             Offset(size.width * 0.62f, size.height * 0.36f),
         )
         routePoints.zipWithNext().forEach { (start, end) ->
-            drawLine(Color(0xFF00A59D), start, end, strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round)
+            drawLine(Color(ApexPalette.MapRoute), start, end, strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round)
         }
-        drawCircle(Color(0xFFFF6B4A), radius = 6.dp.toPx(), center = routePoints.first())
-        drawCircle(Color.White, radius = 2.5.dp.toPx(), center = routePoints.first())
+        drawCircle(Color(ApexPalette.MapPin), radius = 6.dp.toPx(), center = routePoints.first())
+        drawCircle(Color(ApexPalette.TextPrimary), radius = 2.5.dp.toPx(), center = routePoints.first())
     }
 }
 
@@ -322,9 +291,12 @@ private fun BookingDetailsPriceBlock(booking: Booking) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(width = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(0.dp))
-            .padding(top = ApexTheme.tokens.spacing.sm),
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
+            )
+            .padding(ApexTheme.tokens.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -333,7 +305,9 @@ private fun BookingDetailsPriceBlock(booking: Booking) {
         ) {
             Text(
                 text = "${booking.seatsCount} ${booking.seatsCount.pluralPlaces()} · ${booking.rentalCount} ${booking.rentalCount.pluralRentalGear()}",
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -362,21 +336,6 @@ private fun BookingDetailsPriceBlock(booking: Booking) {
             )
         }
     }
-}
-
-@Composable
-private fun BookingInfoBlock(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
-            )
-            .padding(ApexTheme.tokens.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
-        content = content,
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -410,47 +369,20 @@ private fun CancelConfirmSheet(
         confirmValueChange = { !state.isCancelling },
     )
 
-    ModalBottomSheet(
+    ApexBottomSheet(
         onDismissRequest = {
             if (!state.isCancelling) {
                 onIntent(BookingDetailsIntent.DismissCancel)
             }
         },
         sheetState = sheetState,
-        shape = RoundedCornerShape(
-            topStart = ApexTheme.tokens.radius.lg,
-            topEnd = ApexTheme.tokens.radius.lg,
-        ),
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(top = ApexTheme.tokens.spacing.xs)
-                    .size(width = 40.dp, height = 4.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
-                    ),
-            )
-        },
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    start = ApexTheme.tokens.spacing.md,
-                    end = ApexTheme.tokens.spacing.md,
-                    bottom = ApexTheme.tokens.spacing.md,
-                ),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.md),
-        ) {
+        ApexSheetContent {
             Text(
                 text = "Отменить запись?",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -460,27 +392,7 @@ private fun CancelConfirmSheet(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
-                    )
-                    .padding(ApexTheme.tokens.spacing.sm),
-                verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
-            ) {
-                Text(
-                    text = cancellationLabel,
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(ApexTheme.tokens.radius.md),
-                        )
-                        .padding(horizontal = ApexTheme.tokens.spacing.sm, vertical = ApexTheme.tokens.spacing.xxs),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+            ApexFormSection(title = cancellationLabel) {
                 Text(
                     text = cancellationHint,
                     style = MaterialTheme.typography.bodyMedium,
@@ -499,7 +411,7 @@ private fun CancelConfirmSheet(
                 enabled = !state.isCancelling && kind != CancellationKind.UnavailableAfterStart,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(ApexTheme.tokens.sizing.buttonHeight),
                 shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.primary,
@@ -516,7 +428,7 @@ private fun CancelConfirmSheet(
                 enabled = !state.isCancelling,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(ApexTheme.tokens.sizing.buttonHeight),
                 shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -525,7 +437,6 @@ private fun CancelConfirmSheet(
             ) {
                 Text("Не отменять")
             }
-            Spacer(Modifier.height(ApexTheme.tokens.spacing.md))
         }
     }
 }

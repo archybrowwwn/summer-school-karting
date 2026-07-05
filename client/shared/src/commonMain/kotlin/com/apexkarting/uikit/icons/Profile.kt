@@ -18,7 +18,7 @@ val Icons.Profile: ImageVector
             viewportWidth = 32f,
             viewportHeight = 32f
         ).apply {
-            path(fill = SolidColor(Color(0xFF797979))) {
+            path(fill = SolidColor(Color(0xFFAAAAAA))) {
                 moveTo(4f, 25f)
                 horizontalLineTo(2.5f)
                 horizontalLineTo(4f)

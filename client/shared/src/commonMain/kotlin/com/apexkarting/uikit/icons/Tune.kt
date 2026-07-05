@@ -20,7 +20,7 @@ val Icons.Tune: ImageVector
             viewportHeight = 32f
         ).apply {
             path(
-                fill = SolidColor(Color(0xFF797979)),
+                fill = SolidColor(Color(0xFFAAAAAA)),
                 pathFillType = PathFillType.EvenOdd
             ) {
                 moveTo(4f, 21.333f)
@@ -33,7 +33,7 @@ val Icons.Tune: ImageVector
                 close()
             }
             path(
-                fill = SolidColor(Color(0xFF797979)),
+                fill = SolidColor(Color(0xFFAAAAAA)),
                 pathFillType = PathFillType.EvenOdd
             ) {
                 moveTo(4f, 10.667f)
@@ -46,7 +46,7 @@ val Icons.Tune: ImageVector
                 close()
             }
             path(
-                fill = SolidColor(Color(0xFF797979)),
+                fill = SolidColor(Color(0xFFAAAAAA)),
                 pathFillType = PathFillType.EvenOdd
             ) {
                 moveTo(20f, 12f)
@@ -63,7 +63,7 @@ val Icons.Tune: ImageVector
                 close()
             }
             path(
-                fill = SolidColor(Color(0xFF797979)),
+                fill = SolidColor(Color(0xFFAAAAAA)),
                 pathFillType = PathFillType.EvenOdd
             ) {
                 moveTo(12f, 22.667f)

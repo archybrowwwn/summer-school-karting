@@ -18,7 +18,7 @@ val Icons.Options: ImageVector
             viewportWidth = 32f,
             viewportHeight = 32f
         ).apply {
-            path(fill = SolidColor(Color(0xFF797979))) {
+            path(fill = SolidColor(Color(0xFFAAAAAA))) {
                 moveTo(13.333f, 26.667f)
                 curveTo(12.956f, 26.667f, 12.639f, 26.539f, 12.384f, 26.283f)
                 curveTo(12.129f, 26.027f, 12.001f, 25.71f, 12f, 25.333f)

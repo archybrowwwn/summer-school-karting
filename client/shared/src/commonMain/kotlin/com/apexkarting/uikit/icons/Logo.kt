@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexPalette
 
 /**
- * Марка «Апекс»: клетчатый флаг + буква A (акцент Grok-orange).
+ * Марка «Апекс»: клетчатый флаг + буква A (акцент Nothing Red).
  * Многоцветная — tint = [androidx.compose.ui.graphics.Color.Unspecified].
  */
 val Icons.Logo: ImageVector
@@ -52,7 +52,7 @@ val Icons.Logo: ImageVector
                 lineTo(34f, 52f)
                 close()
             }
-            path(fill = SolidColor(Color(ApexPalette.OnAccent))) {
+            path(fill = SolidColor(Color(ApexPalette.Background))) {
                 moveTo(35.8f, 40f)
                 lineTo(40.2f, 40f)
                 lineTo(38.5f, 32f)
