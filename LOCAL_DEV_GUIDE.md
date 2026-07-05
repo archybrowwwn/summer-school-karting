@@ -36,7 +36,7 @@ make migrate
 > Если volume PostgreSQL создан со старой схемой, пересоздайте его: `docker compose --profile db down -v`,
 > затем снова `docker compose --profile db up -d db` и `make migrate`.
 
-4. Если нужны готовые состояния для проверки клиентских экранов (расписание на следующую неделю, брони, маршалы), примените demo-seed:
+4. **Для демо и проверки ДЗ** примените demo-seed (обязательно — иначе в UI мало слотов и броней):
 
 ```bash
 docker compose -f compose.yaml cp seed/demonstration_base.sql db:/tmp/demonstration_base.sql
@@ -129,6 +129,8 @@ cd client
 cd backend
 docker compose --profile db up -d db
 make migrate
+docker compose -f compose.yaml cp seed/demonstration_base.sql db:/tmp/demonstration_base.sql
+docker compose -f compose.yaml exec -T db psql -U apex -d apex -f /tmp/demonstration_base.sql
 make run
 ```
 
@@ -139,4 +141,8 @@ cd client
 ./gradlew :webApp:wasmJsBrowserDevelopmentRun
 ```
 
-Для Android/iOS удобнее запускать host-приложения из IDE после поднятия DB и BE.
+Откройте **`http://localhost:8081`**. Первая сборка Wasm — 5–15 мин.
+
+На **Windows**: `gradlew.bat` вместо `./gradlew`; `make` — через Git Bash или WSL. Краткий сценарий для проверяющего — [03-homework/README.md](03-homework/README.md#проверка-за-10-минут-для-преподавателя).
+
+Для Android/iOS удобнее запускать host-приложения из IDE после поднятия DB и BE. На пути с кириллицей Android-сборка может не пройти — для проверки используйте Web.

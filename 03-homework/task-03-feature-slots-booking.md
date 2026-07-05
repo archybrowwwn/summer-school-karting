@@ -37,7 +37,7 @@
 
 ### Backend
 
-- `handlers/catalog.go` — listSlots, getSlot, listInstructors с фильтрами.
+- `handlers/slots.go` — listSlots, getSlot, listInstructors с фильтрами.
 - `handlers/bookings.go` + `service/booking/service.go` — атомарное createBooking.
 - `storage/postgres/bookings.go` — транзакция, row lock, idempotency.
 - Seed-слот `55555555-…` в `migrations/00002_seed_dev.sql` (8 мест, price 2500, rental 300).

@@ -2,6 +2,78 @@
 
 Журнал выполнения задания по брифу картинг-центра. Каждый пункт содержит цель, ссылки на требования, промпты, ручную проверку и коммиты.
 
+## Проверка за 10 минут (для преподавателя)
+
+**Что нужно:** Docker, Go 1.23+, JDK 17+. Android/Xcode не обязательны — проверяйте через **Web**.
+
+### 1. Клонировать и поднять БД
+
+```bash
+git clone https://github.com/archybrowwwn/summer-school-karting.git
+cd summer-school-karting/backend
+docker compose --profile db up -d db
+make migrate
+```
+
+На **Windows** (PowerShell/cmd): `gradlew.bat` и `make` через **Git Bash** или WSL.
+
+### 2. Демо-данные (обязательно для UI)
+
+Без этого шага в клиенте будет мало слотов и броней. Seed пересчитывает даты относительно **сегодня**.
+
+```bash
+docker compose -f compose.yaml cp seed/demonstration_base.sql db:/tmp/demonstration_base.sql
+docker compose -f compose.yaml exec -T db psql -U apex -d apex -f /tmp/demonstration_base.sql
+```
+
+> Не загружайте SQL через PowerShell `Get-Content` без `-Encoding UTF8` — кириллица станет `??????`.
+
+### 3. Запустить API
+
+```bash
+make run
+```
+
+Проверка: `curl http://127.0.0.1:8080/healthz` → `ok`.
+
+### 4. Запустить Web-клиент
+
+В **втором** терминале:
+
+```bash
+cd ../client
+./gradlew :webApp:wasmJsBrowserDevelopmentRun
+```
+
+Windows: `gradlew.bat :webApp:wasmJsBrowserDevelopmentRun`
+
+Первая сборка Wasm может занять **5–15 минут** — это нормально.
+
+Откройте в браузере: **`http://localhost:8081`** (не `[::1]:8081`).
+
+### 5. Что проверить в UI (3 фичи п.3)
+
+| # | Фича | Шаги | Ожидание |
+|---|------|------|----------|
+| 1 | **OTP-вход** | Телефон `+79990000001` → «Получить код» → код на экране («Код для разработки») → подтвердить | Список заездов |
+| 2 | **Слоты + бронь** | Вкладка «Заезды» → фильтры (уровень/маршрут) → тап по слоту → «Записаться» → 1–2 места → подтвердить | Экран успеха, бронь в «Мои записи» |
+| 3 | **Отмена** | «Мои записи» → тап по брони → «Отменить» → подтвердить | Статус «Отменена» или «Поздняя отмена» |
+
+Подробные тест-кейсы и баг-репорты: [task-04-test-cases-bugs.md](task-04-test-cases-bugs.md).
+
+### 6. Автотесты (опционально)
+
+```bash
+cd backend && go test ./... -count=1
+cd client && ./gradlew :shared:wasmJsTest
+```
+
+Windows: `gradlew.bat :shared:wasmJsTest`
+
+Полный гайд: [LOCAL_DEV_GUIDE.md](../LOCAL_DEV_GUIDE.md).
+
+---
+
 ## Статус
 
 | Пункт ДЗ | Журнал | Статус |
@@ -27,7 +99,7 @@
 - Клиент: [`client/`](../client/)
 - Промпты (лекция): [`01-analysis/prompts/`](../01-analysis/prompts/)
 
-## Коммиты журнала
+## Коммиты журнала и реализации
 
 | Коммит | Содержание |
 |--------|------------|
@@ -35,3 +107,6 @@
 | `2ebf47c` | docs: homework p.2 architecture journal and status sync |
 | `aba49ae` | docs: homework p.3 three feature journals with manual verification |
 | `7818462` | docs: homework p.4 test cases and bug reports |
+| `873a8b6` | feat: demonstration database, CORS and web client cyrillic |
+| `8438d96` | feat(client-ui): slot filters, unified icons and layout polish |
+| `54fc6b0` | chore: cleanup dead code and align docs with Apex project |

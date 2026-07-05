@@ -2,6 +2,12 @@
 
 Учебный проект: клиентское мобильное приложение для записи на заезды в картинг-центре «Апекс».
 
+## Сдача ДЗ (для проверяющего)
+
+**Журнал выполнения задания летней школы (п.1–4):** [03-homework/README.md](03-homework/README.md)
+
+Там же — пошаговая **проверка за 10 минут** (запуск + что кликнуть в UI).
+
 ## Структура
 
 | Папка | Содержимое |
@@ -20,9 +26,11 @@
 # Backend
 cd backend && docker compose --profile db up -d db && make migrate && make run
 
-# Web-клиент
+# Web-клиент (рекомендуется для проверки ДЗ)
 cd client && ./gradlew :webApp:wasmJsBrowserDevelopmentRun
 ```
+
+На **Windows**: `gradlew.bat` вместо `./gradlew`; для `make` — Git Bash или WSL. Подробности — в [LOCAL_DEV_GUIDE.md](LOCAL_DEV_GUIDE.md) и [03-homework/README.md](03-homework/README.md).
 
 ## Репозиторий
 
