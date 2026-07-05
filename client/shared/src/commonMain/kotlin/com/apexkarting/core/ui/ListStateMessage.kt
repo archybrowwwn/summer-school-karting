@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,11 +25,17 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.apexkarting.core.theme.ApexPalette
 import com.apexkarting.core.theme.ApexTheme
 
 internal enum class StateArtwork {
     Empty,
     Error,
+}
+
+internal enum class ListStatePlacement {
+    Overlay,
+    TabContent,
 }
 
 @Composable
@@ -38,15 +45,22 @@ internal fun ListStateMessage(
     buttonText: String? = null,
     onClick: (() -> Unit)? = null,
     artwork: StateArtwork? = StateArtwork.Empty,
+    placement: ListStatePlacement = ListStatePlacement.Overlay,
 ) {
     val illustrated = artwork != null
-    Column(
-        modifier = Modifier
+    val columnModifier = when (placement) {
+        ListStatePlacement.Overlay -> Modifier
             .width(ApexTheme.tokens.sizing.contentWidth)
             .offset(
                 x = ApexTheme.tokens.spacing.md,
                 y = if (illustrated) 190.dp else ApexTheme.tokens.sizing.listStateMessageY,
-            ),
+            )
+        ListStatePlacement.TabContent -> Modifier
+            .contentWidthModifier()
+            .padding(top = ApexTheme.tokens.spacing.xl)
+    }
+    Column(
+        modifier = columnModifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
     ) {
@@ -104,7 +118,7 @@ private fun StateIllustration(artwork: StateArtwork) {
     Canvas(
         modifier = Modifier.size(width = 212.dp, height = 150.dp),
     ) {
-        val light = Color(0xFFE5FFFC)
+        val light = Color(ApexPalette.IllustrationMuted)
         val basePath = androidx.compose.ui.graphics.Path().apply {
             moveTo(size.width * 0.15f, size.height * 0.82f)
             cubicTo(size.width * 0.02f, size.height * 0.46f, size.width * 0.28f, size.height * 0.03f, size.width * 0.52f, size.height * 0.12f)

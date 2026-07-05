@@ -1,21 +1,13 @@
 package com.apexkarting.core.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
-import com.apexkarting.uikit.ApexShapes
-import com.apexkarting.uikit.apexClickable
 import com.apexkarting.uikit.icons.ApexIcon
 import com.apexkarting.uikit.icons.Back
 import com.apexkarting.uikit.icons.Icons
@@ -43,23 +35,12 @@ internal fun ApexBackButton(
             size = ApexTheme.tokens.spacing.xl,
         )
 
-        BackButtonStyle.Floating -> {
-            val circleShape = ApexShapes.circle
-            Box(
-            modifier = modifier
-                .size(40.dp)
-                .shadow(4.dp, circleShape)
-                .apexClickable(circleShape, onClick = onClick)
-                .background(MaterialTheme.colorScheme.surface, circleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            ApexIcon(
-                imageVector = Icons.Back,
-                contentDescription = "Назад",
-                tint = MaterialTheme.colorScheme.primary,
-                size = floatingIconSize,
-            )
-        }
-        }
+        BackButtonStyle.Floating -> FloatingCircleIconButton(
+            imageVector = Icons.Back,
+            contentDescription = "Назад",
+            onClick = onClick,
+            modifier = modifier,
+            iconSize = floatingIconSize,
+        )
     }
 }
