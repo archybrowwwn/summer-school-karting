@@ -366,7 +366,7 @@ private fun ProfileLinks(
                 .background(Color(0xFFF2F2F2)),
         )
         InfoLine(
-            label = "Правила клуба",
+            label = "Правила картодрома",
             value = if (appConfig.rulesUrl != null) null else "не настроено",
             onClick = appConfig.rulesUrl?.let { url -> { onOpenExternalUrl(url) } },
         )
@@ -464,7 +464,7 @@ private fun LogoutConfirmDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Выйти из аккаунта?") },
-        text = { Text("После выхода для записи на прогулку нужно будет снова ввести телефон и код.") },
+        text = { Text("После выхода для записи на заезд нужно будет снова ввести телефон и код.") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("Выйти")

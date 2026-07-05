@@ -9,8 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import com.volna.app.auth.SessionRepository
 import com.volna.app.auth.presentation.AuthEffect
 import com.volna.app.auth.presentation.AuthIntent
@@ -21,6 +21,7 @@ import com.volna.app.core.config.AppConfig
 import com.volna.app.core.navigation.BindBrowserNavigation
 import com.volna.app.core.navigation.BindSystemBack
 import com.volna.app.core.theme.VolnaTheme
+import com.volna.app.uikit.ApexBrandHeader
 import com.volna.app.core.time.AppClock
 import com.volna.app.profile.presentation.ProfileEffect
 import com.volna.app.profile.presentation.ProfileIntent
@@ -325,17 +326,11 @@ private fun SessionSplash() {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(VolnaTheme.tokens.spacing.md),
-            verticalArrangement = Arrangement.Center,
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = "Волна",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-            )
+            ApexBrandHeader()
         }
     }
 }

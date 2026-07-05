@@ -200,7 +200,7 @@ private fun BookingDetailsEventCard(
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = "Инструктор: ${slot?.instructor?.name ?: "уточняется"}",
+            text = "Маршал: ${slot?.instructor?.name ?: "уточняется"}",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -253,7 +253,7 @@ private fun BookingDetailsMapCard(
         )
         BookingDetailsMapPreview()
         Text(
-            text = "Открыть карту",
+            text = "Как добраться",
             modifier = Modifier.clickable { onOpenMap() },
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF0093CC),
@@ -376,10 +376,10 @@ private fun CancelConfirmSheet(
 ) {
     val kind = state.cancellationKind(clock)
     val messageText = when (kind) {
-        CancellationKind.Early -> "До старта больше 2 часов. Запись будет отменена, места и прокатные доски снова станут доступны."
-        CancellationKind.Late -> "До старта осталось менее 2 часов. Запись будет отменена. Штраф за позднюю отмену не взимается."
+        CancellationKind.Early -> "До старта больше 1 часа. Запись будет отменена, карты и прокатная экипировка снова станут доступны."
+        CancellationKind.Late -> "До старта осталось менее 1 часа. Запись будет отменена. Штраф за позднюю отмену не взимается."
         CancellationKind.UnavailableAfterStart,
-        null -> "Прогулка уже началась. Отмена записи недоступна."
+        null -> "Заезд уже начался. Отмена записи недоступна."
     }
     val cancellationLabel = when (kind) {
         CancellationKind.Early -> "Ранняя отмена"
@@ -388,7 +388,7 @@ private fun CancelConfirmSheet(
         null -> "Отмена недоступна"
     }
     val cancellationHint = when (kind) {
-        CancellationKind.Early -> "Места и прокатные доски освободятся."
+        CancellationKind.Early -> "Карты и прокатная экипировка освободятся."
         CancellationKind.Late -> "Ваша запись отменена. Штраф не взимается."
         CancellationKind.UnavailableAfterStart,
         null -> "Запись останется активной."

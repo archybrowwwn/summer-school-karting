@@ -10,7 +10,7 @@ android {
     compileSdk = libs.versions.android.compile.sdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.volna.app"
+        applicationId = "com.apex.karting"
         minSdk = libs.versions.android.min.sdk.get().toInt()
         targetSdk = libs.versions.android.compile.sdk.get().toInt()
         versionCode = 1

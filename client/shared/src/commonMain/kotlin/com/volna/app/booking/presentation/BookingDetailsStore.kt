@@ -222,7 +222,7 @@ fun BookingDetailsState.cancellationKind(clock: AppClock): CancellationKind? {
 }
 
 private fun Booking.cancelSuccessMessage(): String = when (status) {
-    BookingStatus.LateCancel -> "Поздняя отмена: место не освобождено (правило 2 часов). Штраф не взимается."
+    BookingStatus.LateCancel -> "Поздняя отмена: карт не освобождён (правило 1 часа). Штраф не взимается."
     else -> "Бронь отменена"
 }
 

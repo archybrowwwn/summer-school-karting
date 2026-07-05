@@ -37,7 +37,7 @@ fun SlotListScreen(
     }
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            ScreenTitle("Прогулки")
+            ScreenTitle("Заезды")
             VolnaIcon(
                 imageVector = Icons.Tune,
                 contentDescription = "Фильтры",
@@ -64,7 +64,7 @@ fun SlotListScreen(
                     )
                 } else {
                     StateMessage(
-                        title = "Пока нет доступных прогулок",
+                        title = "Пока нет доступных заездов",
                         description = "Загляните позже",
                     )
                 }
@@ -171,7 +171,7 @@ private fun SlotFiltersSheet(
                     DateRangePreviewRow(state)
                 }
 
-                FilterGroup(title = "Тип маршрута") {
+                FilterGroup(title = "Тип трассы") {
                     FilterChipRow {
                         FilterChipButton("Новичковый", RouteType.Novice in state.draftFilters.routeTypes) {
                             onIntent(SlotListIntent.ToggleRouteType(RouteType.Novice))
@@ -313,7 +313,7 @@ private fun AvailabilitySwitchRow(
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
     ) {
         Text(
-            text = "Только со свободными местами",
+            text = "Только со свободными картами",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -333,17 +333,17 @@ private fun InstructorFilterSection(
 ) {
     when (instructors) {
         Loadable.Initial,
-        Loadable.Loading -> FilterGroup("Инструктор") {
-            Text("Загружаем инструкторов", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Loadable.Loading -> FilterGroup("Маршал") {
+            Text("Загружаем маршалов", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         is Loadable.Empty -> Unit
-        is Loadable.Error -> FilterGroup("Инструктор") {
-            Text("Не удалось загрузить инструкторов", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        is Loadable.Error -> FilterGroup("Маршал") {
+            Text("Не удалось загрузить маршалов", color = MaterialTheme.colorScheme.onSurfaceVariant)
             OutlinedButton(onClick = onRetry) {
                 Text("Обновить")
             }
         }
-        is Loadable.Content -> FilterGroup("Инструктор") {
+        is Loadable.Content -> FilterGroup("Маршал") {
             Column(verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xs)) {
                 instructors.value.chunked(2).forEach { row ->
                     FilterChipRow {
@@ -450,7 +450,7 @@ private fun SlotCard(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
             Text(
-                text = "Инструктор: ${slot.instructor.name}",
+                text = "Маршал: ${slot.instructor.name}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
@@ -475,7 +475,7 @@ private fun SlotCard(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
             Text(
-                text = if (canOpen) "Свободно мест" else "Мест нет",
+                text = if (canOpen) "Свободно карт" else "Карт нет",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )

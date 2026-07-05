@@ -540,21 +540,21 @@ E2E/manual smoke:
 
 ## Implementation roadmap
 
-- [ ] `CMP-00` Create `client/` Gradle KMP skeleton with Android, iOS, Web targets.
-- [ ] `CMP-01` Add shared dependency catalog, CI commands, formatting and test tasks.
-- [ ] `CMP-02` Implement core architecture: MVI base, DI, config, clock, error model, logging.
-- [ ] `CMP-03` Implement theme skeleton and Figma token import format.
-- [ ] `CMP-04` Extract Figma tokens and finalize `ApexTheme`.
-- [ ] `CMP-05` Implement network layer and generated/manual DTOs aligned with OpenAPI.
-- [ ] `CMP-06` Implement secure/session storage expect/actual.
-- [ ] `CMP-07` Implement Auth flow `SCR-001`.
-- [ ] `CMP-08` Implement main navigation and tabs.
-- [ ] `CMP-09` Implement slots list, filters and instructors dictionary `SCR-002`/`BS-001`.
-- [ ] `CMP-10` Implement slot card and map preview fallback `SCR-003`.
-- [ ] `CMP-11` Implement booking form and success sheet `SCR-004`/`BS-002`.
-- [ ] `CMP-12` Implement bookings list/details/cancel `SCR-005`/`SCR-006`/`BS-003`.
-- [ ] `CMP-13` Implement route map sheet `BS-004`.
-- [ ] `CMP-14` Implement profile view, edit name, logout, optional phone change/delete `SCR-007`.
+- [x] `CMP-00` Create `client/` Gradle KMP skeleton with Android, iOS, Web targets.
+- [x] `CMP-01` Add shared dependency catalog, CI commands, formatting and test tasks.
+- [x] `CMP-02` Implement core architecture: MVI base, DI, config, clock, error model, logging.
+- [x] `CMP-03` Implement theme skeleton and Figma token import format.
+- [x] `CMP-04` Brand colors and logo for «Апекс» (`ApexBrandColors`, `ApexBrandHeader`); Figma token export — backlog.
+- [x] `CMP-05` Implement network layer and generated/manual DTOs aligned with OpenAPI.
+- [x] `CMP-06` Implement secure/session storage expect/actual.
+- [x] `CMP-07` Implement Auth flow `SCR-001`.
+- [x] `CMP-08` Implement main navigation and tabs.
+- [x] `CMP-09` Implement slots list, filters and instructors dictionary `SCR-002`/`BS-001`.
+- [x] `CMP-10` Implement slot card and map preview fallback `SCR-003`.
+- [x] `CMP-11` Implement booking form and success sheet `SCR-004`/`BS-002`.
+- [x] `CMP-12` Implement bookings list/details/cancel `SCR-005`/`SCR-006`/`BS-003`.
+- [x] `CMP-13` Implement route map sheet `BS-004`.
+- [x] `CMP-14` Implement profile view, edit name, logout, optional phone change/delete `SCR-007`.
 - [ ] `CMP-15` Implement push permission adapter `LOGIC-007`.
 - [ ] `CMP-16` Add unit/data/UI tests for core flows.
 - [ ] `CMP-17` Run integration smoke against local BE.

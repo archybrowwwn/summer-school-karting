@@ -108,7 +108,7 @@ class DomainPolicyTest {
         startAt = Instant.parse("2026-07-01T12:00:00Z"),
         route = Route(
             id = RouteId("route-1"),
-            name = "Острова и каналы",
+            name = "Короткая трасса",
             type = RouteType.Novice,
             capacityCap = capacityCap,
             durationMin = 90,
@@ -119,7 +119,7 @@ class DomainPolicyTest {
         freeRentalBoards = freeRentalBoards,
         price = MoneyRub(price),
         rentalPrice = MoneyRub(rentalPrice),
-        meetingPoint = MeetingPoint("Лодочная станция", GeoPoint(59.978, 30.262)),
+        meetingPoint = MeetingPoint("Павильон у стартовой прямой", GeoPoint(59.978, 30.262)),
         status = SlotStatus.Scheduled,
     )
 }

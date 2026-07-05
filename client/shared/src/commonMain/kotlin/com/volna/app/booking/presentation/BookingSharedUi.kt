@@ -111,7 +111,7 @@ internal fun RouteType.toTagText(): String = when (this) {
 }
 
 internal fun cancelDeadlineText(booking: Booking): String =
-    "Бесплатно освободить место можно до ${booking.slot?.startAt?.minus(1.hours)?.toUiText() ?: "уточняется"}"
+    "Бесплатно освободить карт можно до ${booking.slot?.startAt?.minus(1.hours)?.toUiText() ?: "уточняется"}"
 
 internal fun Instant.toBookingCardStartText(): String {
     val dateTime = toLocalDateTime(TimeZone.currentSystemDefault())
@@ -144,15 +144,15 @@ private fun Month.toMonthName(): String = when (this) {
 }
 
 internal fun Int.pluralPlaces(): String = when {
-    this % 10 == 1 && this % 100 != 11 -> "место"
-    this % 10 in 2..4 && this % 100 !in 12..14 -> "места"
-    else -> "мест"
+    this % 10 == 1 && this % 100 != 11 -> "карт"
+    this % 10 in 2..4 && this % 100 !in 12..14 -> "карта"
+    else -> "картов"
 }
 
 internal fun Int.pluralRentalBoards(): String = when {
-    this % 10 == 1 && this % 100 != 11 -> "прокатная доска"
-    this % 10 in 2..4 && this % 100 !in 12..14 -> "прокатные доски"
-    else -> "прокатных досок"
+    this % 10 == 1 && this % 100 != 11 -> "прокатный комплект"
+    this % 10 in 2..4 && this % 100 !in 12..14 -> "прокатных комплекта"
+    else -> "прокатных комплектов"
 }
 
 internal fun Instant.toUiText(): String =

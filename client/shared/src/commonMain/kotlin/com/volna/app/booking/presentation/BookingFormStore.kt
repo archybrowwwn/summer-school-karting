@@ -270,10 +270,10 @@ private fun enforceRentalAvailability(
 }
 
 private fun AvailabilityViolation.toUserMessage(): String = when (this) {
-    AvailabilityViolation.NoSeats -> "В этом слоте больше нет свободных мест"
-    AvailabilityViolation.SlotCancelled -> "Прогулка отменена"
+    AvailabilityViolation.NoSeats -> "В этом заезде больше нет свободных картов"
+    AvailabilityViolation.SlotCancelled -> "Заезд отменён"
     is AvailabilityViolation.TooManyRentalBoards -> "Доступно прокатных комплектов: $freeRentalBoards"
-    is AvailabilityViolation.TooManySeats -> "Можно выбрать не больше $maxSeats мест"
+    is AvailabilityViolation.TooManySeats -> "Можно выбрать не больше $maxSeats картов"
 }
 
 private fun AppFailure.toUserMessage(): String = when (this) {

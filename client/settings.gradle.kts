@@ -41,7 +41,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "volna-client"
+rootProject.name = "apex-client"
 
 include(":shared")
 include(":androidApp")

@@ -27,7 +27,7 @@ internal fun MeetingPoint.toExternalRouteUrl(): String {
 }
 
 private fun String.toMapQuery(): String =
-    trim().ifBlank { "SUP meeting point" }.replace(" ", "+")
+    trim().ifBlank { "Картодром Апекс" }.replace(" ", "+")
 
 @Composable
 expect fun RouteMapPreview(

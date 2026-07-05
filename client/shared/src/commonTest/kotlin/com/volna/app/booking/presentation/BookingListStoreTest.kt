@@ -99,7 +99,7 @@ class BookingListStoreTest {
             startAt = slotStartAt,
             route = Route(
                 id = RouteId("route-1"),
-                name = "Острова и каналы",
+                name = "Короткая трасса",
                 type = RouteType.Novice,
                 capacityCap = 8,
                 durationMin = 90,
@@ -110,7 +110,7 @@ class BookingListStoreTest {
             freeRentalBoards = 4,
             price = MoneyRub(2_500),
             rentalPrice = MoneyRub(800),
-            meetingPoint = MeetingPoint("Лодочная станция", GeoPoint(59.978, 30.262)),
+            meetingPoint = MeetingPoint("Павильон у стартовой прямой", GeoPoint(59.978, 30.262)),
             status = SlotStatus.Scheduled,
         ),
         isFirstBooking = null,

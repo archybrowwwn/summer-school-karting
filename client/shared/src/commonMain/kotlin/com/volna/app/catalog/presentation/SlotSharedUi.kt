@@ -234,7 +234,7 @@ internal fun RouteType.toTagText(): String = when (this) {
 
 internal fun RouteType.toDetailsAudienceText(): String = when (this) {
     RouteType.Novice -> "для новичков"
-    RouteType.Experienced -> "для опытных райдеров"
+    RouteType.Experienced -> "для опытных пилотов"
 }
 
 internal fun kotlinx.datetime.Instant.toSlotCardStartText(): String {

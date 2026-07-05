@@ -28,7 +28,7 @@ kotlin {
 
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>().configureEach {
         binaries.framework {
-            baseName = "VolnaShared"
+            baseName = "ApexShared"
             isStatic = true
         }
     }

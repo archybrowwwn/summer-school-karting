@@ -7,10 +7,10 @@ plugins {
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 kotlin {
     wasmJs {
-        outputModuleName.set("volna-web")
+        outputModuleName.set("apex-web")
         browser {
             commonWebpackConfig {
-                outputFileName = "volna-web.js"
+                outputFileName = "apex-web.js"
             }
         }
         binaries.executable()

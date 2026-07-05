@@ -16,7 +16,7 @@ actual object PlatformMapLauncher : MapLauncher {
     actual override fun openExternalMap(meetingPoint: MeetingPoint) {
         val lat = meetingPoint.coordinates.lat
         val lng = meetingPoint.coordinates.lng
-        val label = Uri.encode(meetingPoint.title.ifBlank { "SUP meeting point" })
+        val label = Uri.encode(meetingPoint.title.ifBlank { "Картодром Апекс" })
         val pointUri = Uri.parse("geo:$lat,$lng?q=$lat,$lng($label)")
         open(pointUri)
     }

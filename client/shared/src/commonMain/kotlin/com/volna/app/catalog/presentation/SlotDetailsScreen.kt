@@ -50,7 +50,7 @@ fun SlotDetailsScreen(
             Loadable.Initial,
             Loadable.Loading -> {
                 BackButton(onBack)
-                ScreenTitle("Прогулка")
+                ScreenTitle("Заезд")
                 SkeletonCard(y = VolnaTheme.tokens.sizing.listCardTopY)
                 SkeletonCard(y = VolnaTheme.tokens.sizing.listCardSecondY)
             }
@@ -61,7 +61,7 @@ fun SlotDetailsScreen(
                 onOpenMap = { onIntent(SlotDetailsIntent.OpenRouteMap) },
             )
             is Loadable.Empty -> StateMessage(
-                title = "Прогулка недоступна",
+                title = "Заезд недоступен",
                 description = "Попробуйте выбрать другой слот",
                 buttonText = "Назад",
                 onClick = onBack,
@@ -231,12 +231,12 @@ private fun SlotDetailsSheetContent(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = "Прогулка по маршруту «${slot.route.name}» займет ${slot.route.durationMin} минут и отлично подойдет ${slot.route.type.toDetailsAudienceText()}.",
+                    text = "Заезд на трассе «${slot.route.name}» займёт ${slot.route.durationMin} минут и подойдёт ${slot.route.type.toDetailsAudienceText()}.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = "Инструктор: ${slot.instructor.name}",
+                    text = "Маршал: ${slot.instructor.name}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -256,7 +256,7 @@ private fun SlotDetailsSheetContent(
                     .padding(VolnaTheme.tokens.spacing.md),
                 verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.sm),
             ) {
-                DetailsInfoRow("Свободно мест", "${slot.freeSeats} из ${slot.totalSeats}")
+                DetailsInfoRow("Свободно карт", "${slot.freeSeats} из ${slot.totalSeats}")
                 DetailsInfoRow(
                     "Прокатная экипировка (доступно ${availability.freeRentalBoards} шт.)",
                     "${slot.rentalPrice.value} ₽",
@@ -284,7 +284,7 @@ private fun SlotDetailsSheetContent(
                 shape = RoundedCornerShape(VolnaTheme.tokens.radius.pill),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             ) {
-                Text(if (availability.canBook) "Записаться" else "Мест нет", fontWeight = FontWeight.Bold)
+                Text(if (availability.canBook) "Записаться" else "Карт нет", fontWeight = FontWeight.Bold)
             }
         }
         item {
@@ -322,7 +322,7 @@ private fun SlotDetailsMapCard(
         )
         SlotDetailsMapPreview()
         Text(
-            text = "Открыть карту",
+            text = "Как добраться",
             modifier = Modifier.clickable { onOpenMap() },
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF0093CC),

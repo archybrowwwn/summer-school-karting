@@ -1,25 +1,23 @@
-# Volna CMP Client
+# Апекс — CMP Client
 
-Compose Multiplatform client for Android, iOS and Web.
+Compose Multiplatform client for the Apex karting center (Android, iOS, Web).
 
 ## Modules
 
 - `shared` — common UI, domain models, MVI primitives, feature contracts and platform adapters.
-- `androidApp` — Android host application.
+- `androidApp` — Android host application (launcher label: **Апекс**).
 - `webApp` — Web/Wasm host application.
-- `iosApp` — placeholder for the native iOS host; `shared` produces the `VolnaShared` framework.
+- `iosApp` — native iOS host; `shared` produces the `ApexShared` framework.
 
 ## Commands
 
-Run from `client/` after adding a Gradle wrapper or installing Gradle:
+Run from `client/`:
 
 ```bash
-gradle :shared:allTests
-gradle :androidApp:assembleDebug
-gradle :webApp:wasmJsBrowserDevelopmentRun
+./gradlew :shared:compileDebugKotlinAndroid
+./gradlew :androidApp:assembleDebug
+./gradlew :webApp:wasmJsBrowserDevelopmentRun
 ```
-
-The current repository does not include `gradlew`; CI/local setup should add it before relying on these commands.
 
 ## Architecture
 
@@ -30,4 +28,4 @@ The shared module follows clean architecture:
 - feature packages define repository contracts and screen-facing models.
 - platform source sets provide `expect/actual` adapters such as route map rendering.
 
-Theme values are intentionally centralized under `core/theme`; replace placeholder tokens with exported Figma variables before visual polish.
+Brand theme: `core/theme/VolnaColors.kt` (`ApexBrandColors` — racing red + asphalt; internal type names still use Volna* from the template scaffold).

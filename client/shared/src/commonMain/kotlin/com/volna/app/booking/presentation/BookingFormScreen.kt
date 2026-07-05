@@ -167,7 +167,7 @@ private fun BookingSlotSummaryCard(slot: Slot) {
                 modifier = Modifier.weight(1f, fill = false),
             )
             SlotTag(
-                text = "Инструктор: ${slot.instructor.name}",
+                text = "Маршал: ${slot.instructor.name}",
                 color = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.weight(1f, fill = false),
             )
@@ -194,7 +194,7 @@ private fun BookingSeatsCard(
         verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.sm),
     ) {
         Text(
-            text = "Число мест",
+            text = "Число картов",
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
@@ -218,7 +218,7 @@ private fun BookingSeatsCard(
             BookingCounterButton("+", onPlus)
         }
         Text(
-            text = "Можно записать до $maxSeats мест",
+            text = "Можно записать до $maxSeats картов",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -252,14 +252,14 @@ private fun BookingBoardsSection(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.sm)) {
         Text(
-            text = "Доска для каждого места",
+            text = "Экипировка на каждый карт",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
         boardSelections.forEachIndexed { index, selection ->
             val seatNumber = index + 1
             BookingBoardRow(
-                label = if (seatNumber == 1) "Место 1 (вы)" else "Место $seatNumber (гость)",
+                label = if (seatNumber == 1) "Карт 1 (вы)" else "Карт $seatNumber (гость)",
                 rentalSelected = selection == BoardSelection.Rental,
                 rentalEnabled = selection == BoardSelection.Rental ||
                         boardSelections.count { it == BoardSelection.Rental } < freeRentalBoards,
@@ -366,7 +366,7 @@ private fun BookingPriceDetails(
             .padding(top = VolnaTheme.tokens.spacing.sm),
         verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.sm),
     ) {
-        BookingPriceRow("Места: $seatPrice ₽ × $seatsCount", "$seatsTotal ₽")
+        BookingPriceRow("Карты: $seatPrice ₽ × $seatsCount", "$seatsTotal ₽")
         BookingPriceRow("Прокат: $rentalPrice ₽ × $rentalCount", "$rentalTotal ₽")
         BookingPriceRow("Итого", "$total ₽", bold = true)
     }
@@ -492,7 +492,7 @@ private fun BookingSuccessSummaryCard(
                         modifier = Modifier.weight(1f, fill = false),
                     )
                     SlotTag(
-                        text = "Инструктор: ${it.instructor.name}",
+                        text = "Маршал: ${it.instructor.name}",
                         color = MaterialTheme.colorScheme.surface,
                         modifier = Modifier.weight(1f, fill = false),
                     )
@@ -508,8 +508,8 @@ private fun BookingSuccessSummaryCard(
                     .padding(VolnaTheme.tokens.spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.sm),
             ) {
-                DetailsInfoRow("Мест", booking.seatsCount.toString())
-                DetailsInfoRow("Доска в прокат", booking.rentalCount.toString())
+                DetailsInfoRow("Картов", booking.seatsCount.toString())
+                DetailsInfoRow("Прокат экипировки", booking.rentalCount.toString())
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xs)) {

@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.sp
 import com.volna.app.core.phone.formatPhoneNumber
 import com.volna.app.core.theme.VolnaTheme
 import com.volna.app.core.ui.PhoneNumberVisualTransformation
+import com.volna.app.uikit.ApexBrandHeader
 import com.volna.app.uikit.icons.Back
 import com.volna.app.uikit.icons.Icons
-import com.volna.app.uikit.icons.Logo
 import com.volna.app.uikit.icons.VolnaIcon
 
 @Composable
@@ -81,7 +81,7 @@ private fun PhoneStep(
         AuthLogo()
         AuthHeader(
             title = "Вход",
-            description = "Войдите по номеру телефона, чтобы\nзаписаться на прогулку",
+            description = "Войдите по номеру телефона, чтобы\nзаписаться на заезд",
         )
         AuthTextField(
             value = state.phoneInput,
@@ -233,11 +233,10 @@ private fun AuthStepLayout(
 
 @Composable
 private fun AuthLogo() {
-    VolnaIcon(
-        imageVector = Icons.Logo,
-        contentDescription = "Волна",
-        modifier = Modifier.fillMaxWidth(),
-        tint = MaterialTheme.colorScheme.onBackground,
+    ApexBrandHeader(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = VolnaTheme.tokens.sizing.authLogoY),
     )
 }
 
