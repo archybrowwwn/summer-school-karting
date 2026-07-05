@@ -34,4 +34,4 @@
 | `c6c8e03` | docs: homework p.1 MVP requirements journal and bad-prompts |
 | `2ebf47c` | docs: homework p.2 architecture journal and status sync |
 | `aba49ae` | docs: homework p.3 three feature journals with manual verification |
-| `9b37808` | docs: homework p.4 test cases and bug reports |
+| `7818462` | docs: homework p.4 test cases and bug reports |

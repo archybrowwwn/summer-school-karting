@@ -193,4 +193,4 @@ docker compose -f compose.yaml exec -T db psql -U apex -d apex -f /tmp/demonstra
 | `873a8b6` | feat: demonstration database, CORS and web client cyrillic |
 | `43ce6ed` | fix: login screen scrolling, otp handling and wasm api url |
 | `1c2174b` | docs: update homework journals for parts 1-3 |
-| `9b37808` | docs: homework p.4 test cases and bug reports |
+| `7818462` | docs: homework p.4 test cases and bug reports |
