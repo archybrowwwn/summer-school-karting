@@ -14,6 +14,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.uikit.ApexShapes
+import com.apexkarting.uikit.apexClickable
 import com.apexkarting.uikit.icons.ApexIcon
 import com.apexkarting.uikit.icons.Back
 import com.apexkarting.uikit.icons.Icons
@@ -41,12 +43,14 @@ internal fun ApexBackButton(
             size = ApexTheme.tokens.spacing.xl,
         )
 
-        BackButtonStyle.Floating -> Box(
+        BackButtonStyle.Floating -> {
+            val circleShape = ApexShapes.circle
+            Box(
             modifier = modifier
                 .size(40.dp)
-                .shadow(4.dp, RoundedCornerShape(200.dp))
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(200.dp))
-                .clickable { onClick() },
+                .shadow(4.dp, circleShape)
+                .apexClickable(circleShape, onClick = onClick)
+                .background(MaterialTheme.colorScheme.surface, circleShape),
             contentAlignment = Alignment.Center,
         ) {
             ApexIcon(
@@ -55,6 +59,7 @@ internal fun ApexBackButton(
                 tint = MaterialTheme.colorScheme.primary,
                 size = floatingIconSize,
             )
+        }
         }
     }
 }

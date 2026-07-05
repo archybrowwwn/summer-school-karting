@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.uikit.ApexShapes
+import com.apexkarting.uikit.apexClickable
 import com.apexkarting.core.ui.ApexBackButton
 import com.apexkarting.core.ui.ListSkeletonCard
 import com.apexkarting.core.ui.ListStateMessage
@@ -173,12 +175,13 @@ private fun CircleActionButton(
     contentDescription: String,
     onClick: () -> Unit,
 ) {
+    val circleShape = ApexShapes.circle
     Box(
         modifier = Modifier
             .size(40.dp)
-            .shadow(4.dp, RoundedCornerShape(200.dp))
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(200.dp))
-            .clickable { onClick() },
+            .shadow(4.dp, circleShape)
+            .apexClickable(circleShape, onClick = onClick)
+            .background(MaterialTheme.colorScheme.surface, circleShape),
         contentAlignment = androidx.compose.ui.Alignment.Center,
     ) {
         ApexIcon(

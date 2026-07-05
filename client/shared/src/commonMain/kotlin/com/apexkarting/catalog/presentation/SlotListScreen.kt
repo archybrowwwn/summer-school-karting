@@ -31,6 +31,9 @@ import com.apexkarting.core.ui.toTagText
 import com.apexkarting.domain.model.Instructor
 import com.apexkarting.domain.model.RouteType
 import com.apexkarting.domain.model.Slot
+import com.apexkarting.uikit.ApexCard
+import com.apexkarting.uikit.ApexShapes
+import com.apexkarting.uikit.apexClickable
 import com.apexkarting.uikit.icons.Icons
 import com.apexkarting.uikit.icons.Tune
 import com.apexkarting.uikit.icons.ApexIcon
@@ -263,15 +266,16 @@ private fun FilterChipButton(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val chipShape = ApexShapes.chip()
     Text(
         text = label,
         modifier = Modifier
             .height(40.dp)
+            .apexClickable(chipShape, onClick = onClick)
             .background(
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
+                shape = chipShape,
             )
-            .clickable { onClick() }
             .padding(horizontal = ApexTheme.tokens.spacing.sm, vertical = 10.dp),
         style = MaterialTheme.typography.bodyLarge,
         color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
@@ -436,37 +440,33 @@ private fun SlotCard(
     onSlotClick: (Slot) -> Unit,
 ) {
     val canOpen = slot.freeSeats > 0
-    Column(
+    ApexCard(
         modifier = Modifier
             .fillMaxWidth()
-            .height(ApexTheme.tokens.sizing.listCardHeight)
-            .clickable(enabled = canOpen) { onSlotClick(slot) }
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
-            )
-            .padding(ApexTheme.tokens.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
+            .height(ApexTheme.tokens.sizing.listCardHeight),
+        onClick = { onSlotClick(slot) },
+        enabled = canOpen,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs)) {
-            SlotPreviewPhoto()
-            Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-                    RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
-                    RouteTag(
-                        text = slot.route.name,
-                        modifier = Modifier.weight(1f, fill = false),
+        Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm)) {
+            Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs)) {
+                SlotPreviewPhoto()
+                Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
+                        RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
+                        RouteTag(
+                            text = slot.route.name,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                    }
+                    Text(
+                        text = slot.startAt.toCardStartText(),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
-                Text(
-                    text = slot.startAt.toCardStartText(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
             }
-        }
-        Row(
+            Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
@@ -506,6 +506,7 @@ private fun SlotCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
+        }
         }
     }
 }

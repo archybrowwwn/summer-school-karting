@@ -21,6 +21,8 @@ import com.apexkarting.core.config.AppConfig
 import com.apexkarting.core.logging.AppLogger
 import com.apexkarting.core.phone.formatPhoneNumber
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.uikit.ApexShapes
+import com.apexkarting.uikit.apexClickable
 import com.apexkarting.core.ui.ActionStatus
 import com.apexkarting.core.ui.Loadable
 import com.apexkarting.core.ui.PhoneNumberVisualTransformation
@@ -338,15 +340,22 @@ private fun ProfileInfoRow(
     placeholder: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
+    val rowShape = ApexShapes.control()
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(ApexTheme.tokens.sizing.buttonHeight)
+            .then(
+                if (onClick != null) {
+                    Modifier.apexClickable(rowShape, onClick = onClick)
+                } else {
+                    Modifier
+                },
+            )
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
+                shape = rowShape,
             )
-            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(horizontal = ApexTheme.tokens.spacing.md),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

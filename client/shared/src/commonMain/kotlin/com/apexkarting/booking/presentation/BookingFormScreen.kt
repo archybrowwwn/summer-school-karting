@@ -23,6 +23,8 @@ import com.apexkarting.core.ui.toTagText
 import com.apexkarting.domain.model.Booking
 import com.apexkarting.domain.model.Slot
 import com.apexkarting.domain.policy.BookingPriceCalculator
+import com.apexkarting.uikit.ApexShapes
+import com.apexkarting.uikit.apexClickable
 import com.apexkarting.uikit.icons.Back
 import com.apexkarting.uikit.icons.Icons
 import com.apexkarting.uikit.icons.Info
@@ -233,13 +235,14 @@ private fun BookingCounterButton(
     text: String,
     onClick: () -> Unit,
 ) {
+    val controlShape = ApexShapes.control()
     Text(
         text = text,
         modifier = Modifier
             .size(54.dp)
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(ApexTheme.tokens.radius.lg))
-            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(ApexTheme.tokens.radius.lg))
-            .clickable { onClick() }
+            .apexClickable(controlShape, onClick = onClick)
+            .background(MaterialTheme.colorScheme.surface, controlShape)
+            .border(1.dp, MaterialTheme.colorScheme.primary, controlShape)
             .padding(top = 12.dp),
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.titleLarge,
@@ -331,16 +334,17 @@ private fun BoardSegment(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
+    val segmentShape = ApexShapes.control()
     Text(
         text = text,
         modifier = Modifier
             .width(100.dp)
             .height(44.dp)
+            .apexClickable(segmentShape, enabled = enabled, onClick = onClick)
             .background(
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.lg),
+                shape = segmentShape,
             )
-            .clickable(enabled = enabled) { onClick() }
             .padding(top = 12.dp),
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.bodyMedium,
@@ -564,11 +568,12 @@ private fun CounterRow(
             horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
+            val counterShape = ApexShapes.control()
             Text(
                 text = "−",
                 modifier = Modifier
                     .size(ApexTheme.tokens.spacing.xl)
-                    .clickable { onMinus() },
+                    .apexClickable(counterShape, onClick = onMinus),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -583,7 +588,7 @@ private fun CounterRow(
                 text = "+",
                 modifier = Modifier
                     .size(ApexTheme.tokens.spacing.xl)
-                    .clickable { onPlus() },
+                    .apexClickable(counterShape, onClick = onPlus),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -600,12 +605,13 @@ private fun CircleActionButton(
     contentDescription: String,
     onClick: () -> Unit,
 ) {
+    val circleShape = ApexShapes.circle
     Box(
         modifier = Modifier
             .size(40.dp)
-            .shadow(4.dp, RoundedCornerShape(200.dp))
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(200.dp))
-            .clickable { onClick() },
+            .shadow(4.dp, circleShape)
+            .apexClickable(circleShape, onClick = onClick)
+            .background(MaterialTheme.colorScheme.surface, circleShape),
         contentAlignment = androidx.compose.ui.Alignment.Center,
     ) {
         ApexIcon(

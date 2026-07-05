@@ -21,6 +21,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.uikit.ApexCard
+import com.apexkarting.uikit.ApexShapes
+import com.apexkarting.uikit.apexClickable
 import com.apexkarting.core.ui.ListSkeletonCard
 import com.apexkarting.core.ui.ListStateMessage
 import com.apexkarting.core.ui.Loadable
@@ -192,16 +195,17 @@ private fun BookingTabButton(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val chipShape = ApexShapes.chip()
     Text(
         text = text,
         modifier = Modifier
             .width(180.dp)
             .height(40.dp)
+            .apexClickable(chipShape, onClick = onClick)
             .background(
                 color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(ApexTheme.tokens.radius.pill),
+                shape = chipShape,
             )
-            .clickable { onClick() }
             .padding(top = 10.dp),
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.bodyMedium,
@@ -215,16 +219,8 @@ private fun BookingEmptyCard(
     description: String,
     onBookWalk: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
-            )
-            .padding(ApexTheme.tokens.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
-    ) {
+    ApexCard(modifier = Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs)) {
         Text(
             title,
             fontWeight = FontWeight.Bold,
@@ -240,6 +236,7 @@ private fun BookingEmptyCard(
         ) {
             Text("Записаться")
         }
+        }
     }
 }
 
@@ -251,17 +248,11 @@ private fun BookingCard(
 ) {
     val slot = booking.slot
     val status = booking.statusLabel(pastGroup = pastGroup)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(ApexTheme.tokens.spacing.xl),
-            )
-            .padding(ApexTheme.tokens.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
+    ApexCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
     ) {
+        Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm)) {
         BookingPreviewPhoto()
         Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
             Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
@@ -307,6 +298,7 @@ private fun BookingCard(
             )
         }
         BookingStatusBadge(status)
+        }
     }
 }
 
