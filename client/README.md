@@ -19,6 +19,25 @@ Run from `client/`:
 ./gradlew :webApp:wasmJsBrowserDevelopmentRun
 ```
 
+## Tests
+
+Primary target for `commonTest` on all platforms:
+
+```bash
+./gradlew :shared:wasmJsTest
+```
+
+Android JVM unit tests (`:shared:testDebugUnitTest`) may fail with `ClassNotFoundException` on Windows when the project path contains non-ASCII characters (for example `практика`). The `shared` module redirects its `build/` to `%TEMP%/apex-karting-build/shared` in that case.
+
+If tests still fail, map the repo to an ASCII drive letter and run tests from there:
+
+```powershell
+subst X: "D:\path\to\summer-school-karting"
+Set-Location X:\client
+.\gradlew.bat :shared:testDebugUnitTest
+subst X: /d
+```
+
 ## Architecture
 
 The shared module follows clean architecture:

@@ -18,7 +18,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.core.ui.ListSkeletonCard
+import com.apexkarting.core.ui.ListStateMessage
 import com.apexkarting.core.ui.Loadable
+import com.apexkarting.core.ui.StateArtwork
+import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.RouteTypeTag
+import com.apexkarting.core.ui.ScreenHeaderTitle
+import com.apexkarting.core.ui.toCardStartText
+import com.apexkarting.core.ui.toFilterDateText
+import com.apexkarting.core.ui.toTagText
 import com.apexkarting.domain.model.Instructor
 import com.apexkarting.domain.model.RouteType
 import com.apexkarting.domain.model.Slot
@@ -37,7 +46,7 @@ fun SlotListScreen(
     }
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            ScreenTitle("Заезды")
+            ScreenHeaderTitle("Заезды")
             ApexIcon(
                 imageVector = Icons.Tune,
                 contentDescription = "Фильтры",
@@ -55,7 +64,7 @@ fun SlotListScreen(
                 Loadable.Loading -> SlotLoadingSkeleton()
                 is Loadable.Content -> SlotCards(slots.value, onSlotClick)
                 is Loadable.Empty -> if (slots.reason == com.apexkarting.core.ui.EmptyReason.NoSlotsByFilters) {
-                    StateMessage(
+                    ListStateMessage(
                         title = "Нет слотов по условиям",
                         description = "Попробуйте изменить фильтры",
                         buttonText = "Фильтры",
@@ -63,13 +72,13 @@ fun SlotListScreen(
                         onClick = { onIntent(SlotListIntent.OpenFilters) },
                     )
                 } else {
-                    StateMessage(
+                    ListStateMessage(
                         title = "Пока нет доступных заездов",
                         description = "Загляните позже",
                     )
                 }
 
-                is Loadable.Error -> StateMessage(
+                is Loadable.Error -> ListStateMessage(
                     title = "Не удалось загрузить",
                     description = "Проверьте соединение и попробуйте снова",
                     buttonText = "Обновить",
@@ -397,8 +406,8 @@ private fun SlotInitialLoader() {
 
 @Composable
 private fun SlotLoadingSkeleton() {
-    SkeletonCard(y = 136.dp, height = 160.dp)
-    SkeletonCard(y = 308.dp, height = 160.dp)
+    ListSkeletonCard(y = 136.dp, height = 160.dp)
+    ListSkeletonCard(y = 308.dp, height = 160.dp)
 }
 
 @Composable
@@ -443,14 +452,14 @@ private fun SlotCard(
             SlotPreviewPhoto()
             Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-                    RouteTypeSlotTag(type = slot.route.type, text = slot.route.type.toTagText())
-                    RouteSlotTag(
+                    RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
+                    RouteTag(
                         text = slot.route.name,
                         modifier = Modifier.weight(1f, fill = false),
                     )
                 }
                 Text(
-                    text = slot.startAt.toSlotCardStartText(),
+                    text = slot.startAt.toCardStartText(),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,

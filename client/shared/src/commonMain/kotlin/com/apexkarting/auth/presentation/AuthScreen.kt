@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.apexkarting.core.phone.formatPhoneNumber
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.core.ui.ApexBackButton
+import com.apexkarting.core.ui.BackButtonStyle
 import com.apexkarting.core.ui.PhoneNumberVisualTransformation
 import com.apexkarting.uikit.ApexBrandHeader
-import com.apexkarting.uikit.icons.Back
-import com.apexkarting.uikit.icons.Icons
 import com.apexkarting.uikit.icons.ApexIcon
 
 @Composable
@@ -154,8 +154,10 @@ private fun OtpStep(
             )
         }
 
-        BackButton(
+        ApexBackButton(
             onClick = { onIntent(AuthIntent.BackToPhone) },
+            style = BackButtonStyle.Floating,
+            floatingIconSize = 16.dp,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(
@@ -431,28 +433,6 @@ private fun TermsText(text: String) {
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-}
-
-@Composable
-private fun BackButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .shadow(4.dp, RoundedCornerShape(200.dp))
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(200.dp))
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center,
-    ) {
-        ApexIcon(
-            imageVector = Icons.Back,
-            contentDescription = "Назад",
-            tint = MaterialTheme.colorScheme.primary,
-            size = 16.dp,
-        )
-    }
 }
 
 @Composable

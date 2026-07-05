@@ -24,7 +24,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.core.ui.ApexBackButton
+import com.apexkarting.core.ui.ListSkeletonCard
+import com.apexkarting.core.ui.ListStateMessage
 import com.apexkarting.core.ui.Loadable
+import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.RouteTypeTag
+import com.apexkarting.core.ui.ScreenHeaderTitle
+import com.apexkarting.core.ui.toCardStartText
+import com.apexkarting.core.ui.toDetailsAudienceText
+import com.apexkarting.core.ui.toTagText
 import com.apexkarting.domain.model.Slot
 import com.apexkarting.domain.model.SlotId
 import com.apexkarting.domain.policy.AvailabilityPolicy
@@ -49,10 +58,10 @@ fun SlotDetailsScreen(
         when (val slot = state.slot) {
             Loadable.Initial,
             Loadable.Loading -> {
-                BackButton(onBack)
-                ScreenTitle("Заезд")
-                SkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
-                SkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
+                ApexBackButton(onClick = onBack)
+                ScreenHeaderTitle("Заезд")
+                ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
+                ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
             }
             is Loadable.Content -> SlotDetailsContent(
                 slot = slot.value,
@@ -60,13 +69,13 @@ fun SlotDetailsScreen(
                 onBook = { onBook(slot.value) },
                 onOpenMap = { onIntent(SlotDetailsIntent.OpenRouteMap) },
             )
-            is Loadable.Empty -> StateMessage(
+            is Loadable.Empty -> ListStateMessage(
                 title = "Заезд недоступен",
                 description = "Попробуйте выбрать другой слот",
                 buttonText = "Назад",
                 onClick = onBack,
             )
-            is Loadable.Error -> StateMessage(
+            is Loadable.Error -> ListStateMessage(
                 title = "Не удалось загрузить",
                 description = "Проверьте соединение и попробуйте снова",
                 buttonText = "Повторить",
@@ -205,8 +214,8 @@ private fun SlotDetailsSheetContent(
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-                RouteTypeSlotTag(type = slot.route.type, text = slot.route.type.toTagText())
-                RouteSlotTag(
+                RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
+                RouteTag(
                     text = slot.route.name,
                     modifier = Modifier.weight(1f, fill = false),
                 )
@@ -224,7 +233,7 @@ private fun SlotDetailsSheetContent(
                 verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xs),
             ) {
                 Text(
-                    text = slot.startAt.toSlotCardStartText(),
+                    text = slot.startAt.toCardStartText(),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,

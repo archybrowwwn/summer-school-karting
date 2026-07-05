@@ -11,6 +11,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.RouteTypeTag
+import com.apexkarting.core.ui.toTagText
 import com.apexkarting.domain.model.MeetingPoint
 import com.apexkarting.domain.model.Route
 import com.apexkarting.domain.model.RouteType
@@ -87,22 +90,11 @@ fun RouteMapSheet(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs),
             ) {
-                RouteMapTag(
-                    text = route.type.toUiText(),
-                    backgroundColor = when (route.type) {
-                        RouteType.Novice -> ApexTheme.colors.tagNoviceBackground
-                        RouteType.Experienced -> ApexTheme.colors.tagRouteBackground
-                    },
-                    contentColor = when (route.type) {
-                        RouteType.Novice -> ApexTheme.colors.tagNoviceText
-                        RouteType.Experienced -> ApexTheme.colors.tagRouteText
-                    },
+                RouteTypeTag(
+                    type = route.type,
+                    text = route.type.toTagText(),
                 )
-                RouteMapTag(
-                    text = route.name,
-                    backgroundColor = ApexTheme.colors.tagRouteBackground,
-                    contentColor = ApexTheme.colors.tagRouteText,
-                )
+                RouteTag(text = route.name)
             }
             RouteMapPreview(
                 route = route,
@@ -147,23 +139,6 @@ fun RouteMapSheet(
     }
 }
 
-@Composable
-private fun RouteMapTag(
-    text: String,
-    backgroundColor: Color,
-    contentColor: Color,
-) {
-    Text(
-        text = text,
-        modifier = Modifier
-            .background(color = backgroundColor, shape = RoundedCornerShape(ApexTheme.tokens.radius.sm))
-            .padding(horizontal = ApexTheme.tokens.spacing.xs, vertical = ApexTheme.tokens.spacing.xxs),
-        style = MaterialTheme.typography.labelMedium,
-        color = contentColor,
-    )
-}
 
-private fun RouteType.toUiText(): String = when (this) {
-    RouteType.Novice -> "Новичковый"
-    RouteType.Experienced -> "Опытный"
-}
+
+

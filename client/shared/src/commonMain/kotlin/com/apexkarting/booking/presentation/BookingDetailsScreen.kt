@@ -16,7 +16,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
 import com.apexkarting.core.time.AppClock
+import com.apexkarting.core.ui.ApexBackButton
+import com.apexkarting.core.ui.BackButtonStyle
+import com.apexkarting.core.ui.ListSkeletonCard
+import com.apexkarting.core.ui.ListStateMessage
 import com.apexkarting.core.ui.Loadable
+import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.RouteTypeTag
+import com.apexkarting.core.ui.ScreenHeaderTitle
+import com.apexkarting.core.ui.toCardStartText
+import com.apexkarting.core.ui.toTagText
+import com.apexkarting.core.ui.toUiText
 import com.apexkarting.domain.model.Booking
 import com.apexkarting.domain.model.BookingId
 import com.apexkarting.domain.policy.BookingPriceCalculator
@@ -44,15 +54,15 @@ fun BookingDetailsScreen(
                 .fillMaxWidth()
                 .padding(horizontal = ApexTheme.tokens.spacing.md, vertical = 18.dp),
         ) {
-            BookingBackButton(onBack)
-            BookingScreenTitle("Детали записи")
+            ApexBackButton(onClick = onBack, style = BackButtonStyle.Floating)
+            ScreenHeaderTitle("Детали записи")
         }
         Box(modifier = Modifier.fillMaxSize()) {
             when (val booking = state.booking) {
                 Loadable.Initial,
                 Loadable.Loading -> {
-                    BookingSkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
-                    BookingSkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
+                    ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
+                    ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
                 }
 
                 is Loadable.Content -> BookingDetailsContent(
@@ -62,18 +72,20 @@ fun BookingDetailsScreen(
                     onIntent = onIntent,
                 )
 
-                is Loadable.Empty -> BookingStateMessage(
+                is Loadable.Empty -> ListStateMessage(
                     title = "Запись недоступна",
                     description = "Вернитесь к списку и попробуйте снова",
                     buttonText = "Назад",
                     onClick = onBack,
+                    artwork = null,
                 )
 
-                is Loadable.Error -> BookingStateMessage(
+                is Loadable.Error -> ListStateMessage(
                     title = "Не удалось загрузить запись",
                     description = "Проверьте соединение и попробуйте снова",
                     buttonText = "Обновить",
                     onClick = { onIntent(BookingDetailsIntent.Retry) },
+                    artwork = null,
                 )
             }
             if (state.showCancelConfirm) {
@@ -185,27 +197,15 @@ private fun BookingDetailsEventCard(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
             slot?.let {
-                BookingTag(
-                    text = it.route.type.toTagText(),
-                    backgroundColor = when (it.route.type) {
-                        com.apexkarting.domain.model.RouteType.Novice -> ApexTheme.colors.tagNoviceBackground
-                        com.apexkarting.domain.model.RouteType.Experienced -> ApexTheme.colors.tagRouteBackground
-                    },
-                    contentColor = when (it.route.type) {
-                        com.apexkarting.domain.model.RouteType.Novice -> ApexTheme.colors.tagNoviceText
-                        com.apexkarting.domain.model.RouteType.Experienced -> ApexTheme.colors.tagRouteText
-                    },
-                )
-                BookingTag(
+                RouteTypeTag(type = it.route.type, text = it.route.type.toTagText())
+                RouteTag(
                     text = it.route.name,
-                    backgroundColor = ApexTheme.colors.tagRouteBackground,
-                    contentColor = ApexTheme.colors.tagRouteText,
                     modifier = Modifier.weight(1f, fill = false),
                 )
             }
         }
         Text(
-            text = slot?.startAt?.toBookingCardStartText() ?: "Время уточняется",
+            text = slot?.startAt?.toCardStartText() ?: "Время уточняется",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,

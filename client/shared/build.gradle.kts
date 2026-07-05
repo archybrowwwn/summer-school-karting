@@ -1,9 +1,16 @@
+import java.io.File
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+}
+
+// Windows JVM unit tests break when the repo path contains non-ASCII characters.
+if (projectDir.absolutePath.any { it.code > 127 }) {
+    layout.buildDirectory.set(File(System.getProperty("java.io.tmpdir"), "apex-karting-build/${project.name}"))
 }
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)

@@ -14,10 +14,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.apexkarting.catalog.presentation.NeutralSlotTag
-import com.apexkarting.catalog.presentation.RouteSlotTag
-import com.apexkarting.catalog.presentation.RouteTypeSlotTag
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.core.ui.NeutralTag
+import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.RouteTypeTag
+import com.apexkarting.core.ui.toCardStartText
+import com.apexkarting.core.ui.toTagText
 import com.apexkarting.domain.model.Booking
 import com.apexkarting.domain.model.Slot
 import com.apexkarting.domain.policy.BookingPriceCalculator
@@ -157,18 +159,18 @@ private fun BookingSlotSummaryCard(slot: Slot) {
         verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm),
     ) {
         Text(
-            text = slot.startAt.toBookingCardStartText(),
+            text = slot.startAt.toCardStartText(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-            RouteTypeSlotTag(type = slot.route.type, text = slot.route.type.toTagText())
-            RouteSlotTag(
+            RouteTypeTag(type = slot.route.type, text = slot.route.type.toTagText())
+            RouteTag(
                 text = slot.route.name,
                 modifier = Modifier.weight(1f, fill = false),
             )
-            NeutralSlotTag(
+            NeutralTag(
                 text = "Маршал: ${slot.instructor.name}",
                 modifier = Modifier.weight(1f, fill = false),
             )
@@ -479,19 +481,19 @@ private fun BookingSuccessSummaryCard(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.sm)) {
             Text(
-                text = slot?.startAt?.toBookingCardStartText() ?: "Запись создана",
+                text = slot?.startAt?.toCardStartText() ?: "Запись создана",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             slot?.let {
                 Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
-                    RouteTypeSlotTag(type = it.route.type, text = it.route.type.toTagText())
-                    RouteSlotTag(
+                    RouteTypeTag(type = it.route.type, text = it.route.type.toTagText())
+                    RouteTag(
                         text = it.route.name,
                         modifier = Modifier.weight(1f, fill = false),
                     )
-                    NeutralSlotTag(
+                    NeutralTag(
                         text = "Маршал: ${it.instructor.name}",
                         modifier = Modifier.weight(1f, fill = false),
                     )

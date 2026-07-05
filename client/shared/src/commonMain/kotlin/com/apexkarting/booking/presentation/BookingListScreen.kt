@@ -21,7 +21,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apexkarting.core.theme.ApexTheme
+import com.apexkarting.core.ui.ListSkeletonCard
+import com.apexkarting.core.ui.ListStateMessage
 import com.apexkarting.core.ui.Loadable
+import com.apexkarting.core.ui.RouteTag
+import com.apexkarting.core.ui.RouteTypeTag
+import com.apexkarting.core.ui.ScreenHeaderTitle
+import com.apexkarting.core.ui.toCardStartText
+import com.apexkarting.core.ui.toTagText
 import com.apexkarting.domain.model.Booking
 import com.apexkarting.domain.model.BookingId
 import com.apexkarting.domain.policy.BookingPriceCalculator
@@ -44,12 +51,12 @@ fun BookingListScreen(
         }
     }
     Box(Modifier.fillMaxSize()) {
-        BookingScreenTitle("Мои записи")
+        ScreenHeaderTitle("Мои записи")
         when (val bookings = state.bookings) {
             Loadable.Initial,
             Loadable.Loading -> {
-                BookingSkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
-                BookingSkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
+                ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardTopY)
+                ListSkeletonCard(y = ApexTheme.tokens.sizing.listCardSecondY)
             }
             is Loadable.Content -> BookingGroupsContent(
                 groups = bookings.value,
@@ -58,17 +65,19 @@ fun BookingListScreen(
                 onBookingClick = onBookingClick,
                 onBookWalk = onBookWalk,
             )
-            is Loadable.Empty -> BookingStateMessage(
+            is Loadable.Empty -> ListStateMessage(
                 title = "У вас пока нет записей",
                 description = "Выберите заезд и оформите запись",
                 buttonText = "Записаться",
                 onClick = onBookWalk,
+                artwork = null,
             )
-            is Loadable.Error -> BookingStateMessage(
+            is Loadable.Error -> ListStateMessage(
                 title = "Не удалось загрузить записи",
                 description = "Проверьте соединение и попробуйте снова",
                 buttonText = "Обновить",
                 onClick = { onIntent(BookingListIntent.Retry) },
+                artwork = null,
             )
         }
     }
@@ -257,27 +266,15 @@ private fun BookingCard(
         Column(verticalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
             Row(horizontalArrangement = Arrangement.spacedBy(ApexTheme.tokens.spacing.xxs)) {
                 slot?.let {
-                    BookingTag(
-                        text = it.route.type.toTagText(),
-                        backgroundColor = when (it.route.type) {
-                            com.apexkarting.domain.model.RouteType.Novice -> ApexTheme.colors.tagNoviceBackground
-                            com.apexkarting.domain.model.RouteType.Experienced -> ApexTheme.colors.tagRouteBackground
-                        },
-                        contentColor = when (it.route.type) {
-                            com.apexkarting.domain.model.RouteType.Novice -> ApexTheme.colors.tagNoviceText
-                            com.apexkarting.domain.model.RouteType.Experienced -> ApexTheme.colors.tagRouteText
-                        },
-                    )
-                    BookingTag(
+                    RouteTypeTag(type = it.route.type, text = it.route.type.toTagText())
+                    RouteTag(
                         text = it.route.name,
-                        backgroundColor = ApexTheme.colors.tagRouteBackground,
-                        contentColor = ApexTheme.colors.tagRouteText,
                         modifier = Modifier.weight(1f, fill = false),
                     )
                 }
             }
             Text(
-                text = slot?.startAt?.toBookingCardStartText() ?: "Время уточняется",
+                text = slot?.startAt?.toCardStartText() ?: "Время уточняется",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -328,24 +325,7 @@ internal fun BookingPreviewPhoto() {
     )
 }
 
-@Composable
-internal fun BookingTag(
-    text: String,
-    backgroundColor: Color,
-    contentColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        modifier = modifier
-            .background(backgroundColor, RoundedCornerShape(ApexTheme.tokens.radius.sm))
-            .padding(horizontal = ApexTheme.tokens.spacing.xs, vertical = ApexTheme.tokens.spacing.xxs),
-        style = MaterialTheme.typography.labelMedium,
-        color = contentColor,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-    )
-}
+
 
 @Composable
 private fun BookingStatusBadge(status: String) {
