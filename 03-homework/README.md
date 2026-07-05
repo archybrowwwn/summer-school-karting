@@ -9,7 +9,7 @@
 | **1.** MVP-требования (user stories + сценарии) | [task-01-mvp-requirements.md](task-01-mvp-requirements.md) | ✅ Оформлено |
 | **2.** Архитектура + модель данных | [task-02-architecture-data-model.md](task-02-architecture-data-model.md) | ✅ Оформлено |
 | **3.** Реализация ≥3 фич | см. ниже | ✅ Оформлено |
-| **4.** Тест-кейсы + 1–3 бага | — | ⏳ Следующий этап |
+| **4.** Тест-кейсы + 1–3 бага | [task-04-test-cases-bugs.md](task-04-test-cases-bugs.md) | ✅ Оформлено |
 
 ### Фичи (п.3)
 
@@ -34,3 +34,4 @@
 | `c6c8e03` | docs: homework p.1 MVP requirements journal and bad-prompts |
 | `2ebf47c` | docs: homework p.2 architecture journal and status sync |
 | `aba49ae` | docs: homework p.3 three feature journals with manual verification |
+| `9b37808` | docs: homework p.4 test cases and bug reports |
