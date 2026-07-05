@@ -21,13 +21,12 @@ func NewAuthHandler(service *auth.Service) *AuthHandler {
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	token, err := httpapi.BearerToken(r)
-	if err != nil {
-		httpapi.WriteError(w, http.StatusUnauthorized, httpapi.CodeUnauthorized, "Требуется авторизация. Передайте действительный токен в заголовке Authorization.", nil)
+	token, ok := bearerOrUnauthorized(w, r)
+	if !ok {
 		return
 	}
 	if err := h.service.Logout(r.Context(), token); err != nil {
-		httpapi.WriteError(w, http.StatusUnauthorized, httpapi.CodeUnauthorized, "Требуется авторизация. Передайте действительный токен в заголовке Authorization.", nil)
+		httpapi.WriteError(w, http.StatusUnauthorized, httpapi.CodeUnauthorized, msgUnauthorized, nil)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -35,8 +34,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 func (h *AuthHandler) RequestAuthCode(w http.ResponseWriter, r *http.Request) {
 	var req authapi.RequestCodeRequest
-	if err := httpapi.DecodeJSON(r, &req); err != nil {
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+	if !decodeOrBadRequest(w, r, &req) {
 		return
 	}
 
@@ -55,8 +53,7 @@ func (h *AuthHandler) RequestAuthCode(w http.ResponseWriter, r *http.Request) {
 
 func (h *AuthHandler) VerifyAuthCode(w http.ResponseWriter, r *http.Request) {
 	var req authapi.VerifyCodeRequest
-	if err := httpapi.DecodeJSON(r, &req); err != nil {
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+	if !decodeOrBadRequest(w, r, &req) {
 		return
 	}
 
@@ -68,7 +65,7 @@ func (h *AuthHandler) VerifyAuthCode(w http.ResponseWriter, r *http.Request) {
 
 	clientID, err := uuid.Parse(result.Client.ID)
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
 
@@ -92,12 +89,12 @@ func (h *AuthHandler) VerifyAuthCode(w http.ResponseWriter, r *http.Request) {
 func writeAuthError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, auth.ErrInvalidPhone):
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, msgBadRequest, nil)
 	case errors.Is(err, auth.ErrInvalidCode):
 		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeInvalidCode, "Неверный или истёкший код подтверждения.", nil)
 	case errors.Is(err, auth.ErrTooManyRequests):
 		httpapi.WriteError(w, http.StatusTooManyRequests, httpapi.CodeTooManyRequests, "Слишком много запросов. Повторите попытку позже.", nil)
 	default:
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 	}
 }

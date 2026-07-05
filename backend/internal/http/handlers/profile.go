@@ -38,8 +38,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req profileapi.UpdateProfileRequest
-	if err := httpapi.DecodeJSON(r, &req); err != nil {
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+	if !decodeOrBadRequest(w, r, &req) {
 		return
 	}
 	client, err := h.service.UpdateName(r.Context(), token, req.Name)
@@ -68,8 +67,7 @@ func (h *ProfileHandler) RequestPhoneChangeCode(w http.ResponseWriter, r *http.R
 		return
 	}
 	var req profileapi.ChangePhoneRequestCodeRequest
-	if err := httpapi.DecodeJSON(r, &req); err != nil {
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+	if !decodeOrBadRequest(w, r, &req) {
 		return
 	}
 	result, err := h.service.RequestPhoneChangeCode(r.Context(), token, req.NewPhone)
@@ -77,7 +75,11 @@ func (h *ProfileHandler) RequestPhoneChangeCode(w http.ResponseWriter, r *http.R
 		writeProfileError(w, err)
 		return
 	}
-	httpapi.WriteJSON(w, http.StatusOK, profileapi.RequestCodeResponse{TtlSeconds: result.TTLSeconds, ResendAfterSeconds: result.ResendAfterSeconds, Code: &result.Code})
+	httpapi.WriteJSON(w, http.StatusOK, profileapi.RequestCodeResponse{
+		TtlSeconds:         result.TTLSeconds,
+		ResendAfterSeconds: result.ResendAfterSeconds,
+		Code:               &result.Code,
+	})
 }
 
 func (h *ProfileHandler) ConfirmPhoneChange(w http.ResponseWriter, r *http.Request) {
@@ -86,8 +88,7 @@ func (h *ProfileHandler) ConfirmPhoneChange(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	var req profileapi.ChangePhoneConfirmRequest
-	if err := httpapi.DecodeJSON(r, &req); err != nil {
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+	if !decodeOrBadRequest(w, r, &req) {
 		return
 	}
 	client, err := h.service.ConfirmPhoneChange(r.Context(), token, req.NewPhone, req.Code)
@@ -98,35 +99,31 @@ func (h *ProfileHandler) ConfirmPhoneChange(w http.ResponseWriter, r *http.Reque
 	writeProfileClient(w, client)
 }
 
-func bearerOrUnauthorized(w http.ResponseWriter, r *http.Request) (string, bool) {
-	token, err := httpapi.BearerToken(r)
-	if err != nil {
-		httpapi.WriteError(w, http.StatusUnauthorized, httpapi.CodeUnauthorized, "Требуется авторизация. Передайте действительный токен в заголовке Authorization.", nil)
-		return "", false
-	}
-	return token, true
-}
-
 func writeProfileClient(w http.ResponseWriter, client profile.Client) {
 	clientID, err := uuid.Parse(client.ID)
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
-	httpapi.WriteJSON(w, http.StatusOK, profileapi.Client{Id: clientID, Name: client.Name, Phone: client.Phone, CreatedAt: client.CreatedAt})
+	httpapi.WriteJSON(w, http.StatusOK, profileapi.Client{
+		Id:        clientID,
+		Name:      client.Name,
+		Phone:     client.Phone,
+		CreatedAt: client.CreatedAt,
+	})
 }
 
 func writeProfileError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, profile.ErrUnauthorized):
-		httpapi.WriteError(w, http.StatusUnauthorized, httpapi.CodeUnauthorized, "Требуется авторизация. Передайте действительный токен в заголовке Authorization.", nil)
+		httpapi.WriteError(w, http.StatusUnauthorized, httpapi.CodeUnauthorized, msgUnauthorized, nil)
 	case errors.Is(err, profile.ErrInvalidName), errors.Is(err, profile.ErrInvalidPhone), errors.Is(err, profile.ErrInvalidCode):
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, msgBadRequest, nil)
 	case errors.Is(err, profile.ErrPhoneConflict):
 		httpapi.WriteError(w, http.StatusConflict, httpapi.CodePhoneConflict, "Указанный телефон уже используется другим клиентом.", nil)
 	case errors.Is(err, profile.ErrTooManyRequests):
 		httpapi.WriteError(w, http.StatusTooManyRequests, httpapi.CodeTooManyRequests, "Слишком много запросов. Повторите попытку позже.", nil)
 	default:
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 	}
 }

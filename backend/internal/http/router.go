@@ -68,5 +68,5 @@ func NewRouter(logger *slog.Logger, options ...RouterOptions) http.Handler {
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, healthResponse{Status: "ok"})
+	WriteJSON(w, http.StatusOK, healthResponse{Status: "ok"})
 }

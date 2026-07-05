@@ -2,12 +2,8 @@ package profile
 
 import (
 	"context"
-	"crypto/rand"
 	"errors"
-	"fmt"
 	"log/slog"
-	"math/big"
-	"regexp"
 	"strings"
 	"time"
 
@@ -21,14 +17,9 @@ var (
 	ErrInvalidCode     = errors.New("invalid code")
 	ErrPhoneConflict   = errors.New("phone conflict")
 	ErrTooManyRequests = errors.New("too many requests")
-	phonePattern       = regexp.MustCompile(`^\+[1-9]\d{1,14}$`)
-	codePattern        = regexp.MustCompile(`^\d{4,6}$`)
 )
 
-const (
-	phoneChangePurpose = "phone_change"
-	otpCodeLength      = 4
-)
+const phoneChangePurpose = "phone_change"
 
 type Client = auth.Client
 
@@ -100,7 +91,7 @@ func (s *Service) UpdateName(ctx context.Context, token, name string) (Client, e
 }
 
 func (s *Service) RequestPhoneChangeCode(ctx context.Context, token, newPhone string) (RequestPhoneCodeResult, error) {
-	if !phonePattern.MatchString(newPhone) {
+	if !auth.ValidPhone(newPhone) {
 		return RequestPhoneCodeResult{}, ErrInvalidPhone
 	}
 	client, err := s.Current(ctx, token)
@@ -125,7 +116,7 @@ func (s *Service) RequestPhoneChangeCode(ctx context.Context, token, newPhone st
 		return RequestPhoneCodeResult{}, ErrTooManyRequests
 	}
 
-	code, err := randomDigits(otpCodeLength)
+	code, err := auth.RandomDigits(auth.OTPCodeLength)
 	if err != nil {
 		return RequestPhoneCodeResult{}, err
 	}
@@ -138,7 +129,7 @@ func (s *Service) RequestPhoneChangeCode(ctx context.Context, token, newPhone st
 }
 
 func (s *Service) ConfirmPhoneChange(ctx context.Context, token, newPhone, code string) (Client, error) {
-	if !phonePattern.MatchString(newPhone) || !codePattern.MatchString(code) {
+	if !auth.ValidPhone(newPhone) || !auth.ValidCode(code) {
 		return Client{}, ErrInvalidCode
 	}
 	client, err := s.Current(ctx, token)
@@ -178,14 +169,4 @@ func (s *Service) DeleteAccount(ctx context.Context, token string) error {
 	return s.repo.DeleteClientAccount(ctx, client.ID, s.now().UTC())
 }
 
-func randomDigits(length int) (string, error) {
-	buf := make([]byte, length)
-	for i := range buf {
-		n, err := rand.Int(rand.Reader, big.NewInt(10))
-		if err != nil {
-			return "", fmt.Errorf("generate otp digit: %w", err)
-		}
-		buf[i] = byte('0' + n.Int64())
-	}
-	return string(buf), nil
-}
+

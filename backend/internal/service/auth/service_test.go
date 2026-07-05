@@ -21,12 +21,12 @@ func TestHashOTPDependsOnPhonePurposeAndCode(t *testing.T) {
 }
 
 func TestRandomDigits(t *testing.T) {
-	code, err := randomDigits(otpCodeLength)
+	code, err := RandomDigits(OTPCodeLength)
 	if err != nil {
-		t.Fatalf("randomDigits() error = %v", err)
+		t.Fatalf("RandomDigits() error = %v", err)
 	}
-	if !codePattern.MatchString(code) || len(code) != otpCodeLength {
-		t.Fatalf("code = %q, want %d digits", code, otpCodeLength)
+	if !ValidCode(code) || len(code) != OTPCodeLength {
+		t.Fatalf("code = %q, want %d digits", code, OTPCodeLength)
 	}
 }
 

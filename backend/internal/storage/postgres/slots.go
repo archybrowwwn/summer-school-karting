@@ -55,21 +55,7 @@ func NewSlotRepository(db *pgxpool.Pool) *SlotRepository {
 	return &SlotRepository{db: db}
 }
 
-func (r *SlotRepository) List(ctx context.Context, filters SlotFilters) (SlotList, error) {
-	where, args := slotWhere(filters)
-	limit := filters.Limit
-	if limit == 0 {
-		limit = 20
-	}
-	offset := filters.Offset
-
-	var total int
-	if err := r.db.QueryRow(ctx, `SELECT count(*) FROM slots s JOIN routes r ON r.id = s.route_id JOIN instructors i ON i.id = s.instructor_id`+where, args...).Scan(&total); err != nil {
-		return SlotList{}, fmt.Errorf("count slots: %w", err)
-	}
-
-	queryArgs := append(args, limit, offset)
-	rows, err := r.db.Query(ctx, `
+const slotSelectSQL = `
 SELECT
     s.id::text,
     r.id::text,
@@ -91,75 +77,15 @@ SELECT
     s.status
 FROM slots s
 JOIN routes r ON r.id = s.route_id
-JOIN instructors i ON i.id = s.instructor_id
-`+where+`
-ORDER BY s.start_at ASC
-LIMIT $`+fmt.Sprint(len(args)+1)+` OFFSET $`+fmt.Sprint(len(args)+2), queryArgs...)
-	if err != nil {
-		return SlotList{}, fmt.Errorf("query slots: %w", err)
-	}
-	defer rows.Close()
+JOIN instructors i ON i.id = s.instructor_id`
 
-	slots := make([]Slot, 0)
-	for rows.Next() {
-		var slot Slot
-		if err := rows.Scan(
-			&slot.ID,
-			&slot.RouteID,
-			&slot.RouteName,
-			&slot.RouteType,
-			&slot.RouteCapacityCap,
-			&slot.RouteDurationMin,
-			&slot.InstructorID,
-			&slot.InstructorName,
-			&slot.StartAt,
-			&slot.TotalSeats,
-			&slot.FreeSeats,
-			&slot.FreeRentalBoards,
-			&slot.Price,
-			&slot.RentalPrice,
-			&slot.MeetingPoint,
-			&slot.MeetingPointLat,
-			&slot.MeetingPointLng,
-			&slot.Status,
-		); err != nil {
-			return SlotList{}, fmt.Errorf("scan slot: %w", err)
-		}
-		slots = append(slots, slot)
-	}
-	if err := rows.Err(); err != nil {
-		return SlotList{}, fmt.Errorf("iterate slots: %w", err)
-	}
-
-	return SlotList{Items: slots, Total: total}, nil
+type slotScanner interface {
+	Scan(...any) error
 }
 
-func (r *SlotRepository) GetByID(ctx context.Context, id string) (Slot, bool, error) {
+func scanSlot(scanner slotScanner) (Slot, error) {
 	var slot Slot
-	err := r.db.QueryRow(ctx, `
-SELECT
-    s.id::text,
-    r.id::text,
-    r.name,
-    r.type,
-    r.capacity_cap,
-    r.duration_min,
-    i.id::text,
-    i.name,
-    s.start_at,
-    s.total_seats,
-    s.free_seats,
-    s.free_rental_boards,
-    s.price,
-    s.rental_price,
-    s.meeting_point,
-    s.meeting_point_lat,
-    s.meeting_point_lng,
-    s.status
-FROM slots s
-JOIN routes r ON r.id = s.route_id
-JOIN instructors i ON i.id = s.instructor_id
-WHERE s.id = $1`, id).Scan(
+	if err := scanner.Scan(
 		&slot.ID,
 		&slot.RouteID,
 		&slot.RouteName,
@@ -178,7 +104,52 @@ WHERE s.id = $1`, id).Scan(
 		&slot.MeetingPointLat,
 		&slot.MeetingPointLng,
 		&slot.Status,
-	)
+	); err != nil {
+		return Slot{}, fmt.Errorf("scan slot: %w", err)
+	}
+	return slot, nil
+}
+
+func (r *SlotRepository) List(ctx context.Context, filters SlotFilters) (SlotList, error) {
+	where, args := slotWhere(filters)
+	limit := filters.Limit
+	if limit == 0 {
+		limit = 20
+	}
+	offset := filters.Offset
+
+	var total int
+	if err := r.db.QueryRow(ctx, `SELECT count(*) FROM slots s JOIN routes r ON r.id = s.route_id JOIN instructors i ON i.id = s.instructor_id`+where, args...).Scan(&total); err != nil {
+		return SlotList{}, fmt.Errorf("count slots: %w", err)
+	}
+
+	queryArgs := append(args, limit, offset)
+	rows, err := r.db.Query(ctx, slotSelectSQL+where+`
+ORDER BY s.start_at ASC
+LIMIT $`+fmt.Sprint(len(args)+1)+` OFFSET $`+fmt.Sprint(len(args)+2), queryArgs...)
+	if err != nil {
+		return SlotList{}, fmt.Errorf("query slots: %w", err)
+	}
+	defer rows.Close()
+
+	slots := make([]Slot, 0)
+	for rows.Next() {
+		slot, err := scanSlot(rows)
+		if err != nil {
+			return SlotList{}, err
+		}
+		slots = append(slots, slot)
+	}
+	if err := rows.Err(); err != nil {
+		return SlotList{}, fmt.Errorf("iterate slots: %w", err)
+	}
+
+	return SlotList{Items: slots, Total: total}, nil
+}
+
+func (r *SlotRepository) GetByID(ctx context.Context, id string) (Slot, bool, error) {
+	slot, err := scanSlot(r.db.QueryRow(ctx, slotSelectSQL+`
+WHERE s.id = $1`, id))
 	if errors.Is(err, pgx.ErrNoRows) {
 		return Slot{}, false, nil
 	}

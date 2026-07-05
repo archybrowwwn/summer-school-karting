@@ -30,7 +30,7 @@ func (h *SlotHandler) ListSlots(w http.ResponseWriter, r *http.Request, params s
 	if params.RouteType != nil {
 		for _, routeType := range *params.RouteType {
 			if routeType != string(slotsapi.RouteTypeNovice) && routeType != string(slotsapi.RouteTypeExperienced) {
-				httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+				httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, msgBadRequest, nil)
 				return
 			}
 			filters.RouteTypes = append(filters.RouteTypes, routeType)
@@ -47,7 +47,7 @@ func (h *SlotHandler) ListSlots(w http.ResponseWriter, r *http.Request, params s
 
 	list, err := h.repo.List(r.Context(), filters)
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
 
@@ -55,18 +55,21 @@ func (h *SlotHandler) ListSlots(w http.ResponseWriter, r *http.Request, params s
 	for _, slot := range list.Items {
 		mapped, err := slotSummary(slot)
 		if err != nil {
-			httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+			writeInternalError(w)
 			return
 		}
 		items = append(items, mapped)
 	}
-	httpapi.WriteJSON(w, http.StatusOK, slotsapi.SlotListResponse{Items: items, Meta: slotsapi.PaginationMeta{Limit: limit, Offset: offset, Total: list.Total}})
+	httpapi.WriteJSON(w, http.StatusOK, slotsapi.SlotListResponse{
+		Items: items,
+		Meta:  slotsapi.PaginationMeta{Limit: limit, Offset: offset, Total: list.Total},
+	})
 }
 
 func (h *SlotHandler) GetSlot(w http.ResponseWriter, r *http.Request, slotID slotsapi.SlotIdParam) {
 	slot, found, err := h.repo.GetByID(r.Context(), slotID.String())
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
 	if !found {
@@ -75,7 +78,7 @@ func (h *SlotHandler) GetSlot(w http.ResponseWriter, r *http.Request, slotID slo
 	}
 	mapped, err := fullSlot(slot)
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
 	httpapi.WriteJSON(w, http.StatusOK, mapped)
@@ -96,7 +99,7 @@ func (h *InstructorHandler) ListInstructors(w http.ResponseWriter, r *http.Reque
 	}
 	list, err := h.repo.List(r.Context(), limit, offset)
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
 
@@ -104,46 +107,33 @@ func (h *InstructorHandler) ListInstructors(w http.ResponseWriter, r *http.Reque
 	for _, instructor := range list.Items {
 		id, err := uuid.Parse(instructor.ID)
 		if err != nil {
-			httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+			writeInternalError(w)
 			return
 		}
 		items = append(items, instructorsapi.Instructor{Id: id, Name: instructor.Name})
 	}
-	httpapi.WriteJSON(w, http.StatusOK, instructorsapi.InstructorListResponse{Items: items, Meta: instructorsapi.PaginationMeta{Limit: limit, Offset: offset, Total: list.Total}})
-}
-
-func pagination(w http.ResponseWriter, limitParam, offsetParam *int) (int, int, bool) {
-	limit := 20
-	if limitParam != nil {
-		limit = *limitParam
-	}
-	offset := 0
-	if offsetParam != nil {
-		offset = *offsetParam
-	}
-	if limit < 1 || limit > 100 || offset < 0 {
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
-		return 0, 0, false
-	}
-	return limit, offset, true
+	httpapi.WriteJSON(w, http.StatusOK, instructorsapi.InstructorListResponse{
+		Items: items,
+		Meta:  instructorsapi.PaginationMeta{Limit: limit, Offset: offset, Total: list.Total},
+	})
 }
 
 func slotSummary(slot postgres.Slot) (slotsapi.SlotSummary, error) {
-	base, err := slotBase(slot)
+	full, err := fullSlot(slot)
 	if err != nil {
 		return slotsapi.SlotSummary{}, err
 	}
 	return slotsapi.SlotSummary{
-		Id:               base.id,
-		Route:            base.route,
-		Instructor:       base.instructor,
-		StartAt:          slot.StartAt,
-		TotalSeats:       slot.TotalSeats,
-		FreeSeats:        slot.FreeSeats,
-		FreeRentalGear: slot.FreeRentalBoards,
-		Price:            slot.Price,
-		RentalPrice:      slot.RentalPrice,
-		Status:           slotsapi.SlotStatus(slot.Status),
+		Id:               full.Id,
+		Route:            full.Route,
+		Instructor:       full.Instructor,
+		StartAt:          full.StartAt,
+		TotalSeats:       full.TotalSeats,
+		FreeSeats:        full.FreeSeats,
+		FreeRentalGear:   full.FreeRentalGear,
+		Price:            full.Price,
+		RentalPrice:      full.RentalPrice,
+		Status:           full.Status,
 	}, nil
 }
 
@@ -159,7 +149,7 @@ func fullSlot(slot postgres.Slot) (slotsapi.Slot, error) {
 		StartAt:          slot.StartAt,
 		TotalSeats:       slot.TotalSeats,
 		FreeSeats:        slot.FreeSeats,
-		FreeRentalGear: slot.FreeRentalBoards,
+		FreeRentalGear:   slot.FreeRentalBoards,
 		Price:            slot.Price,
 		RentalPrice:      slot.RentalPrice,
 		MeetingPoint:     slot.MeetingPoint,

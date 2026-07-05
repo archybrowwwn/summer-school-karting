@@ -18,3 +18,7 @@ client/java_pid*.hprof
 .env.*
 
 terminals/
+
+# Локальные логи сборки
+gradle-build.log
+*.log

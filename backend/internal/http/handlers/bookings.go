@@ -25,8 +25,7 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request, p
 		return
 	}
 	var req bookingsapi.CreateBookingRequest
-	if err := httpapi.DecodeJSON(r, &req); err != nil {
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+	if !decodeOrBadRequest(w, r, &req) {
 		return
 	}
 
@@ -44,7 +43,7 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request, p
 	}
 	mapped, err := bookingDTO(created)
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
 	httpapi.WriteJSON(w, http.StatusCreated, mapped)
@@ -66,7 +65,7 @@ func (h *BookingHandler) ListBookings(w http.ResponseWriter, r *http.Request, pa
 			value != string(bookingsapi.BookingStatusCancelled) &&
 			value != string(bookingsapi.BookingStatusLateCancel) &&
 			value != string(bookingsapi.BookingStatusClubCancelled) {
-			httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+			httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, msgBadRequest, nil)
 			return
 		}
 		status = &value
@@ -81,7 +80,7 @@ func (h *BookingHandler) ListBookings(w http.ResponseWriter, r *http.Request, pa
 	for _, item := range list.Items {
 		mapped, err := bookingSummaryDTO(item)
 		if err != nil {
-			httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+			writeInternalError(w)
 			return
 		}
 		items = append(items, mapped)
@@ -101,7 +100,7 @@ func (h *BookingHandler) GetBooking(w http.ResponseWriter, r *http.Request, book
 	}
 	mapped, err := bookingDTO(found)
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
 	httpapi.WriteJSON(w, http.StatusOK, mapped)
@@ -119,7 +118,7 @@ func (h *BookingHandler) CancelBooking(w http.ResponseWriter, r *http.Request, b
 	}
 	mapped, err := bookingDTO(cancelled)
 	if err != nil {
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 		return
 	}
 	httpapi.WriteJSON(w, http.StatusOK, mapped)
@@ -129,9 +128,9 @@ func writeBookingError(w http.ResponseWriter, err error) {
 	var availability booking.AvailabilityError
 	switch {
 	case errors.Is(err, booking.ErrUnauthorized):
-		httpapi.WriteError(w, http.StatusUnauthorized, httpapi.CodeUnauthorized, "Требуется авторизация. Передайте действительный токен в заголовке Authorization.", nil)
+		httpapi.WriteError(w, http.StatusUnauthorized, httpapi.CodeUnauthorized, msgUnauthorized, nil)
 	case errors.Is(err, booking.ErrInvalidRequest):
-		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
+		httpapi.WriteError(w, http.StatusBadRequest, httpapi.CodeBadRequest, msgBadRequest, nil)
 	case errors.Is(err, booking.ErrDoubleBooking):
 		httpapi.WriteError(w, http.StatusConflict, httpapi.CodeDoubleBooking, "Вы уже записаны на выбранный слот.", nil)
 	case errors.Is(err, booking.ErrIdempotencyConflict):
@@ -149,7 +148,7 @@ func writeBookingError(w http.ResponseWriter, err error) {
 	case errors.Is(err, booking.ErrSlotStarted):
 		httpapi.WriteError(w, http.StatusUnprocessableEntity, httpapi.CodeSlotStarted, "Слот уже стартовал, операция недоступна.", nil)
 	default:
-		httpapi.WriteError(w, http.StatusInternalServerError, httpapi.CodeInternalError, "Что-то пошло не так. Попробуйте ещё раз позже.", nil)
+		writeInternalError(w)
 	}
 }
 

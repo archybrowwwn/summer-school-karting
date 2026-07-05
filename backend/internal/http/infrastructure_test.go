@@ -30,7 +30,7 @@ func TestInvalidJSONReturnsContractError(t *testing.T) {
 			WriteError(w, http.StatusBadRequest, CodeBadRequest, "Неверные параметры запроса. Проверьте корректность переданных значений.", nil)
 			return
 		}
-		writeJSON(w, http.StatusOK, body)
+		WriteJSON(w, http.StatusOK, body)
 	})
 
 	recorder := httptest.NewRecorder()
@@ -43,7 +43,7 @@ func TestInvalidJSONReturnsContractError(t *testing.T) {
 func TestMissingBearerTokenReturnsContractError(t *testing.T) {
 	router := testRouter()
 	router.With(RequireAuth).Get("/private", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, http.StatusOK, healthResponse{Status: "ok"})
+		WriteJSON(w, http.StatusOK, healthResponse{Status: "ok"})
 	})
 
 	recorder := httptest.NewRecorder()

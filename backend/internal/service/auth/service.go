@@ -23,8 +23,8 @@ var (
 )
 
 const (
-	loginPurpose  = "login"
-	otpCodeLength = 4
+	LoginPurpose  = "login"
+	OTPCodeLength = 4
 )
 
 type Client struct {
@@ -92,12 +92,12 @@ func NewService(repo Repository, logger *slog.Logger) *Service {
 }
 
 func (s *Service) RequestCode(ctx context.Context, phone string) (RequestCodeResult, error) {
-	if !phonePattern.MatchString(phone) {
+	if !ValidPhone(phone) {
 		return RequestCodeResult{}, ErrInvalidPhone
 	}
 
 	now := s.now().UTC()
-	latest, ok, err := s.repo.LatestOTP(ctx, phone, loginPurpose)
+	latest, ok, err := s.repo.LatestOTP(ctx, phone, LoginPurpose)
 	if err != nil {
 		return RequestCodeResult{}, err
 	}
@@ -105,32 +105,32 @@ func (s *Service) RequestCode(ctx context.Context, phone string) (RequestCodeRes
 		return RequestCodeResult{}, ErrTooManyRequests
 	}
 
-	code, err := randomDigits(otpCodeLength)
+	code, err := RandomDigits(OTPCodeLength)
 	if err != nil {
 		return RequestCodeResult{}, err
 	}
-	if err := s.repo.CreateOTP(ctx, phone, loginPurpose, HashOTP(phone, loginPurpose, code), now.Add(s.codeTTL)); err != nil {
+	if err := s.repo.CreateOTP(ctx, phone, LoginPurpose, HashOTP(phone, LoginPurpose, code), now.Add(s.codeTTL)); err != nil {
 		return RequestCodeResult{}, err
 	}
 
-	s.logger.Info("dev otp generated", "phone", phone, "purpose", loginPurpose, "code", code)
+	s.logger.Info("dev otp generated", "phone", phone, "purpose", LoginPurpose, "code", code)
 	return RequestCodeResult{TTLSeconds: int(s.codeTTL.Seconds()), ResendAfterSeconds: int(s.resendAfter.Seconds()), Code: code}, nil
 }
 
 func (s *Service) VerifyCode(ctx context.Context, phone, code string) (VerifyCodeResult, error) {
-	if !phonePattern.MatchString(phone) || !codePattern.MatchString(code) {
+	if !ValidPhone(phone) || !ValidCode(code) {
 		return VerifyCodeResult{}, ErrInvalidCode
 	}
 
 	now := s.now().UTC()
-	otp, ok, err := s.repo.LatestOTP(ctx, phone, loginPurpose)
+	otp, ok, err := s.repo.LatestOTP(ctx, phone, LoginPurpose)
 	if err != nil {
 		return VerifyCodeResult{}, err
 	}
 	if !ok || otp.ConsumedAt != nil || !now.Before(otp.ExpiresAt) || otp.AttemptCount >= s.maxAttempts {
 		return VerifyCodeResult{}, ErrInvalidCode
 	}
-	if otp.CodeHash != HashOTP(phone, loginPurpose, code) {
+	if otp.CodeHash != HashOTP(phone, LoginPurpose, code) {
 		_ = s.repo.IncrementOTPAttempts(ctx, otp.ID)
 		return VerifyCodeResult{}, ErrInvalidCode
 	}
@@ -179,7 +179,15 @@ func HashToken(token string) string {
 	return base64.RawStdEncoding.EncodeToString(sum[:])
 }
 
-func randomDigits(length int) (string, error) {
+func ValidPhone(phone string) bool {
+	return phonePattern.MatchString(phone)
+}
+
+func ValidCode(code string) bool {
+	return codePattern.MatchString(code)
+}
+
+func RandomDigits(length int) (string, error) {
 	buf := make([]byte, length)
 	for i := range buf {
 		n, err := rand.Int(rand.Reader, big.NewInt(10))
