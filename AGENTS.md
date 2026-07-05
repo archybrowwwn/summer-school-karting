@@ -1,8 +1,9 @@
 # AGENTS.md
 
 ## Repo State
-- This repo currently contains BA/analysis artifacts for the SUP club project; BE/FE application code has not been created yet.
-- The root `README.md` is still the GitLab template; use `01-analysis/README.md` and downstream specs instead.
+- This repo is the summer-school karting project «Апекс»: BA/analysis in `01-analysis/`, implementation in `backend/` (Go API) and `client/` (Kotlin CMP).
+- Homework journal (tasks 1–4): `03-homework/README.md`.
+- Use `01-analysis/README.md` and downstream specs as the analysis source of truth.
 - Preserve Russian requirement IDs and traceability links (`BR-*`, `FR-*`, `NFR-*`, `UC-*`, `SCR-*`, `BS-*`, `LOGIC-*`) when changing docs or generating code.
 
 ## Source Of Truth

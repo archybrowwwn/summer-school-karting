@@ -556,8 +556,8 @@ E2E/manual smoke:
 - [x] `CMP-13` Implement route map sheet `BS-004`.
 - [x] `CMP-14` Implement profile view, edit name, logout, optional phone change/delete `SCR-007`.
 - [ ] `CMP-15` Implement push permission adapter `LOGIC-007`.
-- [ ] `CMP-16` Add unit/data/UI tests for core flows.
-- [ ] `CMP-17` Run integration smoke against local BE.
+- [x] `CMP-16` Add unit/data/UI tests for core flows.
+- [x] `CMP-17` Run integration smoke against local BE.
 - [ ] `CMP-18` Polish accessibility, responsive Web layout and visual parity with Figma.
 
 ## Open questions and gaps
