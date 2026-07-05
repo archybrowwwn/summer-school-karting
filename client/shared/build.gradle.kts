@@ -71,7 +71,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.volna.app.shared"
+    namespace = "com.apexkarting.shared"
     compileSdk = libs.versions.android.compile.sdk.get().toInt()
 
     defaultConfig {

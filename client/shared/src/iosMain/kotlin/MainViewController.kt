@@ -1,8 +1,8 @@
 import androidx.compose.ui.window.ComposeUIViewController
-import com.volna.app.VolnaApp
-import com.volna.app.di.initKoin
+import com.apexkarting.ApexApp
+import com.apexkarting.di.initKoin
 
 fun MainViewController() = ComposeUIViewController {
     initKoin()
-    VolnaApp()
+    ApexApp()
 }

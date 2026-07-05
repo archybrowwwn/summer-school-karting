@@ -28,4 +28,4 @@ The shared module follows clean architecture:
 - feature packages define repository contracts and screen-facing models.
 - platform source sets provide `expect/actual` adapters such as route map rendering.
 
-Brand theme: `core/theme/VolnaColors.kt` (`ApexBrandColors` — racing red + asphalt; internal type names still use Volna* from the template scaffold).
+Brand theme: `core/theme/ApexColors.kt` (`ApexBrandColors` — racing red + asphalt).

@@ -1,0 +1,37 @@
+package com.apexkarting.map
+
+import androidx.compose.runtime.Composable
+import com.apexkarting.domain.model.MeetingPoint
+import com.apexkarting.domain.model.Route
+
+interface MapLauncher {
+    fun openExternalMap(meetingPoint: MeetingPoint)
+    fun buildRouteTo(meetingPoint: MeetingPoint)
+}
+
+expect object PlatformMapLauncher : MapLauncher {
+    override fun openExternalMap(meetingPoint: MeetingPoint)
+    override fun buildRouteTo(meetingPoint: MeetingPoint)
+}
+
+internal fun MeetingPoint.toExternalPointUrl(): String {
+    val lat = coordinates.lat
+    val lng = coordinates.lng
+    return "https://maps.apple.com/?ll=$lat,$lng&q=${title.toMapQuery()}"
+}
+
+internal fun MeetingPoint.toExternalRouteUrl(): String {
+    val lat = coordinates.lat
+    val lng = coordinates.lng
+    return "https://maps.apple.com/?daddr=$lat,$lng&q=${title.toMapQuery()}"
+}
+
+private fun String.toMapQuery(): String =
+    trim().ifBlank { "Картодром Апекс" }.replace(" ", "+")
+
+@Composable
+expect fun RouteMapPreview(
+    route: Route,
+    meetingPoint: MeetingPoint,
+    onOpenExternal: () -> Unit,
+)

@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.volna.app.android"
+    namespace = "com.apexkarting.android"
     compileSdk = libs.versions.android.compile.sdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.apex.karting"
+        applicationId = "com.apexkarting"
         minSdk = libs.versions.android.min.sdk.get().toInt()
         targetSdk = libs.versions.android.compile.sdk.get().toInt()
         versionCode = 1

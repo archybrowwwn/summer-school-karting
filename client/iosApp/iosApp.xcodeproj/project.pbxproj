@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1A2B3C4D5E6F700000000001 /* VolnaIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F700000000011 /* VolnaIOSApp.swift */; };
+		1A2B3C4D5E6F700000000001 /* ApexIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F700000000011 /* ApexIOSApp.swift */; };
 		1A2B3C4D5E6F700000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F700000000012 /* ContentView.swift */; };
 		1A2B3C4D5E6F700000000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F700000000013 /* Assets.xcassets */; };
 		1A2B3C4D5E6F700000000004 /* ApexShared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F700000000014 /* ApexShared.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1A2B3C4D5E6F700000000010 /* Volna iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Volna iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		1A2B3C4D5E6F700000000011 /* VolnaIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolnaIOSApp.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F700000000010 /* Apex iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Apex iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A2B3C4D5E6F700000000011 /* ApexIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApexIOSApp.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F700000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F700000000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A2B3C4D5E6F700000000014 /* ApexShared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApexShared.framework; path = "../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/ApexShared.framework"; sourceTree = "<group>"; };
@@ -46,7 +46,7 @@
 		1A2B3C4D5E6F700000000031 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
-				1A2B3C4D5E6F700000000011 /* VolnaIOSApp.swift */,
+				1A2B3C4D5E6F700000000011 /* ApexIOSApp.swift */,
 				1A2B3C4D5E6F700000000012 /* ContentView.swift */,
 				1A2B3C4D5E6F700000000013 /* Assets.xcassets */,
 				1A2B3C4D5E6F700000000015 /* Info.plist */,
@@ -65,7 +65,7 @@
 		1A2B3C4D5E6F700000000033 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1A2B3C4D5E6F700000000010 /* Volna iOS.app */,
+				1A2B3C4D5E6F700000000010 /* Apex iOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -73,9 +73,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1A2B3C4D5E6F700000000040 /* Volna iOS */ = {
+		1A2B3C4D5E6F700000000040 /* Apex iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1A2B3C4D5E6F700000000050 /* Build configuration list for PBXNativeTarget "Volna iOS" */;
+			buildConfigurationList = 1A2B3C4D5E6F700000000050 /* Build configuration list for PBXNativeTarget "Apex iOS" */;
 			buildPhases = (
 				1A2B3C4D5E6F700000000023 /* Build ApexShared */,
 				1A2B3C4D5E6F700000000021 /* Sources */,
@@ -86,9 +86,9 @@
 			);
 			dependencies = (
 			);
-			name = "Volna iOS";
-			productName = "Volna iOS";
-			productReference = 1A2B3C4D5E6F700000000010 /* Volna iOS.app */;
+			name = "Apex iOS";
+			productName = "Apex iOS";
+			productReference = 1A2B3C4D5E6F700000000010 /* Apex iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -119,7 +119,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1A2B3C4D5E6F700000000040 /* Volna iOS */,
+				1A2B3C4D5E6F700000000040 /* Apex iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -162,7 +162,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1A2B3C4D5E6F700000000001 /* VolnaIOSApp.swift in Sources */,
+				1A2B3C4D5E6F700000000001 /* ApexIOSApp.swift in Sources */,
 				1A2B3C4D5E6F700000000002 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -191,7 +191,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.volna.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.apexkarting;
 				PRODUCT_NAME = "Апекс";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -221,7 +221,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.volna.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.apexkarting;
 				PRODUCT_NAME = "Апекс";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -341,7 +341,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1A2B3C4D5E6F700000000050 /* Build configuration list for PBXNativeTarget "Volna iOS" */ = {
+		1A2B3C4D5E6F700000000050 /* Build configuration list for PBXNativeTarget "Apex iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1A2B3C4D5E6F700000000060 /* Debug */,
