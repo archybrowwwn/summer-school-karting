@@ -75,10 +75,10 @@ fun VolnaApp() {
             bookingDetailsStore.accept(BookingDetailsIntent.Reset)
             rootState = RootState.Ready
             navController.navigate(AuthDestination) {
-                popUpTo(navController.graph.findStartDestination().id) {
+                popUpTo(navController.graph.id) {
                     inclusive = true
                 }
-                launchSingleTop = true
+                launchSingleTop = false
             }
         }
 

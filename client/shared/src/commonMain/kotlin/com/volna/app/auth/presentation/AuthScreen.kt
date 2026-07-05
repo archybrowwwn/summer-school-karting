@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -61,7 +62,13 @@ fun AuthScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(VolnaTheme.tokens.spacing.md),
-        )
+        ) { data ->
+            Snackbar(
+                snackbarData = data,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }
 
@@ -70,15 +77,7 @@ private fun PhoneStep(
     state: AuthState,
     onIntent: (AuthIntent) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                horizontal = VolnaTheme.tokens.spacing.md,
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AuthLogo()
+    AuthStepLayout(topLogo = { AuthLogo() }) {
         AuthHeader(
             title = "Вход",
             description = "Войдите по номеру телефона, чтобы\nзаписаться на заезд",
@@ -172,16 +171,7 @@ private fun NameStep(
     state: AuthState,
     onIntent: (AuthIntent) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-//            .verticalScroll(rememberScrollState())
-            .padding(
-                horizontal = VolnaTheme.tokens.spacing.md,
-                vertical = VolnaTheme.tokens.spacing.xl,
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    AuthStepLayout {
         AuthHeader(
             title = "Как вас зовут?",
             description = "Имя будет отображаться в вашем\nпрофиле",
@@ -207,23 +197,25 @@ private fun NameStep(
 
 @Composable
 private fun AuthStepLayout(
+    topLogo: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(
                 horizontal = VolnaTheme.tokens.spacing.md,
                 vertical = VolnaTheme.tokens.spacing.xl,
             ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.md),
     ) {
+        topLogo?.invoke()
         Column(
             modifier = Modifier
-                .align(Alignment.Center)
                 .fillMaxWidth()
-                .widthIn(max = VolnaTheme.tokens.sizing.contentWidth)
-                .wrapContentHeight()
-                .verticalScroll(rememberScrollState()),
+                .widthIn(max = VolnaTheme.tokens.sizing.contentWidth),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.md),
             content = content,
@@ -364,7 +356,7 @@ private fun OtpCodeInput(
             textStyle = TextStyle(color = Color.Transparent),
             cursorBrush = SolidColor(Color.Transparent),
             decorationBox = { innerTextField ->
-                Box {
+                Box(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(VolnaTheme.tokens.spacing.xs),
@@ -377,7 +369,11 @@ private fun OtpCodeInput(
                             )
                         }
                     }
-                    Box(modifier = Modifier.size(VolnaTheme.tokens.spacing.xxs)) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .alpha(0f),
+                    ) {
                         innerTextField()
                     }
                 }

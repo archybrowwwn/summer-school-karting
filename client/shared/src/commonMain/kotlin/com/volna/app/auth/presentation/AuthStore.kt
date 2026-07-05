@@ -159,7 +159,7 @@ class AuthStore(
                         )
                     }
                     if (devCode != null) {
-                        verifyCode()
+                        storeScope.launch { verifyCode() }
                     }
                 },
                 onFailure = { failure ->
@@ -217,6 +217,7 @@ class AuthStore(
                     mutableState.update {
                         it.copy(
                             actionStatus = ActionStatus.Idle,
+                            codeInput = if (appFailure.isInvalidCode()) "" else it.codeInput,
                             message = verifyCodeMessage(appFailure),
                         )
                     }
