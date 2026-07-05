@@ -12,7 +12,7 @@
 - Use `01-analysis/api/redocly.yaml` plus domain files under `01-analysis/api/{auth,slots,bookings,profile,instructors}/` for API contracts.
 - Use `01-analysis/2-requirements/` for requirements and `01-analysis/4-design/data-model.md` for resource model and invariants.
 - Older references to `../api/openapi.yaml` are stale; there is no such file now. Use the multi-file OpenAPI domains registered in `redocly.yaml`.
-- References to `rigla_network/...` in `_SCREEN_TEMPLATE.md` are template leftovers from another project; do not copy them into real specs or code.
+- `_SCREEN_TEMPLATE.md` is a blank screen spec; real SCR/BS files must link to `01-analysis/api/{domain}/api.yaml` operationIds.
 
 ## Target Implementation Constraints
 - BE target stack: Go RESTful API, generated from or aligned to the existing OpenAPI contracts.
@@ -70,6 +70,6 @@
 - `createBooking` supports `Idempotency-Key`; use it for safe retry after network failure.
 - `seats_count` is 1..5 and `rental_count` is 0..`seats_count`; own-gear places consume group seats but not rental gear inventory.
 - Do not hardcode route caps or rental gear inventory in FE; use slot/route data even though docs mention 8/12 and 12 gear units.
-- Late cancellation is `< 2h` before slot start and does not free seats or rental gear; exactly `2h` is early cancellation and frees them.
+- Late cancellation is `< 1h` before slot start and does not free seats or rental gear; exactly `1h` is early cancellation and frees them.
 - "Past" is derived from `slot.start_at`, not a stored status. Booking status is `active`, `cancelled`, or `late_cancel`; slot status is `scheduled` or `cancelled`.
 - Client data access is only to the current user's profile/bookings; cross-client access must return forbidden/unauthorized behavior per common API responses.

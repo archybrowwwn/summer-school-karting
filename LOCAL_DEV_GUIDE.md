@@ -1,8 +1,6 @@
 # Локальный запуск BE, DB и клиента
 
-> **Проект:** мобильное приложение картинг-центра «Апекс» (ветка аналитики — в `01-analysis/`).
-> Проект картинг-центра «Апекс»: клиент `com.apexkarting`, домен, тексты, seed и UI-бренд
-> соответствуют аналитике в `01-analysis/`.
+> **Проект:** мобильное приложение картинг-центра «Апекс». Клиент `com.apexkarting`, домен, тексты, seed и UI-бренд соответствуют аналитике в `01-analysis/`.
 
 Краткий guide для локальной разработки: база и backend запускаются из `backend/`, клиент — из `client/`.
 
@@ -35,8 +33,8 @@ docker compose --profile db up -d db
 make migrate
 ```
 
-> Если раньше использовалась БД `volna`, пересоздайте volume: `docker compose --profile db down -v`,
-> затем снова `docker compose --profile db up -d db` и `make migrate` (включая `00005_rename_rental_boards_to_gear`).
+> Если volume PostgreSQL создан со старой схемой, пересоздайте его: `docker compose --profile db down -v`,
+> затем снова `docker compose --profile db up -d db` и `make migrate`.
 
 4. Если нужны готовые состояния для проверки клиентских экранов (расписание на следующую неделю, брони, маршалы), примените demo-seed:
 

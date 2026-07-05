@@ -146,7 +146,7 @@ flowchart LR
 
 **Тип:** REST  
 **Метод:** {GET/POST/PUT/DELETE}  
-**Спецификация:** [rigla_network/rest/domains/{domain}.yaml](../../rigla_network/rest/domains/{domain}.yaml) → `{operationId}`
+**Спецификация:** [api/{domain}/api.yaml](../../api/{domain}/api.yaml) → `{operationId}`
 
 **Триггер:** Инициализация
 
@@ -172,7 +172,7 @@ flowchart LR
 ### {queryName}
 
 **Тип:** GraphQL  
-**Спецификация:** [rigla_network/gql/schema_rigla.graphql](../../rigla_network/gql/schema_rigla.graphql) → `Query.{queryName}`
+**Спецификация:** _не используется в MVP «Апекс» (только REST); для GraphQL-экранов укажите схему и `Query.{queryName}`_
 
 **Триггер:** Инициализация
 
@@ -199,7 +199,7 @@ flowchart LR
 
 **Тип:** REST  
 **Метод:** {GET/POST/PUT/DELETE}  
-**Спецификация:** [rigla_network/rest/domains/{domain}.yaml](../../rigla_network/rest/domains/{domain}.yaml) → `{operationId}`
+**Спецификация:** [api/{domain}/api.yaml](../../api/{domain}/api.yaml) → `{operationId}`
 
 **Триггер:** Инициализация (после {endpoint1})
 
@@ -226,7 +226,7 @@ flowchart LR
 
 **Тип:** REST  
 **Метод:** {POST/PUT/DELETE}  
-**Спецификация:** [rigla_network/rest/domains/{domain}.yaml](../../rigla_network/rest/domains/{domain}.yaml) → `{operationId}`
+**Спецификация:** [api/{domain}/api.yaml](../../api/{domain}/api.yaml) → `{operationId}`
 
 **Триггер:** {Тап на кнопку / Ввод текста / и т.д.}
 
@@ -250,18 +250,14 @@ flowchart LR
 
 **Доступные спецификации:**
 
-REST API (`rigla_network/rest/domains/`):
-- `authentication.yaml` — авторизация, токены
-- `booking_mine.yaml`, `booking_guest.yaml` — фикстуры бронирования (себя + гости)
-- `checkout.yaml` — оформление заказа
-- `customer_profile.yaml` — профиль пользователя
-- `orders.yaml` — заказы
-- `reviews.yaml` — отзывы
-- `wishlist.yaml` — избранное
-- `mindbox_loyalty.yaml` — программа лояльности
+REST API (`01-analysis/api/`, домены из `redocly.yaml`):
+- `auth/api.yaml` — OTP-авторизация, сессии
+- `slots/api.yaml` — заезды и фильтры
+- `bookings/api.yaml` — бронирование и отмена
+- `profile/api.yaml` — профиль клиента
+- `instructors/api.yaml` — справочник маршалов
 
-GraphQL (`rigla_network/gql/`):
-- `schema_rigla.graphql` — основная схема
+GraphQL: в MVP «Апекс» не используется.
 
 ---
 
