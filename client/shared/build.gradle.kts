@@ -46,6 +46,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
             implementation(libs.coroutines.core)
             implementation(libs.datetime)
             implementation(libs.koin.core)
@@ -75,6 +76,11 @@ kotlin {
             implementation(libs.ktor.client.js)
         }
     }
+}
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.apexkarting.generated.resources"
 }
 
 android {

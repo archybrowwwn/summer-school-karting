@@ -38,11 +38,16 @@ make migrate
 > Если раньше использовалась БД `volna`, пересоздайте volume: `docker compose --profile db down -v`,
 > затем снова `docker compose --profile db up -d db` и `make migrate` (включая `00005_rename_rental_boards_to_gear`).
 
-4. Если нужны готовые состояния для проверки клиентских экранов, примените mock-seed:
+4. Если нужны готовые состояния для проверки клиентских экранов (расписание на следующую неделю, брони, маршалы), примените demo-seed:
 
 ```bash
-docker compose -f compose.yaml exec -T db psql -U apex -d apex < seed/mock_client_app_states.sql
+docker compose -f compose.yaml cp seed/demonstration_base.sql db:/tmp/demonstration_base.sql
+docker compose -f compose.yaml exec -T db psql -U apex -d apex -f /tmp/demonstration_base.sql
 ```
+
+> На Windows не подавайте SQL через `Get-Content` без `-Encoding UTF8` — кириллица в именах маршалов и адресах превратится в `??????`.
+
+Тестовые клиенты: `+79990000001` … `+79990000008` (OTP-код в логах backend при запросе кода).
 
 Подключение по умолчанию: `postgres://apex:apex@localhost:5433/apex?sslmode=disable` (порт 5433 на хосте — см. `compose.yaml`).
 

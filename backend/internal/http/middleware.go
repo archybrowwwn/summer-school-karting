@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -26,16 +27,9 @@ func requestIDMiddleware(next http.Handler) http.Handler {
 }
 
 func corsMiddleware(next http.Handler) http.Handler {
-	allowedOrigins := map[string]struct{}{
-		"http://localhost:8081":  {},
-		"http://127.0.0.1:8081":  {},
-		"http://localhost:8080":  {},
-		"http://127.0.0.1:8080":  {},
-	}
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-		if _, ok := allowedOrigins[origin]; ok {
+		if isAllowedDevOrigin(origin) {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Vary", "Origin")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
@@ -50,6 +44,24 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func isAllowedDevOrigin(origin string) bool {
+	if origin == "" {
+		return false
+	}
+
+	parsed, err := url.Parse(origin)
+	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return false
+	}
+
+	switch parsed.Hostname() {
+	case "localhost", "127.0.0.1", "::1":
+		return parsed.Port() == "" || parsed.Port() == "8080" || parsed.Port() == "8081"
+	default:
+		return false
+	}
 }
 
 func jsonContentTypeMiddleware(next http.Handler) http.Handler {

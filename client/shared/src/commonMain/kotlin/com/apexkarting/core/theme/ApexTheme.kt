@@ -3,7 +3,6 @@ package com.apexkarting.core.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -83,7 +82,7 @@ fun ApexTheme(
     CompositionLocalProvider(LocalApexTokens provides tokens) {
         MaterialTheme(
             colorScheme = tokens.colors.toMaterialColorScheme(),
-            typography = apexTypography(tokens.colors),
+            typography = apexTypography(colors = tokens.colors),
             content = {
                 CompositionLocalProvider(
                     LocalContentColor provides tokens.colors.textPrimary,
@@ -93,27 +92,6 @@ fun ApexTheme(
             },
         )
     }
-}
-
-private fun apexTypography(colors: ApexColorScheme): Typography {
-    val base = Typography()
-    return base.copy(
-        displayLarge = base.displayLarge.copy(color = colors.textPrimary),
-        displayMedium = base.displayMedium.copy(color = colors.textPrimary),
-        displaySmall = base.displaySmall.copy(color = colors.textPrimary),
-        headlineLarge = base.headlineLarge.copy(color = colors.textPrimary),
-        headlineMedium = base.headlineMedium.copy(color = colors.textPrimary),
-        headlineSmall = base.headlineSmall.copy(color = colors.textPrimary),
-        titleLarge = base.titleLarge.copy(color = colors.textPrimary),
-        titleMedium = base.titleMedium.copy(color = colors.textPrimary),
-        titleSmall = base.titleSmall.copy(color = colors.textPrimary),
-        bodyLarge = base.bodyLarge.copy(color = colors.textPrimary),
-        bodyMedium = base.bodyMedium.copy(color = colors.textPrimary),
-        bodySmall = base.bodySmall.copy(color = colors.textSecondary),
-        labelLarge = base.labelLarge.copy(color = colors.textPrimary),
-        labelMedium = base.labelMedium.copy(color = colors.textPrimary),
-        labelSmall = base.labelSmall.copy(color = colors.textSecondary),
-    )
 }
 
 object ApexTheme {
