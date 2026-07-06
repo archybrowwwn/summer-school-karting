@@ -6,6 +6,32 @@
 
 **Что нужно:** Docker, Go 1.23+, JDK 17+. Android/Xcode не обязательны — проверяйте через **Web**.
 
+<details>
+<summary><b>Windows PowerShell (без make) — рекомендуется на Windows</b></summary>
+
+**Терминал 1** — из корня репозитория или после `git clone`:
+
+```powershell
+cd backend
+docker compose --profile db up -d db
+$env:DATABASE_URL = "postgres://apex:apex@localhost:5433/apex?sslmode=disable"
+go run github.com/pressly/goose/v3/cmd/goose@v3.24.1 -dir migrations postgres $env:DATABASE_URL up
+docker compose -f compose.yaml cp seed/demonstration_base.sql db:/tmp/demonstration_base.sql
+docker compose -f compose.yaml exec -T db psql -U apex -d apex -f /tmp/demonstration_base.sql
+go run ./cmd/api
+```
+
+**Терминал 2:**
+
+```powershell
+cd client
+.\gradlew.bat :webApp:wasmJsBrowserDevelopmentRun
+```
+
+Браузер: **`http://localhost:8081`**. Подробнее: [LOCAL_DEV_GUIDE.md §1.1](../LOCAL_DEV_GUIDE.md#11-windows-powershell-без-make).
+
+</details>
+
 ### 1. Клонировать и поднять БД
 
 ```bash
@@ -15,7 +41,7 @@ docker compose --profile db up -d db
 make migrate
 ```
 
-На **Windows** (PowerShell/cmd): `gradlew.bat` и `make` через **Git Bash** или WSL.
+На **Windows без `make`**: см. блок PowerShell выше или [LOCAL_DEV_GUIDE.md §1.1](../LOCAL_DEV_GUIDE.md#11-windows-powershell-без-make).
 
 ### 2. Демо-данные (обязательно для UI)
 
@@ -34,7 +60,15 @@ docker compose -f compose.yaml exec -T db psql -U apex -d apex -f /tmp/demonstra
 make run
 ```
 
-Проверка: `curl http://127.0.0.1:8080/healthz` → `ok`.
+PowerShell: `$env:DATABASE_URL = "postgres://apex:apex@localhost:5433/apex?sslmode=disable"; go run ./cmd/api`
+
+Проверка (PowerShell: **`curl.exe`**, не `curl` — иначе предупреждение Invoke-WebRequest):
+
+```powershell
+curl.exe http://127.0.0.1:8080/healthz
+```
+
+Ожидается `ok`. Терминал с API **не закрывать** — переходите к шагу 4.
 
 ### 4. Запустить Web-клиент
 
@@ -45,7 +79,7 @@ cd ../client
 ./gradlew :webApp:wasmJsBrowserDevelopmentRun
 ```
 
-Windows: `gradlew.bat :webApp:wasmJsBrowserDevelopmentRun`
+PowerShell: `.\gradlew.bat :webApp:wasmJsBrowserDevelopmentRun`
 
 Первая сборка Wasm может занять **5–15 минут** — это нормально.
 
@@ -68,9 +102,9 @@ cd backend && go test ./... -count=1
 cd client && ./gradlew :shared:wasmJsTest
 ```
 
-Windows: `gradlew.bat :shared:wasmJsTest`
+PowerShell: `.\gradlew.bat :shared:wasmJsTest`
 
-Полный гайд: [LOCAL_DEV_GUIDE.md](../LOCAL_DEV_GUIDE.md).
+Полный гайд: [LOCAL_DEV_GUIDE.md](../LOCAL_DEV_GUIDE.md) (в т.ч. [§1.1 PowerShell](../LOCAL_DEV_GUIDE.md#11-windows-powershell-без-make)).
 
 ---
 

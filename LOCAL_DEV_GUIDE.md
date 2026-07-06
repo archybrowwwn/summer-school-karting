@@ -13,6 +13,53 @@
 - Xcode для iOS.
 - Node.js/npm нужны только для OpenAPI-команд из `01-analysis/api`.
 
+## 1.1 Windows: PowerShell (без `make`)
+
+Если в PowerShell команда `make` не найдена — используйте эквиваленты ниже. Git Bash не обязателен.
+
+Переменная подключения (нужна для миграций и API):
+
+```powershell
+$env:DATABASE_URL = "postgres://apex:apex@localhost:5433/apex?sslmode=disable"
+```
+
+| Вместо `make …` | PowerShell |
+|-----------------|------------|
+| `make migrate` | `go run github.com/pressly/goose/v3/cmd/goose@v3.24.1 -dir migrations postgres $env:DATABASE_URL up` |
+| `make run` | `go run ./cmd/api` |
+| `make test` | `go test ./...` |
+
+**Полный запуск для проверки Web (терминал 1 — `backend/`):**
+
+```powershell
+cd backend
+docker compose --profile db up -d db
+$env:DATABASE_URL = "postgres://apex:apex@localhost:5433/apex?sslmode=disable"
+go run github.com/pressly/goose/v3/cmd/goose@v3.24.1 -dir migrations postgres $env:DATABASE_URL up
+docker compose -f compose.yaml cp seed/demonstration_base.sql db:/tmp/demonstration_base.sql
+docker compose -f compose.yaml exec -T db psql -U apex -d apex -f /tmp/demonstration_base.sql
+go run ./cmd/api
+```
+
+**Терминал 2 — `client/`:**
+
+```powershell
+cd client
+.\gradlew.bat :webApp:wasmJsBrowserDevelopmentRun
+```
+
+Браузер: **`http://localhost:8081`**. Первая сборка Wasm — 5–15 мин.
+
+Проверка, что API жив (в **другом** окне PowerShell, пока `go run ./cmd/api` работает):
+
+```powershell
+curl.exe http://127.0.0.1:8080/healthz
+```
+
+> В PowerShell команда `curl` без `.exe` — псевдоним `Invoke-WebRequest` и может показать предупреждение «риск сценария». Используйте **`curl.exe`** или `Invoke-RestMethod http://127.0.0.1:8080/healthz`.
+
+После ответа `ok`: не останавливайте API → второй терминал → `.\gradlew.bat :webApp:wasmJsBrowserDevelopmentRun` → браузер `http://localhost:8081` → `+79990000001`.
+
 ## 2. DB: PostgreSQL
 
 1. Перейдите в backend:
@@ -143,6 +190,6 @@ cd client
 
 Откройте **`http://localhost:8081`**. Первая сборка Wasm — 5–15 мин.
 
-На **Windows**: `gradlew.bat` вместо `./gradlew`; `make` — через Git Bash или WSL. Краткий сценарий для проверяющего — [03-homework/README.md](03-homework/README.md#проверка-за-10-минут-для-преподавателя).
+На **Windows без `make`**: см. [§1.1 Windows: PowerShell](#11-windows-powershell-без-make). Краткий сценарий для проверяющего — [03-homework/README.md](03-homework/README.md#проверка-за-10-минут-для-преподавателя).
 
 Для Android/iOS удобнее запускать host-приложения из IDE после поднятия DB и BE. На пути с кириллицей Android-сборка может не пройти — для проверки используйте Web.
